@@ -69,13 +69,13 @@ def main():
 
     # Sink is output to outside world (in this case to VIE)
     # For MPL, this might be: real MPL/NFU, Virtual Arm, etc.
-    nfu = UnityUdp()  # ("192.168.1.24")
-    #nfu = NfuUdp(user_config.get_user_config_var('mplNfuIp', '192.168.1.111'),
-    #             user_config.get_user_config_var('mplNfuUdpStreamPort', 6300),
-    #             user_config.get_user_config_var('mplNfuUdpCommandPort', 6201))
-    #t = threading.Thread(name='MPLNFU', target=connection_manager, args=(nfu,))
-    #t.setDaemon(True)
-    #t.start()
+    # nfu = UnityUdp()  # ("192.168.1.24")
+    nfu = NfuUdp(user_config.get_user_config_var('mplNfuIp', '192.168.1.111'),
+                 user_config.get_user_config_var('mplNfuUdpStreamPort', 6300),
+                 user_config.get_user_config_var('mplNfuUdpCommandPort', 6201))
+    t = threading.Thread(name='MPLNFU', target=connection_manager, args=(nfu,))
+    t.setDaemon(True)
+    t.start()
     vie.DataSink = nfu
 
     # ##########################
