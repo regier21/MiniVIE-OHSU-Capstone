@@ -48,6 +48,7 @@ class NfuUdp:
         self.__active_connection = False
 
         self.mpl_status = None  # updated by heartbeat messages
+        self.enable_percept_streaming = False
 
     def is_alive(self):
         with self.__lock:
@@ -78,7 +79,8 @@ class NfuUdp:
         # Enable Streaming
         # type = 5 NFU PERCEPTS
         msg1 = bytearray([150, 9, 1, 0, 0, 0, 0, 0, 0, 0])
-        self.send_udp_command(msg1)
+        if self.enable_percept_streaming:
+            self.send_udp_command(msg1)
 
         # wait
         time.sleep(0.2)
