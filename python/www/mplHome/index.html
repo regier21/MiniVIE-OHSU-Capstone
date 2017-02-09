@@ -25,6 +25,23 @@
                 border-left: 5px #666 outset !important;
             }
         }
+		
+		#mtProgressBackground {
+		  width: 100%;
+		  height: 30px;
+		  background-color: #ddd;
+		}
+
+		#mtProgressBar {
+		  width: 0%;
+		  height: 100%;
+		  background-color: #4CAF50;
+		}
+
+		#mtProgressLabel {
+		  text-align: center;
+		  line-height: 30px;
+		  color: white;
     </style>
 
     
@@ -128,13 +145,18 @@
 					 $("#msg_train").text(cmd_data);
 				 }         
 				 if (cmd_type == "strOutputMotion") {
-					 $("#msg_output").text(cmd_data);
+					 $("#main_output").text(cmd_data);
+					 $("#mt_output").text(cmd_data);
+					 $("#tac_output").text(cmd_data);
 				 }
                  if (cmd_type == "strMotionTester") {
-					 $("#assessment_status").text(cmd_data);
+					 $("#mt_status").text(cmd_data);
+				 }
+				 if (cmd_type == "strTAC") {
+					 $("#tac_status").text(cmd_data);
 				 }
 			 }
-         }
+         }   
 
     </script>
 
@@ -143,80 +165,124 @@
 
 
 <body>
-
-    <div data-role="page">
+	<!-- Main Mobile Trainer Page -->
+    <div data-role="page" id="ID_MAIN_PAGE">
         <div data-role="header" data-theme="b" >
             <h1>MPL Mobile Trainer</h1>
-        </div>
-        <!-- <div data-role="content">	 -->
+        </div><!-- /header -->
+		<div data-role="content">
+			<div data-role="collapsible" data-collapsed-icon="gear" data-expanded-icon="gear">
+			<h4>Configure</h4>
+			<ul data-role="listview" data-inset="false">
+			<li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-plus" id="ID_SPEEDUP">Increase Arm Speed</a></li>
+			<li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-minus" id="ID_SPEEDDOWN">Decrease Arm Speed</a></li>
+			<li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-plus" id="ID_HAND_SPEED_UP">Increase Hand Speed</a></li>
+			<li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-minus" id="ID_HAND_SPEED_DOWN">Decrease Hand Speed</a></li>
+			</ul>
+			</div>
+			
+			<div data-role="collapsible" data-collapsed-icon="bullets" data-expanded-icon="bullets">
+			<h4>Options</h4>
+			<ul data-role="listview" data-inset="false">
+			<li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-forbidden" id="ID_PAUSE">Pause All Motion</a></li>
+			<li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-forbidden" id="ID_PAUSE_HAND">Pause Hand</a></li>
+			<li></li>
+			<li><a href="#ID_TAC_PAGE" data-transition="slidefade" class="ui-btn ui-btn-icon-right ui-icon-star">TAC Assessment</a></li>
+			<li><a href="#ID_MT_PAGE" data-transition="slidefade" class="ui-btn ui-btn-icon-right ui-icon-star">Motion Tester</a></li>                
+			<li></li>
+			<li><a href="#popupDialog" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" data-transition="pop" data-icon="power" data-theme="a" data-iconpos="right">Shutdown MPL</a></li>
+			</ul>
+			</div>
 
-        <div data-role="collapsible" data-collapsed-icon="gear" data-expanded-icon="gear">
-        <h4>Configure</h4>
-        <ul data-role="listview" data-inset="false">
-        <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-plus" id="ID_SPEEDUP">Increase Arm Speed</a></li>
-        <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-minus" id="ID_SPEEDDOWN">Decrease Arm Speed</a></li>
-        <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-plus" id="ID_HAND_SPEED_UP">Increase Hand Speed</a></li>
-        <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-minus" id="ID_HAND_SPEED_DOWN">Decrease Hand Speed</a></li>
-        </ul>
-        </div>
-        
-        <div data-role="collapsible" data-collapsed-icon="bullets" data-expanded-icon="bullets">
-        <h4>Options</h4>
-        <ul data-role="listview" data-inset="false">
-        <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-forbidden" id="ID_PAUSE">Pause All Motion</a></li>
-        <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-forbidden" id="ID_PAUSE_HAND">Pause Hand</a></li>
-        <li></li>
-        <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-star" id="ID_ASSESSMENT_TAC">Start TAC Assessment</a></li>
-        <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-star" id="ID_ASSESSMENT_MT">Start Motion Test</a></li>                
-        <li>Assesment Status: <p = id="assessment_status"/></li>
-        <li></li>
-        <li><a href="#popupDialog" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" data-transition="pop" data-icon="power" data-theme="a" data-iconpos="right">Shutdown MPL</a></li>
-        </ul>
-        </div>
+			<div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="b" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+			<div data-role="header" data-theme="a" class="ui-corner-top">
+			<h1>Confirm Shutdown</h1>
+			</div>
+			<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+			<h3 class="ui-title">Are you sure you want to shutdown?</h3>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
+			<a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" id="ID_SHUTDOWN">OK</a>
+			</div>
+			</div>
+			
+			<p>Selected Motion: <span = id="msg_train"/></p>
+			<div id="blueimp-image-carousel" class="blueimp-gallery blueimp-gallery-controls blueimp-gallery-carousel">
+				<div class="slides"></div>
+				<h3 class="title"></h3>
+				<a class="prev">‹</a>
+				<a class="next">›</a>
+			</div>
 
-        <div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="b" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
-        <div data-role="header" data-theme="a" class="ui-corner-top">
-        <h1>Confirm Shutdown</h1>
-        </div>
-        <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
-        <h3 class="ui-title">Are you sure you want to shutdown?</h3>
-        <a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
-        <a href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b" id="ID_SHUTDOWN">OK</a>
-        </div>
-        </div>
-        
-        <p>Selected Motion: <span = id="msg_train"/></p>
-        <div id="blueimp-image-carousel" class="blueimp-gallery blueimp-gallery-controls blueimp-gallery-carousel">
-            <div class="slides"></div>
-            <h3 class="title"></h3>
-            <a class="prev">‹</a>
-            <a class="next">›</a>
-        </div>
+			<div data-role="controlgroup" data-type="horizontal">
+				<a href="#" class="ui-btn" id="ID_ADD">Add</a>
+				<a href="#" class="ui-btn" id="ID_STOP">Stop</a>
+				<a href="#" class="ui-btn" id="ID_CLEARCLASS">Clear</a>
+				<a href="#" class="ui-btn" id="ID_CLEARALL">Reset</a>
+				<a href="#" class="ui-btn" id="ID_SAVE">Save</a>
+				<!-- <a href="#" class="ui-btn" id="ID_TRAIN">Train</a> -->
+			</div>
 
-        <div data-role="controlgroup" data-type="horizontal">
-            <a href="#" class="ui-btn" id="ID_ADD">Add</a>
-            <a href="#" class="ui-btn" id="ID_STOP">Stop</a>
-            <a href="#" class="ui-btn" id="ID_CLEARCLASS">Clear</a>
-            <a href="#" class="ui-btn" id="ID_CLEARALL">Reset</a>
-            <a href="#" class="ui-btn" id="ID_SAVE">Save</a>
-            <!-- <a href="#" class="ui-btn" id="ID_TRAIN">Train</a> -->
-        </div>
+			<script src="blueimp-gallery/js/blueimp-helper.js"></script>
+			<script src="blueimp-gallery/js/blueimp-gallery.js"></script>
+			<script src="blueimp-gallery/js/blueimp-gallery-fullscreen.js"></script>
+			<script src="blueimp-gallery/js/blueimp-gallery-indicator.js"></script>
+			<script src="blueimp-gallery/js/vendor/jquery.js"></script>
+			<script src="blueimp-gallery/js/jquery.blueimp-gallery.js"></script>
+			<script src="gallery-links.js"></script>
 
-        <script src="blueimp-gallery/js/blueimp-helper.js"></script>
-        <script src="blueimp-gallery/js/blueimp-gallery.js"></script>
-        <script src="blueimp-gallery/js/blueimp-gallery-fullscreen.js"></script>
-        <script src="blueimp-gallery/js/blueimp-gallery-indicator.js"></script>
-        <script src="blueimp-gallery/js/vendor/jquery.js"></script>
-        <script src="blueimp-gallery/js/jquery.blueimp-gallery.js"></script>
-        <script src="gallery-links.js"></script>
+			<p>Classifying: <span = id="main_output"/></p>
+			<p>Status: <span = id="msg_status"/></p>
+			<p>Server: <span = id="statusMsg"/></p>
 
-        <p>Classifying: <span = id="msg_output"/></p>
-        <p>Status: <span = id="msg_status"/></p>
-        <p>Server: <span = id="statusMsg"/></p>
+        </div><!-- /content -->
+    </div><!-- /page -->
+	
+	<!-- Motion Tester Page -->
+	<div data-role="page" id="ID_MT_PAGE">
+        <div data-role="header" data-theme="b" >
+            <h1>Motion Tester</h1>
+			<a href="#ID_MAIN_PAGE" data-role="button" data-icon="arrow-l">Back</a>
+        </div><!-- /header -->
+		<div data-role="content">
+			<a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-r" id="ID_ASSESSMENT_MT">Start Motion Tester</a>
+			<p>Motion to Train: <span = id="mt_status"/></p>
+			<p>Classifying: <span = id="mt_output"/></p>
+			<img src="img_arm_motions/No_Movement.png" alt="Motion Image" width="561" height="312">
+			<div id="mtProgressBackground">
+				<div id="mtProgressBar">
+					<div id="mtProgressLabel">0%</div>
+				 </div>
+			</div>
+		</div><!-- /content -->
+    </div><!-- /page -->
+	
+	<!-- TAC Page -->
+	<div data-role="page" id="ID_TAC_PAGE">
+        <div data-role="header" data-theme="b" >
+            <h1>Target Achievement Control</h1>
+			<a href="#ID_MAIN_PAGE" data-role="button" data-icon="arrow-l">Back</a>
+			<p>Assessment Status: <span = id="tac_status"/></p>
+			<p>Classifying: <span = id="tac_output"/></p>
+			<img src="img_arm_motions/No_Movement.png" alt="Motion Image" width="561" height="312">
+        </div><!-- /header -->
+		<div data-role="content">
+		</div><!-- /content -->
+    </div><!-- /page -->
+	
+<script>
 
-        <!-- </div><!-- /content -->
-    </div>
-    <!-- /page -->
+// See http://www.w3schools.com/howto/howto_js_progressbar.asp for details
+function updateMTProgressBar(percent) {
+  var elem = document.getElementById("mtProgressBar");   
+  var width = 1;
+  var id = setInterval(frame, 10);
+  elem.style.width = width + '%'; 
+  document.getElementById("mtProgressLabel").innerHTML = width * 1  + '%';
+    }
+  }
+}
+
+</script>
 
 </body>
 
