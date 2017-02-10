@@ -21,7 +21,7 @@ class TrainingManagerSpacebrew(object):
         
         # store the last messages so we don't re-transmit a lot of repeated data
         self.last_msg = {'strStatus': '', 'strOutputMotion': '', 'strTrainingMotion': '', 'strMotionTester': '',
-                         'strTAC': ''}
+                         'strTAC': '', 'strMotionTesterProgress': '', 'strMotionTesterImage': ''}
         
         # keep count of skipped messages so we can send at some nominal rate
         self.msg_skip_count = 0
