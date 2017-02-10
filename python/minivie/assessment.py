@@ -1,7 +1,19 @@
 # take in a vie object and perform a control assessment
 
+import logging
+import threading
+import time
+import numpy as np
+import h5py
+import datetime as dtime
+import math
+import time
+from mpl import JointEnum as MplId
+
 
 class MotionTester(object):
+# Method to perform motion tester assessments, communicate results to user
+
     def __init__(self, vie, trainer):
         self.vie = vie
         self.trainer = trainer
@@ -10,6 +22,7 @@ class MotionTester(object):
         self.file_ext = '.hdf5'
         self.reset()
 
+        # Initialize data storage lists
         self.target_class = []
         self.class_decision = []
         self.correct_decision = []
@@ -18,6 +31,8 @@ class MotionTester(object):
         self.data = []  # List of dicts
 
     def reset(self):
+        # Method to reset all stored data
+
         self.target_class = []
         self.class_decision = []
         self.correct_decision = []
@@ -35,8 +50,6 @@ class MotionTester(object):
             Cmd - Indicates the cmd_value is a command word. Options are:
                 StartAssessment
         """
-        import threading
-        import logging
 
         logging.info('Received new motion tester command:' + value)
         parsed = value.split(':')
@@ -55,51 +68,77 @@ class MotionTester(object):
             else:
                 logging.info('Unknown motion tester command: ' + cmd_data)
 
-    def start_assessment(self):
-        # Clear assessment data
+    def start_assessment(self, num_trials=3):
+        # Method to assess all trained classes
+
+        # Clear assessment data from previous assessments
         self.reset()
+
+        # Update progress bar to 0
+        self.update_gui_progress(0, 1)
 
         # Determine which classes should be trained
         all_class_names = self.vie.TrainingData.motion_names;
         totals = self.vie.TrainingData.get_totals()
-
         trained_classes = [all_class_names[i] for i, e in enumerate(totals) if e != 0]
+        # Remove no movement class
+        if 'No Movement' in trained_classes: trained_classes.remove('No Movement')
 
         # pause limb during test
         self.vie.pause('All', True)
         self.send_status('Holdout')
 
-        for i_rep in range(3):
+        for i_rep in range(num_trials):  # Right now, assessing each class 3 times
             self.send_status('New Assessment Trial')
             for i,i_class in enumerate(trained_classes):
-                if not (i_class == 'No Movement'):  # Don't train no movement
-                    if i_rep == 0:  # Only adding new data dict for first time training each class
-                        self.class_id_to_test.append(all_class_names.index(i_class))
-                        self.data.append({'targetClass': [], 'classDecision': [], 'voteDecision': [], 'emgFrames': []})
+                if i_rep == 0:
+                    # Initiate new class storage "struct"
+                    self.class_id_to_test.append(all_class_names.index(i_class))
+                    self.data.append({'targetClass': [], 'classDecision': [], 'voteDecision': [], 'emgFrames': []})
 
-                    # Assess class
-                    is_complete = self.assess_class(i_class)
-                    if is_complete:
-                        self.send_status('Motion Completed!')
-                    else:
-                        self.send_status('Motion Incomplete')
+                # Assess class
+                is_complete = self.assess_class(i_class)
+                if is_complete:
+                    self.send_status('Motion Completed!')
+                else:
+                    self.send_status('Motion Incomplete')
 
+                # Update progress bar
+                self.update_gui_progress(i + 1 + i_rep*len(trained_classes), num_trials*len(trained_classes))
+
+        # Reset GUI to no-motion image
+        image_name = self.vie.TrainingData.get_motion_image('No Motion')
+        self.trainer.send_message("strMotionTesterImage", image_name)
+        # Save out stored data
         self.save_results()
+        # Send status
         self.send_status('Assessment Completed.')
-        self.send_status('')
+        # Unlock limb
         self.vie.pause('All', False)
 
     def assess_class(self, class_name):
-        import time
-        import numpy as np
+        # Method to assess a single class, display/save results for viewing
 
-        # Give countdown
-        countdown_time = 3;
-        dt = 1;
-        tvec = np.linspace(countdown_time,0,int(round(countdown_time/dt)+1))
-        for t in tvec:
-            self.send_status('Prepare to Test Class - ' + class_name + ' - In ' + str(t) + ' Seconds')
-            time.sleep(dt)
+        # Update GUI image
+        image_name = self.vie.TrainingData.get_motion_image(class_name)
+        if image_name:
+            self.trainer.send_message("strMotionTesterImage", image_name)
+
+        # # Give countdown
+        # countdown_time = 3;
+        # dt = 1;
+        # tvec = np.linspace(countdown_time,0,int(round(countdown_time/dt)+1))
+        # for t in tvec:
+        #     self.send_status('Testing Class - ' + class_name + ' - In ' + str(t) + ' Seconds)')
+        #     time.sleep(dt)
+
+        # Start once user goes to no-movement, then first non- no movement classification is given
+        self.send_status('Testing Class - ' + class_name + ' - Return to "No Movement" and Begin')
+        entered_no_movement = False
+        while True:
+            current_class = self.vie.output['decision']
+            if current_class == 'No Movement': entered_no_movement = True
+            if (current_class != 'No Movement') and (current_class != 'None') and entered_no_movement: break
 
         dt = 0.1  # 100ms RIC JAMA
         timeout = 5
@@ -121,31 +160,38 @@ class MotionTester(object):
             else:
                 num_wrong += 1
 
-            # send status to mobile trainer
+            # print status
             self.send_status('Testing Class - ' + class_name + ' - ' + str(num_correct) + '/' + str(max_correct) + ' Correct Classifications')
 
             # update data for output
             self.add_data(class_name,current_class)
 
+            # determine if move is completed
             if num_correct >= max_correct:
                 move_complete = True
 
+            # Sleep before next assessed classification
             time.sleep(dt)
             time_elapsed = time.time() - time_begin
 
+        # Motion completed, update status
         self.send_status('Class Assessment - ' + class_name + ' - ' + str(num_correct) + '/' + str(max_correct) + ' Correct Classifications, ' + str(num_wrong) + ' Misclassifications')
 
         return move_complete
 
-    def send_status(self, status):
-        import logging
+    def update_gui_progress(self,  num_correct, max_correct):
+        # Method to update the progress bar in the web-based GUI
+        self.trainer.send_message("strMotionTesterProgress", str(int(round((float(num_correct)/max_correct)*100))))
 
+    def send_status(self, status):
+        # Method to send more verbose status updates for command line users and logging purposes
         print(status)
         logging.info(status)
-        # TODO: Update so it doesn't update if it is the same string
         self.trainer.send_message("strMotionTester", status)
 
     def add_data(self, class_name_to_test, current_class):
+        # Method to add data following each assessment
+
         # TODO: Better fix for this, should 'None' be an available classification in first place?
         if current_class is 'None':
             current_class = 'No Movement'
@@ -163,10 +209,10 @@ class MotionTester(object):
         #self.data[class_id_to_test]['emgFrames'].append([])
 
     def save_results(self):
-        import h5py
-        import datetime as dt
+        # Method to save out compiled assessment results in h5df formal, following full assessment
+        # Mimics struct hierarchy of MATLAB motion tester results
 
-        t = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        t = dtime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         h5 = h5py.File(self.filename + self.file_ext, 'w')
         g1 = h5.create_group('TrialLog')
         g1.attrs['description'] = t + 'Motion Tester Data'
@@ -201,8 +247,6 @@ class TargetAchievementControl(object):
             Cmd - Indicates the cmd_value is a command word. Options are:
                 StartAssessment
         """
-        import logging
-        import threading
 
         logging.info('Received new  TAC command:' + value)
         parsed = value.split(':')
@@ -220,9 +264,6 @@ class TargetAchievementControl(object):
                 self.thread.start()
 
     def start_assessment(self):
-        import math
-        import time
-        from mpl import JointEnum as MplId
 
         timeout = 6.0 #seconds
         dt = 0.05 # seconds
