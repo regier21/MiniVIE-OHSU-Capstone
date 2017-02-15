@@ -76,8 +76,8 @@ def main():
 
     # Sink is output to outside world (in this case to VIE)
     # For MPL, this might be: real MPL/NFU, Virtual Arm, etc.
-    vmpl = UnityUdp(remote_host="127.0.0.1")  # ("192.168.1.24")
-    vie.DataSink = vmpl
+    # vmpl = UnityUdp(remote_host="127.0.0.1")  # ("192.168.1.24")
+    # vie.DataSink = vmpl
 
     # ##########################
     # Run the control loop
@@ -91,7 +91,7 @@ def main():
             # Run the actual model
             output = vie.update()
 
-            trainer.send_message("strStatus", 'V=' + vmpl.get_voltage() + ' ' + output['status'])
+            # trainer.send_message("strStatus", 'V=' + vmpl.get_voltage() + ' ' + output['status'])
             trainer.send_message("strOutputMotion", output['decision'])
 
             msg = '{} [{:.0f}]'.format(vie.training_motion, round(vie.TrainingData.get_totals(vie.training_id), -1))

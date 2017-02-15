@@ -42,6 +42,38 @@
 		  text-align: center;
 		  line-height: 30px;
 		  color: white;
+		}
+		  
+		#tacJoint1Background, #tacJoint2Background, #tacJoint3Background {
+		  width: 100%;
+		  height: 30px;
+		  background-color: #ddd;
+		  position:relative;
+		}
+		
+		#tacJoint1Target, #tacJoint2Target , #tacJoint3Target{
+		  width: 10%;
+		  height: 100%;
+		  background-color: #1E90FF;
+		  margin-left: 0%;
+		  position: absolute;
+		}
+
+		#tacJoint1Bar, #tacJoint2Bar, #tacJoint3Bar {
+		  width: 5%;
+		  height: 100%;
+		  background-color: #4CAF50;
+		  margin-left: 0%;
+          position: absolute;
+          z-index: 10;
+		}
+
+		#tacJoint1Label, #tacJoint2Label, #tacJoint3Label {
+		  text-align: center;
+		  line-height: 30px;
+		  color: white;
+		 }
+		 
     </style>
 
     
@@ -104,7 +136,7 @@
             $("#ID_PAUSE_HAND").on("mousedown", function() {sendCmd("Cmd:PauseHand")} );
             $("#ID_SHUTDOWN").on("mousedown", function() {sendCmd("Cmd:Shutdown")} );
             $("#ID_ASSESSMENT_MT").on("mousedown", function() {sendCmd("Cmd:StartMotionTester")} );
-            $("#ID_ASSESSMENT_TAC").on("mousedown", function() {sendCmd("Cmd:StartAssessment")} );
+            $("#ID_ASSESSMENT_TAC").on("mousedown", function() {sendCmd("Cmd:StartTAC")} );
             
         };
         
@@ -161,6 +193,42 @@
 				 if (cmd_type == "strTAC") {
 					 $("#tac_status").text(cmd_data);
 				 }
+				 if (cmd_type == "strTACJoint1Name") {
+					 $("#tacJoint1Name").text(cmd_data);
+				 }
+				 if (cmd_type == "strTACJoint1Bar") {
+					 updateTACJointBar(cmd_data, "tacJoint1Bar");
+				 }
+				 if (cmd_type == "strTACJoint1Target") {
+					updateTACJointTarget(cmd_data, "tacJoint1Target");
+				 }
+				 if (cmd_type == "strTACJoint1Error") {
+					updateTACJointError(cmd_data, "tacJoint1Target");
+				 }
+				 if (cmd_type == "strTACJoint2Name") {
+					 $("#tacJoint2Name").text(cmd_data);
+				 }
+				 if (cmd_type == "strTACJoint2Bar") {
+					 updateTACJointBar(cmd_data, "tacJoint2Bar");
+				 }
+				 if (cmd_type == "strTACJoint2Target") {
+					updateTACJointTarget(cmd_data, "tacJoint2Target");
+				 }
+				 if (cmd_type == "strTACJoint2Error") {
+					updateTACJointError(cmd_data, "tacJoint2Target");
+				 }
+				 if (cmd_type == "strTACJoint3Name") {
+					 $("#tacJoint3Name").text(cmd_data);
+				 }
+				 if (cmd_type == "strTACJoint3Bar") {
+					 updateTACJointBar(cmd_data, "tacJoint3Bar");
+				 }
+				 if (cmd_type == "strTACJoint3Target") {
+					updateTACJointTarget(cmd_data, "tacJoint3Target");
+				 }
+				 if (cmd_type == "strTACJoint3Error") {
+					updateTACJointError(cmd_data, "tacJoint3Target");
+				 }
 			 }
          }   
 
@@ -175,6 +243,28 @@
 		// Function to update motion tester image based on class being assessed
 		function updateMTImage(imageFile){
 			document.getElementById("ID_MT_IMAGE").src=imageFile
+		}
+		
+		function updateTACJointBar(value, elementId) {
+			var elem = document.getElementById(elementId);   
+			elem.style.marginLeft = value - 2.5 + '%'; // The 2.5 is to account for 5% width
+			document.getElementById("tacJoint1Label").innerHTML = Math.round(value * 1);
+		}
+		
+		function updateTACJointError(value, elementId) {
+			var elem = document.getElementById(elementId); 
+            elem.style.width = value*2 + '%'			
+		}
+		
+		function updateTACJointTarget(value, elementId) {
+			var elem = document.getElementById(elementId);
+			percentChar = elem.style.width
+			percentNum  = percentChar.substring(0, percentChar.length - 1) // Remove percent sign
+			halfWidth = percentNum * 1 / 2
+			valuePercent = value * 1
+			newMargin = valuePercent  - halfWidth
+			newMarginPercent = newMargin * 1 + '%'
+			elem.style.marginLeft = newMarginPercent;
 		}
 		
     </script>
@@ -280,11 +370,32 @@
         <div data-role="header" data-theme="b" >
             <h1>Target Achievement Control</h1>
 			<a href="#ID_MAIN_PAGE" data-role="button" data-icon="arrow-l">Back</a>
-			<p>Assessment Status: <span = id="tac_status"/></p>
-			<p>Classifying: <span = id="tac_output"/></p>
-			<img src="img_arm_motions/No_Movement.png" alt="Motion Image" width="561" height="312">
-        </div><!-- /header -->
+		</div><!-- /header -->
 		<div data-role="content">
+			<a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-r" id="ID_ASSESSMENT_TAC">Start TAC</a>
+			<p>Status: <span = id="tac_status"/></p>
+			<p>Classifying: <span = id="tac_output"/></p>
+			<p><span = id="tacJoint1Name"/></p>
+            <div id="tacJoint1Background">
+				<div id="tacJoint1Target"></div>
+				<div id="tacJoint1Bar">
+					<div id="tacJoint1Label">0</div>
+				 </div>
+			</div>
+			<p><span = id="tacJoint2Name"/></p>
+            <div id="tacJoint2Background">
+				<div id="tacJoint2Target"></div>
+				<div id="tacJoint2Bar">
+					<div id="tacJoint2Label">0</div>
+				 </div>
+			</div>
+			<p><span = id="tacJoint3Name"/></p>
+            <div id="tacJoint3Background">
+				<div id="tacJoint3Target"></div>
+				<div id="tacJoint3Bar">
+					<div id="tacJoint3Label">0</div>
+				 </div>
+			</div>
 		</div><!-- /content -->
     </div><!-- /page -->
 
