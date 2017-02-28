@@ -130,7 +130,7 @@ class SignalViewer(QObject):
         # Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.
         for i in range(len(tableau20)):
             r, g, b = tableau20[i]
-            self.tableau20[i] = (r / 255., g / 255., b / 255.)
+            tableau20[i] = (r / 255., g / 255., b / 255.)
 
         # Will setup 16 lines which can be plotted
         for i_channel in range(16):
@@ -161,9 +161,10 @@ class SignalViewer(QObject):
             else:
                 self._signal_lines[i_channel][0].set_visible(False)
 
+        # TODO: This is taking a while, especially the draw() method
         # Setup range
-        self._signal_ax.relim()
-        self._signal_ax.autoscale_view()
+        #self._signal_ax.relim()
+        #self._signal_ax.autoscale_view()
         # Redraw
         self._signal_canvas.draw()
 
