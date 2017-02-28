@@ -136,7 +136,8 @@
             $("#ID_PAUSE_HAND").on("mousedown", function() {sendCmd("Cmd:PauseHand")} );
             $("#ID_SHUTDOWN").on("mousedown", function() {sendCmd("Cmd:Shutdown")} );
             $("#ID_ASSESSMENT_MT").on("mousedown", function() {sendCmd("Cmd:StartMotionTester")} );
-            $("#ID_ASSESSMENT_TAC").on("mousedown", function() {sendCmd("Cmd:StartTAC")} );
+            $("#ID_ASSESSMENT_TAC1").on("mousedown", function() {sendCmd("Cmd:StartTAC1")} );
+			$("#ID_ASSESSMENT_TAC3").on("mousedown", function() {sendCmd("Cmd:StartTAC3")} );
             
         };
         
@@ -372,7 +373,8 @@
 			<a href="#ID_MAIN_PAGE" data-role="button" data-icon="arrow-l">Back</a>
 		</div><!-- /header -->
 		<div data-role="content">
-			<a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-r" id="ID_ASSESSMENT_TAC">Start TAC</a>
+			<a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-r" id="ID_ASSESSMENT_TAC1">Start TAC1</a>
+			<a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-r" id="ID_ASSESSMENT_TAC3">Start TAC3</a>
 			<p>Status: <span = id="tac_status"/></p>
 			<p>Classifying: <span = id="tac_output"/></p>
 			<p><span = id="tacJoint1Name"/></p>
