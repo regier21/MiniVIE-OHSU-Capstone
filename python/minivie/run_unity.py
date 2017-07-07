@@ -10,7 +10,7 @@
 # Python 2 and 3:
 from utilities import user_config
 import scenarios.mpl_nfu
-from pattern_rec import training, assessment
+from pattern_rec import training, assessment, features, features_selected
 
 
 def main():
@@ -31,6 +31,10 @@ def main():
     motion_test = assessment.MotionTester(vie, vie.TrainingInterface)
     vie.TrainingInterface.add_message_handler(motion_test.command_string)
     vie.TrainingInterface.add_message_handler(tac.command_string)
+
+    #setup features
+    select_features = features_selected.Features_selected(vie)
+    vie.TrainingInterface.add_message_handler(select_features.command_string)
 
     scenarios.mpl_nfu.run(vie)
 

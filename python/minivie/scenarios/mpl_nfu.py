@@ -14,6 +14,7 @@ from mpl.unity import UnityUdp
 from controls.plant import Plant, class_map
 from scenarios import Scenario
 
+
 dt = 0.02  # seconds per loop.  50Hz update
 
 
@@ -31,14 +32,43 @@ def setup():
     vie = Scenario()
 
     # attach inputs
-    vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001'), myo.MyoUdp(source='//0.0.0.0:15002')])
+    vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001')])
 
     # Training Data holds data labels
     # training data manager
     vie.TrainingData = pr.TrainingData()
     vie.TrainingData.load()
     vie.TrainingData.num_channels = vie.num_channels
-    vie.FeatureExtract = pr.FeatureExtract(zc_thresh=0.05, ssc_thresh=0.05, sample_rate=200)
+    vie.FeatureExtract = pr.FeatureExtract()
+
+
+    #create instances of all feature classes
+    #f1 = pr.features.Mav()
+    #f2 = pr.features.Curve_len()
+    #f3 = pr.features.Zc()
+    #f4 = pr.features.Ssc()
+    #f5 = pr.features.Wamp()
+    #f6 = pr.features.Var()
+    #f7 = pr.features.Vorder()
+    #f8 = pr.features.Logdetect()
+    #f9 = pr.features.EMGhist()
+    #f10 = pr.features.AR()
+    #f11 = pr.features.Ceps()
+
+
+    #adds feature instances to attached features list
+    #vie.FeatureExtract.attachFeature(f1)
+    #vie.FeatureExtract.attachFeature(f2)
+    #vie.FeatureExtract.attachFeature(f3)
+    #vie.FeatureExtract.attachFeature(f4)
+    #vie.FeatureExtract.attachFeature(f5)
+    #vie.FeatureExtract.attachFeature(f6)
+    #vie.FeatureExtract.attachFeature(f7)
+    #vie.FeatureExtract.attachFeature(f8)
+    #vie.FeatureExtract.attachFeature(f9)
+    #vie.FeatureExtract.attachFeature(f10)
+    #vie.FeatureExtract.attachFeature(f11)
+
 
     # Classifier parameters
     vie.SignalClassifier = pr.Classifier(vie.TrainingData)
@@ -84,7 +114,7 @@ def run(vie):
                 msg = '<br>' + vie.DataSink.get_status_msg()  # Limb Status
                 msg += ' ' + output['status']  # Classifier Status
                 msg += '<br>MYO1:' + vie.SignalSource[0].get_status_msg()
-                msg += '<br>MYO2:' + vie.SignalSource[1].get_status_msg()
+                #msg += '<br>MYO2:' + vie.SignalSource[1].get_status_msg()
                 msg += '<br>' + time.strftime("%c")
 
                 vie.TrainingInterface.send_message("strStatus", msg)

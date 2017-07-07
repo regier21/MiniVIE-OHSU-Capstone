@@ -91,7 +91,83 @@ function setupSpacebrew() {
             sendCmd("Cmd:AutoSaveOff");
         }
     });
-    
+	$('#mav').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:mavOn");
+        } else {
+            sendCmd("Cmd:mavOff");
+        }
+    });
+	$('#zc').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:zcOn");
+        } else {
+            sendCmd("Cmd:zcOff");
+        }
+    });
+	$('#ssc').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:sscOn");
+        } else {
+            sendCmd("Cmd:sscOff");
+        }
+    });
+	$('#curve_len').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:curve_lenOn");
+        } else {
+            sendCmd("Cmd:curve_lenOff");
+        }
+    });
+	$('#wamp').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:wampOn");
+        } else {
+            sendCmd("Cmd:wampOff");
+        }
+    });
+    $('#var').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:varOn");
+        } else {
+            sendCmd("Cmd:varOff");
+        }
+    });
+	$('#vorder').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:vorderOn");
+        } else {
+            sendCmd("Cmd:vorderOff");
+        }
+    });
+	$('#logdetect').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:logdetectOn");
+        } else {
+            sendCmd("Cmd:logdetectOff");
+        }
+    });
+	$('#emghist').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:emghistOn");
+        } else {
+            sendCmd("Cmd:emghistOff");
+        }
+    });
+	$('#ar').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:arOn");
+        } else {
+            sendCmd("Cmd:arOff");
+        }
+    });
+	$('#ceps').on("change", function() {
+        if (this.checked) {
+            sendCmd("Cmd:cepsOn");
+        } else {
+            sendCmd("Cmd:cepsOff");
+        }
+    });
 
 } // setupSpacebrew
 
