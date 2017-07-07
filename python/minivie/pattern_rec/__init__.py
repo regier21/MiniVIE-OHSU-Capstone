@@ -126,9 +126,14 @@ class FeatureExtract(object):
 
         if len(features_array)> 0 :
             vstack_features_array = np.vstack(features_array)
-            return vstack_features_array.T.reshape(1, (len(features_array)*8))
+
+            #determines total number of elements in array
+            size = 1
+            for dim in np.shape(vstack_features_array): size *= dim
+
+            return vstack_features_array.T.reshape(1, size)
         else:
-            return np.ones(4)
+            return np.ones(1)
 
 def test_feature_extract():
     # Offline test code
