@@ -8,10 +8,9 @@
 # 2016OCT05 Armiger: Created
 
 # Python 2 and 3:
-from utilities import user_config
+from utilities import user_config, setup
 import scenarios.mpl_nfu
 from pattern_rec import training, assessment, features, features_selected
-
 
 def main():
 
@@ -35,6 +34,9 @@ def main():
     #setup features
     select_features = features_selected.Features_selected(vie)
     vie.TrainingInterface.add_message_handler(select_features.command_string)
+    wait_for_received = setup.On_connection_with_www(vie.TrainingInterface)
+    vie.TrainingInterface.add_message_handler(wait_for_received.command_string)
+    setup.setup_once(wait_for_received, vie.TrainingInterface)
 
     scenarios.mpl_nfu.run(vie)
 

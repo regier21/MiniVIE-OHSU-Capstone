@@ -83,91 +83,15 @@ function setupSpacebrew() {
             sendCmd("Cmd:PauseHandOff");
         }
     });
-    $('#autoSave').on("change", function() {
-        var val = this.value;
-        if (val=="On") {
-            sendCmd("Cmd:AutoSaveOn");
-        } else {
-            sendCmd("Cmd:AutoSaveOff");
-        }
-    });
-	$('#mav').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:mavOn");
-        } else {
-            sendCmd("Cmd:mavOff");
-        }
-    });
-	$('#zc').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:zcOn");
-        } else {
-            sendCmd("Cmd:zcOff");
-        }
-    });
-	$('#ssc').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:sscOn");
-        } else {
-            sendCmd("Cmd:sscOff");
-        }
-    });
-	$('#curve_len').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:curve_lenOn");
-        } else {
-            sendCmd("Cmd:curve_lenOff");
-        }
-    });
-	$('#wamp').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:wampOn");
-        } else {
-            sendCmd("Cmd:wampOff");
-        }
-    });
-    $('#var').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:varOn");
-        } else {
-            sendCmd("Cmd:varOff");
-        }
-    });
-	$('#vorder').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:vorderOn");
-        } else {
-            sendCmd("Cmd:vorderOff");
-        }
-    });
-	$('#logdetect').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:logdetectOn");
-        } else {
-            sendCmd("Cmd:logdetectOff");
-        }
-    });
-	$('#emghist').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:emghistOn");
-        } else {
-            sendCmd("Cmd:emghistOff");
-        }
-    });
-	$('#ar').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:arOn");
-        } else {
-            sendCmd("Cmd:arOff");
-        }
-    });
-	$('#ceps').on("change", function() {
-        if (this.checked) {
-            sendCmd("Cmd:cepsOn");
-        } else {
-            sendCmd("Cmd:cepsOff");
-        }
-    });
+	$('select[type=checkbox]').each(function () {
+        $('#'+this.id).on("change", function() {
+		   if (this.value == "On") {
+               sendCmd("Cmd:" + this.id + "On")
+		   }else{
+			   sendCmd("Cmd:" + this.id + "Off")
+           }
+		});
+	});
 
 } // setupSpacebrew
 
@@ -187,6 +111,7 @@ function onOpen() {
         message += "<br>You can customize this app's name in the query string by adding <strong>name=your_app_name</strong>."
     }
     $("#statusMsg").html(message);
+	
 }
 
 /**
@@ -261,6 +186,18 @@ function onOpen() {
          if (cmd_type == "strTACJoint3Error") {
             updateTACJointError(cmd_data, "tacJoint3Target");
          }
+		 if (cmd_type == "featureSetup") {
+			 if (cmd_data == "start"){
+				 sendCmd("Cmd:received")
+				 $('select[type=checkbox]').each(function () {
+					if (this.value == "On") {
+						sendCmd("Cmd:" + this.id + "On")
+					}else{
+						sendCmd("Cmd:" + this.id + "Off")
+					}
+				});
+			 }
+		 }
      }
  }
 
@@ -326,3 +263,4 @@ function updateTACJointTarget(value, elementId) {
     newMarginPercent = newMargin * 1 + '%'
     elem.style.marginLeft = newMarginPercent;
 }
+
