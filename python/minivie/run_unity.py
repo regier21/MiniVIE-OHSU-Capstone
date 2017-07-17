@@ -36,7 +36,7 @@ def main():
     vie.TrainingInterface.add_message_handler(select_features.command_string)
     wait_for_received = setup.On_connection_with_www(vie.TrainingInterface)
     vie.TrainingInterface.add_message_handler(wait_for_received.command_string)
-    setup.setup_once(wait_for_received, vie.TrainingInterface)
+    wait_for_received.setup_features()
 
     scenarios.mpl_nfu.run(vie)
 
