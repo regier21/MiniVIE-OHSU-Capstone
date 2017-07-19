@@ -702,6 +702,8 @@ classdef TrainingData < handle
                 
                 desc = h5readatt(fullFile,'/data','description');
                 numchannels = double(h5readatt(fullFile,'/data','num_channels'));
+                numsamples = double(h5readatt(fullFile,'/data','num_samples'));
+                numfeatures = double(h5readatt(fullFile,'/data','num_features'));
                 unix_time = double(h5read(fullFile,'/data/time_stamp')); %posix time
                 tz = java.util.Date(); % The date string display
                 tz_val = -tz.getTimezoneOffset()/60; % the timezone offset from UTC
@@ -731,7 +733,7 @@ classdef TrainingData < handle
             end
             
             % load features
-            obj.SignalFeatures3D = reshape(features(:),4,16,[]);
+            obj.SignalFeatures3D = reshape(features(:),numfeatures,numchannels,numsamples);
             obj.SignalFeatures3D = permute(obj.SignalFeatures3D,[2 1 3]);
             obj.MaxChannels = double(numchannels);
             

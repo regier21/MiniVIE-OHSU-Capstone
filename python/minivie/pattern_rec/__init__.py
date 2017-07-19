@@ -272,6 +272,7 @@ class TrainingData:
         self.name = []  # Name of each class
         self.time_stamp = []
         self.num_samples = 0
+        self.num_features = 0
 
     def clear(self, motion_id):
         # Remove the class data for the matching index
@@ -308,6 +309,7 @@ class TrainingData:
         self.id.append(id_)
         self.data.append(data_)
         self.imu.append(imu_)
+        self.num_features = (len(data_)/self.num_channels)
         self.num_samples += 1
 
     def get_totals(self, motion_id=None):
@@ -373,6 +375,8 @@ class TrainingData:
         group = h5.create_group('data')
         group.attrs['description'] = t + 'Myo Armband Raw EMG Data'
         group.attrs['num_channels'] = self.num_channels
+        group.attrs['num_samples'] = self.num_samples
+        group.attrs['num_features'] = self.num_features
         group.create_dataset('time_stamp', data=self.time_stamp)
         group.create_dataset('id', data=self.id)
         encoded = [a.encode('utf8') for a in self.name]
