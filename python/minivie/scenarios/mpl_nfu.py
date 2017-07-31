@@ -8,7 +8,7 @@ Initial pass at simulating MiniVIE processing using python so that this runs on 
 
 import sys
 import time
-from inputs import myo
+from inputs import myo, daqEMGDevice
 import pattern_rec as pr
 from mpl.unity import UnityUdp
 from controls.plant import Plant, class_map
@@ -17,7 +17,7 @@ from scenarios import Scenario
 dt = 0.02  # seconds per loop.  50Hz update
 
 
-def setup():
+def setup(source, trainingDataArm, unityArm):
     """
     Create the building blocks of the MiniVIE
 
@@ -31,12 +31,11 @@ def setup():
     vie = Scenario()
 
     # attach inputs
-    #vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001'), myo.MyoUdp(source='//0.0.0.0:15002')])
-    vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001')])
-
+    #vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15003'), myo.MyoUdp(source='//0.0.0.0:15004')])
+    vie.attach_source(source)
     # Training Data holds data labels
     # training data manager
-    vie.TrainingData = pr.TrainingData()
+    vie.TrainingData = pr.TrainingData(trainingDataArm)
     vie.TrainingData.load()
     vie.TrainingData.num_channels = vie.num_channels
     vie.FeatureExtract = pr.FeatureExtract(zc_thresh=0.05, ssc_thresh=0.05, sample_rate=200)
@@ -49,9 +48,12 @@ def setup():
     filename = "../../WrRocDefaults.xml"
     vie.Plant = Plant(dt, filename)
 
+    #set arm
+    vie.arm = unityArm
+
     # Sink is output to outside world (in this case to VIE)
     # For MPL, this might be: real MPL/NFU, Virtual Arm, etc.
-    vmpl = UnityUdp(remote_host="127.0.0.1")  # ("192.168.1.24")
+    vmpl = UnityUdp(remote_host="127.0.0.1", arm = unityArm)  # ("192.168.1.24")
     vie.DataSink = vmpl
 
     return vie
@@ -84,8 +86,9 @@ def run(vie):
             if vie.TrainingInterface is not None:
                 msg = '<br>' + vie.DataSink.get_status_msg()  # Limb Status
                 msg += ' ' + output['status']  # Classifier Status
-                msg += '<br>MYO1:' + vie.SignalSource[0].get_status_msg()
-                #msg += '<br>MYO2:' + vie.SignalSource[1].get_status_msg()
+                msg += '<br>Input1:' + vie.SignalSource[0].get_status_msg()
+                if (len(vie.SignalSource) == 2):
+                    msg += '<br>Input2:' + vie.SignalSource[1].get_status_msg()
                 msg += '<br>' + time.strftime("%c")
 
                 vie.TrainingInterface.send_message("strStatus", msg)

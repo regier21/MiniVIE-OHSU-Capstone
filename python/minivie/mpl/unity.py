@@ -71,8 +71,18 @@ class UnityUdp(object):
         obj.MplAddress = '127.0.0.1';
 
     """
-    def __init__(self, remote_host="127.0.0.1", remote_port=25000, local_port=25001):
-        self.udp = {'RemoteHost': remote_host, 'RemotePort': remote_port, 'LocalPort': local_port}
+    def __init__(self, remote_host="127.0.0.1", arm = "right"):
+        right_remote_port = 25000
+        right_local_port = 25001
+
+        left_remote_port = 25100
+        left_local_port = 25101
+
+        if arm.lower() == "right":
+            self.udp = {'RemoteHost': remote_host, 'RemotePort': right_remote_port, 'LocalPort': right_local_port}
+        elif arm.lower() == "left":
+            self.udp = {'RemoteHost': remote_host, 'RemotePort': left_remote_port, 'LocalPort': left_local_port}
+
         self.sock = None
         self.is_connected = False
         self.connect()

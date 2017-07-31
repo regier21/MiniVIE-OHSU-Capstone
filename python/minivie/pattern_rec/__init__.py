@@ -10,6 +10,7 @@ import csv
 import logging
 import threading
 import numpy as np
+import time
 
 
 class FeatureExtract(object):
@@ -38,6 +39,8 @@ class FeatureExtract(object):
         self.zc_thresh = zc_thresh
         self.ssc_thresh = ssc_thresh
         self.sample_rate = sample_rate
+        self.Fref = np.eye(4)
+        self.count = 0
 
     def get_features(self, data_input):
         """
@@ -50,19 +53,17 @@ class FeatureExtract(object):
 
         if data_input is None:
             # Can't get features
-            return None, None, None
+            return None, None, None, None
         elif isinstance(data_input, np.ndarray):
             # Extract features from the data provided
             f = feature_extract(data_input, self.zc_thresh, self.ssc_thresh, self.sample_rate)
             imu = None
         else:
             # input is a data source so call it's get_data method
-
             # Get features from emg data
             f = np.array([])
             for s in data_input:
                 f = np.append(f,feature_extract(s.get_data()*0.01, self.zc_thresh, self.ssc_thresh, self.sample_rate))
-
             imu = np.array([])
             for s in data_input:
                 result = s.get_imu()
@@ -72,13 +73,20 @@ class FeatureExtract(object):
                 # add imu to features
                 #f = np.append(f, imu)
 
+            rot_mat = []
+            for s in data_input:
+                result = s.get_rotationMatrix()
+                rot_mat.append(result)
+
         feature_list = f.tolist()
 
         # format the data in a way that sklearn wants it
         f = np.squeeze(f)
         feature_learn = f.reshape(1, -1)
+        self.count += 1
+        print(self.count)
 
-        return feature_list, feature_learn, imu
+        return feature_list, feature_learn, imu, rot_mat
 
 
 def feature_extract(y, zc_thresh=0.15, ssc_thresh=0.15, sample_rate=200):
@@ -242,8 +250,8 @@ class Classifier:
 
 class TrainingData:
     """Python Class for managing machine learning and Myo training operations."""
-    def __init__(self):
-        self.filename = 'TRAINING_DATA'
+    def __init__(self, arm=""):
+        self.filename = ('TRAINING_DATA' + arm)
         self.file_ext = '.hdf5'
 
         # Names of potentially trained classes
@@ -414,7 +422,8 @@ class TrainingData:
         encoded = [a.encode('utf8') for a in self.name]
         group.create_dataset('name', data=encoded)
         group.create_dataset('data', data=self.data)
-        group.create_dataset('imu', data=self.imu)
+        if self.imu[0][0] is not None:
+            group.create_dataset('imu', data=self.imu)
         group.create_dataset('motion_names', data=[a.encode('utf8') for a in self.motion_names]) #utf-8
         h5.close()
         print('Saved ' + self.filename)
