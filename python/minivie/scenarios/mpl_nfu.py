@@ -31,7 +31,7 @@ def setup():
     vie = Scenario()
 
     # attach inputs
-    # vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001'), myo.MyoUdp(source='//0.0.0.0:15002')])		    #vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001')])
+    # vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001'), myo.MyoUdp(source='//0.0.0.0:15002')])
     vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001')])
 
     # Training Data holds data labels

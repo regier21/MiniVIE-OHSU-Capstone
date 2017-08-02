@@ -273,6 +273,7 @@ class TrainingData:
 
         # Create lock to control write access to training data
         self.__lock = threading.Lock()
+
         self.num_channels = 0
 
         self.data = []  # List of all feature extracted samples
