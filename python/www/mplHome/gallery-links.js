@@ -11,6 +11,42 @@ $(function () {
         type: 'image/png',
         thumbnail: 'img_arm_motions/No_Movement.png'
         },
+		{
+        title: 'Shoulder Flexion',
+        href:  'img_arm_motions/Shoulder_Flexion.png',
+        type: 'image/png',
+        thumbnail: 'img_arm_motions/Shoulder_Flexion.png'
+        },
+		{
+        title: 'Shoulder Extension',
+        href:  'img_arm_motions/Shoulder_Extension.png',
+        type: 'image/png',
+        thumbnail: 'img_arm_motions/Shoulder_Extension.png'
+        },
+		{
+        title: 'Shoulder Adduction',
+        href:  'img_arm_motions/Shoulder_Adduction.png',
+        type: 'image/png',
+        thumbnail: 'img_arm_motions/Shoulder_Adduction.png'
+        },
+		{
+        title: 'Shoulder Abduction',
+        href:  'img_arm_motions/Shoulder_Abduction.png',
+        type: 'image/png',
+        thumbnail: 'img_arm_motions/Shoulder_Abduction.png'
+        },
+		{
+        title: 'Humeral Internal Rotation',
+        href:  'img_arm_motions/Humeral_Internal_Rotation.png',
+        type: 'image/png',
+        thumbnail: 'img_arm_motions/Humeral_Internal_Rotation.png'
+        },
+		{
+        title: 'Humeral External Rotation',
+        href:  'img_arm_motions/Humeral_External_Rotation.png',
+        type: 'image/png',
+        thumbnail: 'img_arm_motions/Humeral_External_Rotation.png'
+        },
         {
         title: 'Elbow Flexion',
         href:  'img_arm_motions/Elbow_Flexion.png',
@@ -89,19 +125,25 @@ $(function () {
                 // Note these class commands must match those listed in pattern_rec\__init__.py class TrainingData
                 switch(index) {
                 case  0: sendCmd("Cls:No Movement"); break;
-                case  1: sendCmd("Cls:Elbow Flexion"); break;
-                case  2: sendCmd("Cls:Elbow Extension"); break;
-                case  3: sendCmd("Cls:Wrist Rotate In"); break;
-                case  4: sendCmd("Cls:Wrist Rotate Out"); break;
-                case  5: sendCmd("Cls:Wrist Flex In"); break;
-                case  6: sendCmd("Cls:Wrist Extend Out"); break;
-                case  7: sendCmd("Cls:Hand Open"); break;
-                case  8: sendCmd("Cls:Spherical Grasp"); break;
-                case  9: sendCmd("Cls:Tip Grasp"); break;
-                case 10: sendCmd("Cls:Three Finger Pinch Grasp"); break;
-                case 11: sendCmd("Cls:Lateral Grasp"); break;
-                case 12: sendCmd("Cls:Cylindrical Grasp"); break;
-                case 13: sendCmd("Cls:Point Grasp"); break;
+				case  1: sendCmd("Cls:Shoulder Flexion"); break;
+				case  2: sendCmd("Cls:Shoulder Extension"); break;
+				case  3: sendCmd("Cls:Shoulder Adduction"); break;
+				case  4: sendCmd("Cls:Shoulder Abduction"); break;
+				case  5: sendCmd("Cls:Humeral Internal Rotation"); break;
+				case  6: sendCmd("Cls:Humeral External Rotation"); break;
+                case  7: sendCmd("Cls:Elbow Flexion"); break;
+                case  8: sendCmd("Cls:Elbow Extension"); break;
+                case  9: sendCmd("Cls:Wrist Rotate In"); break;
+                case 10: sendCmd("Cls:Wrist Rotate Out"); break;
+                case 11: sendCmd("Cls:Wrist Flex In"); break;
+                case 12: sendCmd("Cls:Wrist Extend Out"); break;
+                case 13: sendCmd("Cls:Hand Open"); break;
+                case 14: sendCmd("Cls:Spherical Grasp"); break;
+                case 15: sendCmd("Cls:Tip Grasp"); break;
+                case 16: sendCmd("Cls:Three Finger Pinch Grasp"); break;
+                case 17: sendCmd("Cls:Lateral Grasp"); break;
+                case 18: sendCmd("Cls:Cylindrical Grasp"); break;
+                case 19: sendCmd("Cls:Point Grasp"); break;
                 default: break;
                 }
         }

@@ -4,7 +4,6 @@ import os.path
 from shutil import copyfile
 import h5py
 import datetime as dt
-import time
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import csv
 import logging
@@ -40,7 +39,6 @@ class FeatureExtract(object):
         self.ssc_thresh = ssc_thresh
         self.sample_rate = sample_rate
         self.Fref = np.eye(4)
-        self.count = 0
 
     def get_features(self, data_input):
         """
@@ -83,8 +81,6 @@ class FeatureExtract(object):
         # format the data in a way that sklearn wants it
         f = np.squeeze(f)
         feature_learn = f.reshape(1, -1)
-        self.count += 1
-        print(self.count)
 
         return feature_list, feature_learn, imu, rot_mat
 
@@ -417,6 +413,7 @@ class TrainingData:
         group = h5.create_group('data')
         group.attrs['description'] = t + 'Myo Armband Raw EMG Data'
         group.attrs['num_channels'] = self.num_channels
+        group.attrs['num_samples'] = self.num_samples
         group.create_dataset('time_stamp', data=self.time_stamp)
         group.create_dataset('id', data=self.id)
         encoded = [a.encode('utf8') for a in self.name]
@@ -424,6 +421,8 @@ class TrainingData:
         group.create_dataset('data', data=self.data)
         if self.imu[0][0] is not None:
             group.create_dataset('imu', data=self.imu)
+        else:
+            group.create_dataset('imu', data=[])
         group.create_dataset('motion_names', data=[a.encode('utf8') for a in self.motion_names]) #utf-8
         h5.close()
         print('Saved ' + self.filename)

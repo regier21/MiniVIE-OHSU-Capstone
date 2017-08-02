@@ -118,13 +118,13 @@ classdef DaqHwDevice < Inputs.SignalInput
             % channels
             %set(obj.AnalogInput,'SampleRate',obj.SampleFrequency);
             actualSampleFrequency = setverify(obj.AnalogInput,'SampleRate',obj.SampleFrequency);
-            
+
             if ~isequal(actualSampleFrequency,obj.SampleFrequency)
                 fprintf('[%s] Actual sample frequency [%f] differs from requested sample frequency [%f]\n',...
                     mfilename ,actualSampleFrequency, obj.SampleFrequency);
                 obj.SampleFrequency = actualSampleFrequency;
             end
-            
+
             set(obj.AnalogInput,'TriggerType','Manual');
             set(obj.AnalogInput,'LoggingMode','Memory');
             set(obj.AnalogInput,'TriggerType','Immediate');
