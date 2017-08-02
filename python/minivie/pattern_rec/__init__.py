@@ -244,6 +244,7 @@ class TrainingData:
     def __init__(self, vie):
         self.filename = 'TRAINING_DATA'
         self.file_ext = '.hdf5'
+        self.vie = vie
 
         # Names of potentially trained classes
         self.motion_names = (
