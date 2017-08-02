@@ -297,7 +297,7 @@ class MyoUdp(SignalInput):
         self.__dataTime = np.zeros((num_samples, 1))
 
         # UDP Port setup
-        self.addr = utilities.get_address('//127.0.0.1:10001') #  was source, changed to work with myoudp.exe, not sure why this works and not the way it was
+        self.addr = utilities.get_address(source) #  was source, changed to work with myoudp.exe, not sure why this works and not the way it was
 
         # Internal values
         self.__battery_level = -1  # initial value is unknown
