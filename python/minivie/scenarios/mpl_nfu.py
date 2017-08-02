@@ -37,7 +37,7 @@ def setup():
 
     # Training Data holds data labels
     # training data manager
-    vie.TrainingData = pr.TrainingData()
+    vie.TrainingData = pr.TrainingData(vie)
     vie.TrainingData.load()
     vie.TrainingData.num_channels = vie.num_channels
     vie.FeatureExtract = pr.FeatureExtract()

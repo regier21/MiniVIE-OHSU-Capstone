@@ -704,6 +704,7 @@ classdef TrainingData < handle
                 numchannels = double(h5readatt(fullFile,'/data','num_channels'));
                 numsamples = double(h5readatt(fullFile,'/data','num_samples'));
                 numfeatures = double(h5readatt(fullFile,'/data','num_features'));
+                featurenames = deblank(h5readatt(fullFile,'/data','feature_names'));
                 unix_time = double(h5read(fullFile,'/data/time_stamp')); %posix time
                 tz = java.util.Date(); % The date string display
                 tz_val = -tz.getTimezoneOffset()/60; % the timezone offset from UTC
@@ -717,7 +718,6 @@ classdef TrainingData < handle
                 if any(strcmp({h.Groups.Datasets.Name},'imu'))
                     imu = double(h5read(fullFile,'/data/imu'));
                 end
-                
                 
                 % rewrite the class label ids based on the name
                 for i = 1:length(classnames)
@@ -737,6 +737,9 @@ classdef TrainingData < handle
             obj.SignalFeatures3D = permute(obj.SignalFeatures3D,[2 1 3]);
             obj.MaxChannels = double(numchannels);
             
+            %load feature names
+            obj.FeatureNames = featurenames;
+
             % load labels
             obj.ClassLabelId = class_labels;
             

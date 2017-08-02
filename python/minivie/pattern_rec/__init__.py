@@ -91,6 +91,19 @@ class FeatureExtract(object):
         else:
             return self.attached_features.append(instance)
 
+    def get_featurenames(self):
+        #return an list with the names of all features being used
+        names = []
+        for instance in self.attached_features:
+            featurename = instance.feature_name()
+            #if name is a list, append each element individually
+            if type(featurename) is list:
+                for i in featurename:
+                    names.append(i)
+            else:
+                names.append(featurename)
+        return names
+
     def clear_features(self):
         del self.attached_features[:]
 
@@ -133,7 +146,7 @@ class FeatureExtract(object):
 
             return vstack_features_array.T.reshape(1, size)
         else:
-            return np.ones(1)
+            return None
 
 def test_feature_extract():
     # Offline test code
@@ -151,7 +164,7 @@ def test_feature_extract():
 
     start_time = timeit.default_timer()
     # code you want to evaluate
-    f = feature_extract(emg_buffer)
+    f = FeatureExtract.feature_extract(emg_buffer)
     # code you want to evaluate
     elapsed = timeit.default_timer() - start_time
     print(elapsed)
@@ -224,13 +237,14 @@ class Classifier:
         return decision_id, status_msg
 
 
-class TrainingData:
+class TrainingData(object):
     """Python Class for managing machine learning and Myo training operations."""
 
-    def __init__(self):
+    def __init__(self, vie):
         self.filename = 'TRAINING_DATA'
         self.file_ext = '.hdf5'
         self.reset()
+        self.vie = vie
 
         # Names of potentially trained classes
         self.motion_names = (
@@ -272,7 +286,6 @@ class TrainingData:
         self.name = []  # Name of each class
         self.time_stamp = []
         self.num_samples = 0
-        self.num_features = 0
 
     def clear(self, motion_id):
         # Remove the class data for the matching index
@@ -309,7 +322,6 @@ class TrainingData:
         self.id.append(id_)
         self.data.append(data_)
         self.imu.append(imu_)
-        self.num_features = (len(data_)/self.num_channels)
         self.num_samples += 1
 
     def get_totals(self, motion_id=None):
@@ -376,7 +388,8 @@ class TrainingData:
         group.attrs['description'] = t + 'Myo Armband Raw EMG Data'
         group.attrs['num_channels'] = self.num_channels
         group.attrs['num_samples'] = self.num_samples
-        group.attrs['num_features'] = self.num_features
+        group.attrs['num_features'] = len(self.vie.FeatureExtract.get_featurenames())
+        group.attrs['feature_names'] = [a.encode('utf8') for a in self.vie.FeatureExtract.get_featurenames()]
         group.create_dataset('time_stamp', data=self.time_stamp)
         group.create_dataset('id', data=self.id)
         encoded = [a.encode('utf8') for a in self.name]

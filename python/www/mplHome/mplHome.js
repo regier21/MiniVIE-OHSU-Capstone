@@ -186,18 +186,6 @@ function onOpen() {
          if (cmd_type == "strTACJoint3Error") {
             updateTACJointError(cmd_data, "tacJoint3Target");
          }
-		 if (cmd_type == "featureSetup") {
-			 if (cmd_data == "start"){
-				 sendCmd("Cmd:received")
-				 $('select[type=checkbox]').each(function () {
-					if (this.value == "On") {
-						sendCmd("Cmd:" + this.id + "On")
-					}else{
-						sendCmd("Cmd:" + this.id + "Off")
-					}
-				});
-			 }
-		 }
      }
  }
 

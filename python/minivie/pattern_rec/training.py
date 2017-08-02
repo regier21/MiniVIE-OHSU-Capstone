@@ -24,8 +24,7 @@ class TrainingManagerSpacebrew(object):
                          'strTAC': '', 'strMotionTesterProgress': '', 'strMotionTesterImage': '',
                          'strTACJoint1Bar': '','strTACJoint1Target': '','strTACJoint1Error': '','strTACJoint1Name': '',
                          'strTACJoint2Bar': '','strTACJoint2Target': '','strTACJoint2Error': '','strTACJoint2Name': '',
-                         'strTACJoint3Bar': '','strTACJoint3Target': '','strTACJoint3Error': '','strTACJoint3Name': '',
-                         "featureSetup": ""
+                         'strTACJoint3Bar': '','strTACJoint3Target': '','strTACJoint3Error': '','strTACJoint3Name': ''
                          }
         
         # keep count of skipped messages so we can send at some nominal rate
