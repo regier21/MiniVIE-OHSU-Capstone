@@ -7,15 +7,19 @@ This class is designed to receive training commands. Training commands can be fo
 @author: R. Armiger
 """
 
+from pattern_rec.training_interface import TrainingInterface
 
-class TrainingManagerSpacebrew(object):
+class TrainingManagerSpacebrew(TrainingManager):
     """
     This Training manager uses websockets provided through the spacebrew interface to manager training commands
 
     """
 
     def __init__(self):
-        
+
+        # Initialize superclass
+        super(TrainingInterface, self).__init__()
+
         # handle to spacebrew websocket interface
         self.brew = None
         
@@ -24,7 +28,7 @@ class TrainingManagerSpacebrew(object):
                          'strTAC': '', 'strMotionTesterProgress': '', 'strMotionTesterImage': '',
                          'strTACJoint1Bar': '','strTACJoint1Target': '','strTACJoint1Error': '','strTACJoint1Name': '',
                          'strTACJoint2Bar': '','strTACJoint2Target': '','strTACJoint2Error': '','strTACJoint2Name': '',
-                         'strTACJoint3Bar': '','strTACJoint3Target': '','strTACJoint3Error': '','strTACJoint3Name': ''
+                         'strTACJoint3Bar': '','strTACJoint3Target': '','strTACJoint3Error': '','strTACJoint3Name': '',
                          }
         
         # keep count of skipped messages so we can send at some nominal rate

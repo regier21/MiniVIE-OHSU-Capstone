@@ -294,10 +294,9 @@ class MyoUdp(SignalInput):
         # Default data buffer [nSamples by nChannels]
         # Treat as private.  use getData to access since it is thread-safe
         self.__dataEMG  = np.zeros((num_samples, 8))
-        self.__dataTime = np.zeros((num_samples, 1))
 
         # UDP Port setup
-        self.addr = utilities.get_address(source) #  was source, changed to work with myoudp.exe, not sure why this works and not the way it was
+        self.addr = utilities.get_address(source)
 
         # Internal values
         self.__battery_level = -1  # initial value is unknown
@@ -449,7 +448,7 @@ class MyoUdp(SignalInput):
             return quat2euler(self.__quat)
 
     def get_imu(self):
-        """ Return IMU data as a dictionary 
+        """ Return IMU data as a dictionary
         result['quat'] = (qw qx qy qz)
         result['accel'] = (ax ay az)
         result['gyro'] = (rx ry rz)
@@ -606,7 +605,6 @@ def connect(mac_addr, stream_addr, hci_interface):
 
     # This blocks until device is awake and connection established
     logger.info("Connecting to: " + mac_addr)
-    #p = btlePeripheral(mac_addr, addrType=btleADDR_TYPE_PUBLIC, iface=hci_interface)
 
     # create unconnected peripheral
     p = btlePeripheral(None, addrType=btleADDR_TYPE_PUBLIC, iface=hci_interface)

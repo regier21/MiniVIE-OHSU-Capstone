@@ -39,6 +39,11 @@ def main():
     vie.TrainingInterface.add_message_handler(motion_test.command_string)
     vie.TrainingInterface.add_message_handler(tac.command_string)
 
+    #setup features
+    select_features = features_selected.Features_selected(vie)
+    vie.TrainingInterface.add_message_handler(select_features.command_string)
+    select_features.create_instance_list()
+
     mpl_nfu.run(vie)
 
 if __name__ == '__main__':
