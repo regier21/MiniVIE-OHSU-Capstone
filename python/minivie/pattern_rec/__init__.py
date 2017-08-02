@@ -10,7 +10,7 @@ import csv
 import logging
 import threading
 import numpy as np
-
+from pattern_rec.EMGFeatures import EMGFeatures
 
 class FeatureExtract(object):
     """
@@ -32,12 +32,14 @@ class FeatureExtract(object):
 
     Revisions;
         17NOV2016 Armiger: Created
+        22JUN2017 J. Kelly: Updated Feature Extraction
 
     """
-    def __init__(self, zc_thresh=0.15, ssc_thresh=0.15, sample_rate=200):
-        self.zc_thresh = zc_thresh
-        self.ssc_thresh = ssc_thresh
-        self.sample_rate = sample_rate
+
+    def __init__(self):
+
+        self.attached_features = []
+
 
     def get_features(self, data_input):
         """
@@ -53,7 +55,7 @@ class FeatureExtract(object):
             return None, None, None
         elif isinstance(data_input, np.ndarray):
             # Extract features from the data provided
-            f = feature_extract(data_input, self.zc_thresh, self.ssc_thresh, self.sample_rate)
+            f = self.feature_extract(data_input)
             imu = None
         else:
             # input is a data source so call it's get_data method
@@ -61,7 +63,7 @@ class FeatureExtract(object):
             # Get features from emg data
             f = np.array([])
             for s in data_input:
-                f = np.append(f,feature_extract(s.get_data()*0.01, self.zc_thresh, self.ssc_thresh, self.sample_rate))
+                f = np.append(f, self.feature_extract(s.get_data() * 0.01))
 
             imu = np.array([])
             for s in data_input:
@@ -80,76 +82,72 @@ class FeatureExtract(object):
 
         return feature_list, feature_learn, imu
 
+    def attachFeature(self, instance):
 
-def feature_extract(y, zc_thresh=0.15, ssc_thresh=0.15, sample_rate=200):
-    """
-    Created on Mon Jan 25 16:25:14 2016
+        #attaches feature class instance to attached_features list
+        if not isinstance(instance, EMGFeatures):
+            return self.attached_features
+        elif instance in self.attached_features:
+            return self.attached_features
+        else:
+            return self.attached_features.append(instance)
 
-    Perform feature extraction, vectorized
+    def get_featurenames(self):
+        #return an list with the names of all features being used
+        names = []
+        for instance in self.attached_features:
+            featurename = instance.feature_name()
+            #if name is a list, append each element individually
+            if type(featurename) is list:
+                for i in featurename:
+                    names.append(i)
+            else:
+                names.append(featurename)
+        return names
 
-    @author: R. Armiger
-    # compute features
-    #
-    # Input:
-    # data buffer to compute features
-    # y = numpy.zeros((numSamples, numChannels))
-    # E.g. numpy.zeros((50, 8))
-    #
-    # Optional:
-    # Thresholds for computing zero crossing and slope sign change features
-    #
-    # Output: feature vector should be [1,nChan*nFeat]
-    # data ordering is as follows
-    # [ch1f1, ch1f2, ch1f3, ch1f4, ch2f1, ch2f2, ch2f3, ch2f4, ... chNf4]
-    """
+    def clear_features(self):
+        del self.attached_features[:]
 
-    # Number of Samples
-    n = y.shape[0]
+    def feature_extract(self, data_input):
+        """
+        Created on Thurs June 22 2016
 
-    # Normalize features so they are independent of the window size
-    fs = sample_rate
+        Perform feature extraction, vectorized
 
-    # Value to compute 'zero-crossing' around
-    t = 0.0
+        @Original author: R. Armiger
+        # compute features
+        #
+        # Input:
+        # data buffer to compute features
+        # data_input = numpy.zeros((numSamples, numChannels))
+        # E.g. numpy.zeros((50, 8))
+        #
+        # Optional:
+        # Thresholds for computing zero crossing and slope sign change features
+        #
+        # Output: feature vector should be [1,nChan*nFeat]
+        # data ordering is as follows
+        # [ch1f1, ch1f2, ch1f3, ch1f4, ch2f1, ch2f2, ch2f3, ch2f4, ... chNf4]
+        """
 
-    # Compute mav across all samples (axis=0)
-    mav = np.mean(abs(y), 0)  # mav shouldn't be normalized
 
-    # Curve length is the sum of the absolute value of the derivative of the
-    # signal, normalized by the sample rate
-    curve_len = np.sum(abs(np.diff(y, axis=0)), axis=0) * fs / n
+        features_array = []
 
-    # Criteria for crossing zero
-    # zeroCross=(y[iSample] - t > 0 and y[iSample + 1] - t < 0) or (y[iSample] - t < 0 and y[iSample + 1] - t > 0)
-    # overThreshold=abs(y[iSample] - t - y[iSample + 1] - t) > zc_thresh
-    # if zeroCross and overThreshold:
-    #     # Count a zero cross
-    #     zc[iChannel]=zc[iChannel] + 1
-    zc = np.sum(
-        ((y[0:n - 1, :] - t > 0) & (y[1:n, :] - t < 0) |
-         (y[0:n - 1, :] - t < 0) & (y[1:n, :] - t > 0)) &
-        (abs(y[0:n - 1, :] - t - y[1:n, :] - t) > zc_thresh),
-        axis=0) * fs / n
+        #loops through instaces and extractes features
+        for instance in self.attached_features:
+            new_feature = instance.extract_features(data_input)
+            features_array.append(new_feature)
 
-    # Criteria for counting slope sign changes
-    # signChange = (y[iSample] > y[iSample - 1]) and (y[iSample] > y[iSample + 1]) or (y[iSample] < y[iSample - 1]) and
-    #       (y[iSample] < y[iSample + 1])
-    # overThreshold=abs(y[iSample] - y[iSample + 1]) > ssc_thresh or abs(y[iSample] - y[iSample - 1]) > ssc_thresh
-    # if signChange and overThreshold:
-    #     # Count a slope change
-    #     ssc[iChannel]=ssc[iChannel] + 1
-    ssc = np.sum(
-        ((y[1:n - 1, :] > y[0:n - 2, :]) & (y[1:n - 1, :] > y[2:n, :]) |
-         (y[1:n - 1, :] < y[0:n - 2, :]) & (y[1:n - 1, :] < y[2:n, :])) &
-        ((abs(y[1:n - 1, :] - y[2:n, :]) > ssc_thresh) | (abs(y[1:n - 1, :] - y[0:n - 2, :]) > ssc_thresh)),
-        axis=0) * fs / n
+        if len(features_array)> 0 :
+            vstack_features_array = np.vstack(features_array)
 
-    # VAR = np.var(y,axis=0) * fs / n
+            #determines total number of elements in array
+            size = 1
+            for dim in np.shape(vstack_features_array): size *= dim
 
-    features = np.vstack((mav, curve_len, zc, ssc))
-
-    return features.T.reshape(1, 32)
-
+            return vstack_features_array.T.reshape(1, size)
+        else:
+            return None
 
 def test_feature_extract():
     # Offline test code
@@ -167,7 +165,7 @@ def test_feature_extract():
 
     start_time = timeit.default_timer()
     # code you want to evaluate
-    f = feature_extract(emg_buffer)
+    f = FeatureExtract.feature_extract(emg_buffer)
     # code you want to evaluate
     elapsed = timeit.default_timer() - start_time
     print(elapsed)
@@ -242,7 +240,8 @@ class Classifier:
 
 class TrainingData:
     """Python Class for managing machine learning and Myo training operations."""
-    def __init__(self):
+
+    def __init__(self, vie):
         self.filename = 'TRAINING_DATA'
         self.file_ext = '.hdf5'
 
@@ -322,7 +321,7 @@ class TrainingData:
         else:
             print('Error, "' + new_class + '" already contained in class list.')
             return False
-        
+
     def add_data(self, data_, id_, name_, imu_=-1):
         # New Data marked with:
         # time_stamp, name, id, data
@@ -345,7 +344,7 @@ class TrainingData:
             total = [0] * num_motions
             for c_ in range(num_motions):
                 total[c_] = self.id.count(c_)
-                logging.debug('{} [{}]'.format(self.motion_names[c_],total[c_]))
+                logging.debug('{} [{}]'.format(self.motion_names[c_], total[c_]))
         else:
             total = self.id.count(motion_id)
 
@@ -400,22 +399,25 @@ class TrainingData:
         if not os.access(self.filename + self.file_ext, os.R_OK):
             print('File Not Readable: ' + self.filename + self.file_ext)
             return False
-            
+
         return True
-        
+
     def save(self):
         t = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         h5 = h5py.File(self.filename + self.file_ext, 'w')
         group = h5.create_group('data')
         group.attrs['description'] = t + 'Myo Armband Raw EMG Data'
         group.attrs['num_channels'] = self.num_channels
+        group.attrs['num_samples'] = self.num_samples
+        group.attrs['num_features'] = len(self.vie.FeatureExtract.get_featurenames())
+        group.attrs['feature_names'] = [a.encode('utf8') for a in self.vie.FeatureExtract.get_featurenames()]
         group.create_dataset('time_stamp', data=self.time_stamp)
         group.create_dataset('id', data=self.id)
         encoded = [a.encode('utf8') for a in self.name]
         group.create_dataset('name', data=encoded)
         group.create_dataset('data', data=self.data)
         group.create_dataset('imu', data=self.imu)
-        group.create_dataset('motion_names', data=[a.encode('utf8') for a in self.motion_names]) #utf-8
+        group.create_dataset('motion_names', data=[a.encode('utf8') for a in self.motion_names])  #utf-8
         h5.close()
         print('Saved ' + self.filename)
 
@@ -467,8 +469,8 @@ class TrainingData:
             return None
 
         # Parse motion name - image map file
-        #pattern_rec_dir = os.path.dirname(os.path.abspath(__file__))
-        #map_path = pattern_rec_dir + '\\..\\..\\www\\mplHome\\motion_name_image_map.csv'
+            # pattern_rec_dir = os.path.dirname(os.path.abspath(__file__))
+            # map_path = pattern_rec_dir + '\\..\\..\\www\\mplHome\\motion_name_image_map.csv'
         map_path = os.path.join(os.path.dirname(__file__), '..', '..', 'www', 'mplHome', 'motion_name_image_map.csv')
         mapped_motion_names = []
         mapped_image_names = []

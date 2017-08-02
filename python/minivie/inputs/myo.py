@@ -293,7 +293,7 @@ class MyoUdp(SignalInput):
 
         # Default data buffer [nSamples by nChannels]
         # Treat as private.  use getData to access since it is thread-safe
-        self.__dataEMG = np.zeros((num_samples, 8))
+        self.__dataEMG  = np.zeros((num_samples, 8))
 
         # UDP Port setup
         self.addr = utilities.get_address(source)
@@ -448,7 +448,7 @@ class MyoUdp(SignalInput):
             return quat2euler(self.__quat)
 
     def get_imu(self):
-        """ Return IMU data as a dictionary 
+        """ Return IMU data as a dictionary
         result['quat'] = (qw qx qy qz)
         result['accel'] = (ax ay az)
         result['gyro'] = (rx ry rz)

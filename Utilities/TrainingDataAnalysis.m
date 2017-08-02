@@ -361,7 +361,7 @@ classdef TrainingDataAnalysis < PatternRecognition.TrainingData
             
             for iFeature = 1:obj.NumFeatures
                 
-                h = subplot(4,1,iFeature);
+                h = subplot(obj.NumFeatures,1,iFeature);
                 hold on
                 
                 if iFeature == 1;
@@ -378,7 +378,7 @@ classdef TrainingDataAnalysis < PatternRecognition.TrainingData
                     plot(lineData,'Color',c(i,:))
                 end
                 
-                if iFeature == 4;
+                if iFeature == obj.NumFeatures
                     set(h,'XTick',xTick)
                     set(h,'XTickLabel',xTickLabels);
                 else
@@ -505,7 +505,7 @@ classdef TrainingDataAnalysis < PatternRecognition.TrainingData
             ssc = UserConfig.getUserConfigVar('FeatureExtract.sscThreshold',0.15);
 
             [numChannelsAll, numSamplesPerWindow, numSamples] = size(d.emgData);
-            numFeatures = 4;
+            numFeatures = obj.NumFeatures;
             features3D = zeros(numChannelsAll,numFeatures,numSamples);
             for i = 1:size(filteredData,3)
                 features3D(:,:,i) = feature_extract(...

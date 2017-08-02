@@ -83,15 +83,15 @@ function setupSpacebrew() {
             sendCmd("Cmd:PauseHandOff");
         }
     });
-    $('#autoSave').on("change", function() {
-        var val = this.value;
-        if (val=="On") {
-            sendCmd("Cmd:AutoSaveOn");
-        } else {
-            sendCmd("Cmd:AutoSaveOff");
-        }
-    });
-    
+	$('select[type=checkbox]').each(function () {
+        $('#'+this.id).on("change", function() {
+		   if (this.value == "On") {
+               sendCmd("Cmd:" + this.id + "On")
+		   }else{
+			   sendCmd("Cmd:" + this.id + "Off")
+           }
+		});
+	});
 
 } // setupSpacebrew
 
@@ -111,6 +111,7 @@ function onOpen() {
         message += "<br>You can customize this app's name in the query string by adding <strong>name=your_app_name</strong>."
     }
     $("#statusMsg").html(message);
+	
 }
 
 /**
@@ -250,3 +251,4 @@ function updateTACJointTarget(value, elementId) {
     newMarginPercent = newMargin * 1 + '%'
     elem.style.marginLeft = newMarginPercent;
 }
+
