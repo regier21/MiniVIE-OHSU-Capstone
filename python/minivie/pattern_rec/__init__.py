@@ -56,24 +56,37 @@ class FeatureExtract(object):
             # Extract features from the data provided
             f = feature_extract(data_input, self.zc_thresh, self.ssc_thresh, self.sample_rate)
             imu = None
+            rot_mat = None
         else:
             # input is a data source so call it's get_data method
             # Get features from emg data
             f = np.array([])
             for s in data_input:
                 f = np.append(f,feature_extract(s.get_data()*0.01, self.zc_thresh, self.ssc_thresh, self.sample_rate))
+
             imu = np.array([])
-            for s in data_input:
-                result = s.get_imu()
-                imu = np.append(imu, result['quat'])
-                imu = np.append(imu, result['accel'])
-                imu = np.append(imu, result['gyro'])
-                # add imu to features
-                #f = np.append(f, imu)
+            try:
+                for s in data_input:
+                    if s.get_imu() is not None:
+                        result = s.get_imu()
+                    else:
+                        result = None
+                    imu = np.append(imu, result['quat'])
+                    imu = np.append(imu, result['accel'])
+                    imu = np.append(imu, result['gyro'])
+                    # add imu to features
+                    #f = np.append(f, imu)
+            except:
+                print("no imu data")
+            else:
+                imu = None
 
             rot_mat = []
             for s in data_input:
-                result = s.get_rotationMatrix()
+                if s.get_rotationMatrix is not None:
+                    result = s.get_rotationMatrix()
+                else:
+                    result = None
                 rot_mat.append(result)
 
         feature_list = f.tolist()
@@ -419,7 +432,7 @@ class TrainingData:
         encoded = [a.encode('utf8') for a in self.name]
         group.create_dataset('name', data=encoded)
         group.create_dataset('data', data=self.data)
-        if self.imu[0][0] is not None:
+        if any(self.imu):
             group.create_dataset('imu', data=self.imu)
         else:
             group.create_dataset('imu', data=[])

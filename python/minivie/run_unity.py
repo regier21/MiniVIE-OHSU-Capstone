@@ -25,6 +25,8 @@ def main():
     parser.add_argument('-lb', '--Left_Both', help='Left Both', action='store_true')
     parser.add_argument('-rd', '--Right_Daq', help='Right Daq', action='store_true')
     parser.add_argument('-ld', '--Left_Daq', help='Left Daq', action='store_true')
+    parser.add_argument('-dc', '--Device_Name_and_Channels', help=r'Device Name and Channels',
+                        default='Dev1/ai0:7')
     args = parser.parse_args()
 
     if args.Right_Upper:
@@ -55,13 +57,14 @@ def main():
         ID = "MPL Embedded Right"
         trainingDataArm = "_Right"
         unityArm = "right"
-        source = [daqEMGDevice.DaqEMGDevice('Dev2/ai0:7')]
+        source = [daqEMGDevice.DaqEMGDevice(args.Device_Name_and_Channels)]
 
     elif args.Left_Daq:
         ID = "MPL Embedded Left"
         trainingDataArm = "_Left"
         unityArm = "left"
-        source = [daqEMGDevice.DaqEMGDevice('Dev3/ai0:7')]
+        print(args.Device_Name_and_Channels)
+        source = [daqEMGDevice.DaqEMGDevice(args.Device_Name_and_Channels)]
 
     else:
         ID = "MPL Embedded Right"

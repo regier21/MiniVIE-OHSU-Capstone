@@ -310,7 +310,7 @@ class Scenario(object):
         elif self.is_paused('Hand'):
             self.output['status'] = 'HAND PAUSED'
 
-        if rot_mat[0] is not None:
+        if any(rot_mat):
             # Create 4x4 matrix from 3x3 rotation matrix
             with_col = np.insert(rot_mat[0], 3, 0, axis=1)
             F = np.insert(with_col, 3, [0, 0, 0, 1], axis=0)
