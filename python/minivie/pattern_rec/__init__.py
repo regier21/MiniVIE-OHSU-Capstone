@@ -432,7 +432,7 @@ class TrainingData:
         encoded = [a.encode('utf8') for a in self.name]
         group.create_dataset('name', data=encoded)
         group.create_dataset('data', data=self.data)
-        if any(self.imu):
+        if self.imu[0] is not None:
             group.create_dataset('imu', data=self.imu)
         else:
             group.create_dataset('imu', data=[])
