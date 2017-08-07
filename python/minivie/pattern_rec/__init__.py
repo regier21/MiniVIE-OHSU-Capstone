@@ -65,36 +65,32 @@ class FeatureExtract(object):
                 f = np.append(f,feature_extract(s.get_data()*0.01, self.zc_thresh, self.ssc_thresh, self.sample_rate))
 
             imu = np.array([])
-            try:
-                for s in data_input:
-                    if s.get_imu() is not None:
-                        result = s.get_imu()
-                    else:
-                        result = None
+            for s in data_input:
+                if hasattr(s, 'get_imu'):
+                    result = s.get_imu()
                     imu = np.append(imu, result['quat'])
                     imu = np.append(imu, result['accel'])
                     imu = np.append(imu, result['gyro'])
                     # add imu to features
                     #f = np.append(f, imu)
-            except:
-                print("no imu data")
-            else:
-                imu = None
+                else:
+                    imu = None
 
             rot_mat = []
             for s in data_input:
-                if s.get_rotationMatrix is not None:
+                if hasattr(s, 'get_rotationMatrix'):
                     result = s.get_rotationMatrix()
+                    rot_mat.append(result)
                 else:
-                    result = None
-                rot_mat.append(result)
+                    rot_mat = None
 
         feature_list = f.tolist()
 
         # format the data in a way that sklearn wants it
         f = np.squeeze(f)
         feature_learn = f.reshape(1, -1)
-
+        print(imu)
+        print(rot_mat)
         return feature_list, feature_learn, imu, rot_mat
 
 
@@ -432,7 +428,8 @@ class TrainingData:
         encoded = [a.encode('utf8') for a in self.name]
         group.create_dataset('name', data=encoded)
         group.create_dataset('data', data=self.data)
-        if self.imu[0] is not None:
+        if any(self.imu):
+            print(self.imu)
             group.create_dataset('imu', data=self.imu)
         else:
             group.create_dataset('imu', data=[])
