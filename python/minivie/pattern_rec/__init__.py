@@ -89,8 +89,7 @@ class FeatureExtract(object):
         # format the data in a way that sklearn wants it
         f = np.squeeze(f)
         feature_learn = f.reshape(1, -1)
-        print(imu)
-        print(rot_mat)
+
         return feature_list, feature_learn, imu, rot_mat
 
 
@@ -428,7 +427,7 @@ class TrainingData:
         encoded = [a.encode('utf8') for a in self.name]
         group.create_dataset('name', data=encoded)
         group.create_dataset('data', data=self.data)
-        if any(self.imu):
+        if self.imu[0] is not None:
             print(self.imu)
             group.create_dataset('imu', data=self.imu)
         else:
