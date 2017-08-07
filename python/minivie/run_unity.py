@@ -19,65 +19,68 @@ from inputs import myo, daqEMGDevice
 def main():
     # Parameters:
     parser = argparse.ArgumentParser(description='Run Unity.')
-    parser.add_argument('-ru', '--Right_Upper', help='Right Upper', action='store_true')
-    parser.add_argument('-lu', '--Left_Upper', help='Left Upper', action='store_true')
-    parser.add_argument('-rb', '--Right_Both', help='Right Both', action='store_true')
-    parser.add_argument('-lb', '--Left_Both', help='Left Both', action='store_true')
-    parser.add_argument('-rd', '--Right_Daq', help='Right Daq', action='store_true')
-    parser.add_argument('-ld', '--Left_Daq', help='Left Daq', action='store_true')
+    parser.add_argument('-r', '--Right', help='Right Upper', action='store_true')
+    parser.add_argument('-l', '--Left', help='Left Upper', action='store_true')
+    parser.add_argument('-ae8', '--Above_ELbow_8_Channel', help='Right Both', action='store_true')
+    parser.add_argument('-ae16', '--Above_ELbow_16_Channel', help='Left Both', action='store_true')
+    parser.add_argument('-be', '--Below_Elbow', help='Right Daq', action='store_true')
+    parser.add_argument('-d', '--DAQ', help='DAQ', action='store_true')
     parser.add_argument('-dc', '--Device_Name_and_Channels', help=r'Device Name and Channels',
                         default='Dev1/ai0:7')
     args = parser.parse_args()
 
-    if args.Right_Upper:
+    if args.Right:
         ID = "MPL Embedded Right"
         trainingDataArm = "_Right"
         unityArm = "right"
-        source = [myo.MyoUdp(source='//0.0.0.0:15001')]
+        Myo1 = '//0.0.0.0:15001'
+        Myo2 = '//0.0.0.0:15002'
 
-    elif args.Left_Upper:
+    elif args.Left:
         ID = "MPL Embedded Left"
         trainingDataArm = "_Left"
         unityArm = "left"
-        source = [myo.MyoUdp(source='//0.0.0.0:15003')]
-
-    elif args.Right_Both:
-        ID = "MPL Embedded Right"
-        trainingDataArm = "_Right"
-        unityArm = "right"
-        source = [myo.MyoUdp(source='//0.0.0.0:15001'),myo.MyoUdp(source='//0.0.0.0:15002')]
-
-    elif args.Left_Both:
-        ID = "MPL Embedded Left"
-        trainingDataArm = "_Left"
-        unityArm = "left"
-        source = [myo.MyoUdp(source='//0.0.0.0:15003'),myo.MyoUdp(source='//0.0.0.0:15004')]
-
-    elif args.Right_Daq:
-        ID = "MPL Embedded Right"
-        trainingDataArm = "_Right"
-        unityArm = "right"
-        source = [daqEMGDevice.DaqEMGDevice(args.Device_Name_and_Channels)]
-
-    elif args.Left_Daq:
-        ID = "MPL Embedded Left"
-        trainingDataArm = "_Left"
-        unityArm = "left"
-        print(args.Device_Name_and_Channels)
-        source = [daqEMGDevice.DaqEMGDevice(args.Device_Name_and_Channels)]
+        Myo1 = '//0.0.0.0:15003'
+        Myo2 = '//0.0.0.0:15004'
 
     else:
         ID = "MPL Embedded Right"
         trainingDataArm = "_Right"
         unityArm = "right"
-        source = [myo.MyoUdp(source='//0.0.0.0:15001')]
+        Myo1 = '//0.0.0.0:15001'
+        Myo2 = '//0.0.0.0:15002'
+
+    if args.Above_ELbow_8_Channel:
+        shoulder = True
+        elbow = False
+        source = [myo.MyoUdp(source=Myo1)]
+
+    elif args.Above_ELbow_16_Channel:
+        shoulder = True
+        elbow = False
+        source = [myo.MyoUdp(source=Myo1),myo.MyoUdp(source=Myo2)]
+
+    elif args.Below_Elbow:
+        shoulder = True
+        elbow = True
+        source = [myo.MyoUdp(source=Myo1),myo.MyoUdp(source=Myo2)]
+
+    elif args.DAQ:
+        shoulder = False
+        elbow = False
+        source = [daqEMGDevice.DaqEMGDevice(args.Device_Name_and_Channels)]
+
+    else:
+        shoulder = True
+        elbow = False
+        source = [myo.MyoUdp(source=Myo1)]
 
 
     # setup logging
     user_config.setup_file_logging(prefix='VMPL_')
 
     # Setup MPL scenario
-    vie = mpl_nfu.setup(source, trainingDataArm, unityArm)
+    vie = mpl_nfu.setup(source, trainingDataArm, unityArm, shoulder, elbow)
 
     # setup web interface
     vie.TrainingInterface = training.TrainingManagerSpacebrew()

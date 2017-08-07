@@ -17,7 +17,7 @@ from scenarios import Scenario
 dt = 0.02  # seconds per loop.  50Hz update
 
 
-def setup(source, trainingDataArm, unityArm):
+def setup(source, trainingDataArm, unityArm, shoulder, elbow):
     """
     Create the building blocks of the MiniVIE
 
@@ -50,6 +50,10 @@ def setup(source, trainingDataArm, unityArm):
 
     #set arm
     vie.arm = unityArm
+
+    #set residual joints to control with motion tracking
+    vie.shoulder = shoulder
+    vie.elbow = elbow
 
     # Sink is output to outside world (in this case to VIE)
     # For MPL, this might be: real MPL/NFU, Virtual Arm, etc.

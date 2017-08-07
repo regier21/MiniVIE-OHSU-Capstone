@@ -22,6 +22,8 @@ class Scenario(object):
         self.Plant = None
         self.DataSink = None
         self.arm = None
+        self.shoulder = None
+        self.elbow = None
 
         # Debug socket for streaming Features
         #self.DebugSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -310,7 +312,7 @@ class Scenario(object):
         elif self.is_paused('Hand'):
             self.output['status'] = 'HAND PAUSED'
 
-        if rot_mat is not None:
+        if self.shoulder:
             # Create 4x4 matrix from 3x3 rotation matrix
             with_col = np.insert(rot_mat[0], 3, 0, axis=1)
             F = np.insert(with_col, 3, [0, 0, 0, 1], axis=0)
@@ -326,7 +328,7 @@ class Scenario(object):
             EL = 0
 
             # is second myo present, calculate elbow position in relation to shoulder position
-            if (len(rot_mat) > 1):
+            if self.elbow:
                 # Create 4x4 matrix from 3x3 rotation matrix
                 with_col2 = np.insert(rot_mat[1], 3, 0, axis=1)
                 F2 = np.insert(with_col2, 3, [0, 0, 0, 1], axis=0)
@@ -346,7 +348,7 @@ class Scenario(object):
                 self.Plant.JointPosition[0] = newXYZ[2]
                 self.Plant.JointPosition[1] = -newXYZ[1]
                 self.Plant.JointPosition[2] = newXYZ[0]
-                if (len(rot_mat) > 1):
+                if self.elbow:
                     self.Plant.JointPosition[3] = EL
 
             elif (self.arm.lower() == "left"):
@@ -354,7 +356,7 @@ class Scenario(object):
                 self.Plant.JointPosition[0] = -newXYZ[2]
                 self.Plant.JointPosition[1] = -newXYZ[1]
                 self.Plant.JointPosition[2] = -newXYZ[0]
-                if (len(rot_mat) > 1):
+                if self.elbow:
                     self.Plant.JointPosition[3] = -EL
 
         # set the mapped class into either a hand or arm motion
