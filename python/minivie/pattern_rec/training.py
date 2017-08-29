@@ -20,7 +20,6 @@ class TrainingManagerSpacebrew(TrainingInterface):
 
         # Initialize superclass
         super(TrainingInterface, self).__init__()
-        
         # handle to spacebrew websocket interface
         self.brew = None
         
