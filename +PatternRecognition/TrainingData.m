@@ -718,7 +718,7 @@ classdef TrainingData < handle
                 if any(strcmp({h.Groups.Datasets.Name},'imu'))
                     imu = double(h5read(fullFile,'/data/imu'));
                 end
-                
+                                
                 % rewrite the class label ids based on the name
                 for i = 1:length(classnames)
                     class_labels(strcmp(classnames{i},names)) = i;

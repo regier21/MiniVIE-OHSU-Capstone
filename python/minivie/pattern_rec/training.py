@@ -34,11 +34,11 @@ class TrainingManagerSpacebrew(TrainingInterface):
         # keep count of skipped messages so we can send at some nominal rate
         self.msg_skip_count = 0
 
-    def setup(self, description="JHU/APL Embedded Controller", server="192.168.1.1", port=9000):
+    def setup(self, description="JHU/APL Embedded Controller", server="192.168.1.1", port=9000, id = "MPL Embedded Right"):
         from pySpacebrew.spacebrew import Spacebrew
 
         # setup web interface
-        self.brew = Spacebrew("MPL Embedded", description, server, port)
+        self.brew = Spacebrew(id, description, server, port)
         self.brew.addSubscriber("cmdString", "string")
         self.brew.addPublisher("statusString", "string")
         self.brew.start()

@@ -35,6 +35,7 @@ class FeatureExtract(object):
         22JUN2017 J. Kelly: Updated Feature Extraction
 
     """
+        self.Fref = np.eye(4)
 
     def __init__(self):
 
@@ -52,14 +53,14 @@ class FeatureExtract(object):
 
         if data_input is None:
             # Can't get features
-            return None, None, None
+            return None, None, None, None
         elif isinstance(data_input, np.ndarray):
             # Extract features from the data provided
             f = self.feature_extract(data_input)
             imu = None
+            rot_mat = None
         else:
             # input is a data source so call it's get_data method
-
             # Get features from emg data
             f = np.array([])
             for s in data_input:
@@ -67,12 +68,23 @@ class FeatureExtract(object):
 
             imu = np.array([])
             for s in data_input:
-                result = s.get_imu()
-                imu = np.append(imu, result['quat'])
-                imu = np.append(imu, result['accel'])
-                imu = np.append(imu, result['gyro'])
-                # add imu to features
-                #f = np.append(f, imu)
+                if hasattr(s, 'get_imu'):
+                    result = s.get_imu()
+                    imu = np.append(imu, result['quat'])
+                    imu = np.append(imu, result['accel'])
+                    imu = np.append(imu, result['gyro'])
+                    # add imu to features
+                    #f = np.append(f, imu)
+                else:
+                    imu = None
+
+            rot_mat = []
+            for s in data_input:
+                if hasattr(s, 'get_rotationMatrix'):
+                    result = s.get_rotationMatrix()
+                    rot_mat.append(result)
+                else:
+                    rot_mat = None
 
         feature_list = f.tolist()
 
@@ -80,7 +92,7 @@ class FeatureExtract(object):
         f = np.squeeze(f)
         feature_learn = f.reshape(1, -1)
 
-        return feature_list, feature_learn, imu
+        return feature_list, feature_learn, imu, rot_mat
 
     def attachFeature(self, instance):
 
@@ -240,9 +252,15 @@ class Classifier:
 
 class TrainingData:
     """Python Class for managing machine learning and Myo training operations."""
+<<<<<<< .mine
 
     def __init__(self, vie):
         self.filename = 'TRAINING_DATA'
+=======
+    def __init__(self, arm=""):
+        self.filename = ('TRAINING_DATA' + arm)
+
+>>>>>>> .theirs
         self.file_ext = '.hdf5'
         self.vie = vie
 
@@ -417,7 +435,11 @@ class TrainingData:
         encoded = [a.encode('utf8') for a in self.name]
         group.create_dataset('name', data=encoded)
         group.create_dataset('data', data=self.data)
-        group.create_dataset('imu', data=self.imu)
+        if self.imu[0] is not None:
+            print(self.imu)
+            group.create_dataset('imu', data=self.imu)
+        else:
+            group.create_dataset('imu', data=[])
         group.create_dataset('motion_names', data=[a.encode('utf8') for a in self.motion_names])  #utf-8
         h5.close()
         print('Saved ' + self.filename)

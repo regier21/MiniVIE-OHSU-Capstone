@@ -1,5 +1,7 @@
 import struct
 from utilities import user_config
+import numpy as np
+from transforms3d.euler import mat2euler
 
 class Scenario(object):
     """
@@ -21,6 +23,17 @@ class Scenario(object):
         self.TrainingInterface = None
         self.Plant = None
         self.DataSink = None
+<<<<<<< .mine
+
+
+
+
+=======
+        self.arm = None
+        self.shoulder = None
+        self.elbow = None
+
+>>>>>>> .theirs
         # Debug socket for streaming Features
         #self.DebugSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -30,6 +43,9 @@ class Scenario(object):
         self.auto_save = user_config.get_user_config_var('AUTO_SAVE_BOOL', True) # Boolean, if true, will save out training data every time new data finished beind added
         self.training_motion = 'No Movement'
         self.training_id = 0
+
+        self.Fref = np.eye(4) #offset
+        self.Fref2 = np.eye(4)
 
         self.num_channels = 0
 
@@ -268,7 +284,7 @@ class Scenario(object):
         self.output = {'status': 'RUNNING', 'features': None, 'decision': 'None', 'vote': None}
 
         # get data / features
-        self.output['features'], f, imu = self.FeatureExtract.get_features(self.SignalSource)
+        self.output['features'], f, imu, rot_mat = self.FeatureExtract.get_features(self.SignalSource)
 
         # Debug stream:
         #values = self.output['features']
@@ -297,6 +313,7 @@ class Scenario(object):
 
         # get decision name
         class_decision = self.TrainingData.motion_names[decision_id]
+
         self.output['decision'] = class_decision
 
         # parse decision type as arm, grasp, etc
@@ -311,6 +328,53 @@ class Scenario(object):
             return self.output
         elif self.is_paused('Hand'):
             self.output['status'] = 'HAND PAUSED'
+
+        if self.shoulder:
+            # Create 4x4 matrix from 3x3 rotation matrix
+            with_col = np.insert(rot_mat[0], 3, 0, axis=1)
+            F = np.insert(with_col, 3, [0, 0, 0, 1], axis=0)
+
+            # set offset first time through
+            if np.array_equal(self.Fref, np.eye(4)):
+                self.Fref = F
+
+            # compute shoulder angles
+            newXYZ = (mat2euler(np.dot(np.linalg.pinv(self.Fref), F)))
+
+            # define elbow value
+            EL = 0
+
+            # is second myo present, calculate elbow position in relation to shoulder position
+            if self.elbow:
+                # Create 4x4 matrix from 3x3 rotation matrix
+                with_col2 = np.insert(rot_mat[1], 3, 0, axis=1)
+                F2 = np.insert(with_col2, 3, [0, 0, 0, 1], axis=0)
+
+                # set offset first time through
+                if np.array_equal(self.Fref2, np.eye(4)):
+                    self.Fref2 = F2
+
+                # compute euler angles
+                # pinv(pinv(obj.Fref)*F)*pinv(obj.Fref2)*F2)
+                relXYZ = (mat2euler(np.dot(np.linalg.pinv(np.dot(np.linalg.pinv(self.Fref), F)),
+                                           np.dot(np.linalg.pinv(self.Fref2), F2))))
+                EL = relXYZ[2]
+
+            if (self.arm.lower() == "right"):
+                # use imu data to control position of residual limb (right)
+                self.Plant.JointPosition[0] = newXYZ[2]
+                self.Plant.JointPosition[1] = -newXYZ[1]
+                self.Plant.JointPosition[2] = newXYZ[0]
+                if self.elbow:
+                    self.Plant.JointPosition[3] = EL
+
+            elif (self.arm.lower() == "left"):
+                # use imu data to control position of residual limb (left)
+                self.Plant.JointPosition[0] = -newXYZ[2]
+                self.Plant.JointPosition[1] = -newXYZ[1]
+                self.Plant.JointPosition[2] = -newXYZ[0]
+                if self.elbow:
+                    self.Plant.JointPosition[3] = -EL
 
         # set the mapped class into either a hand or arm motion
         pause_hand = self.is_paused('Hand') or self.is_paused('All')
