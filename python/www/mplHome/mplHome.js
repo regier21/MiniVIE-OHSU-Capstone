@@ -37,6 +37,8 @@ function setupSpacebrew() {
     $("#ID_CLEARALL").on("mousedown", function() {sendCmd("Cmd:ClearAll")} );
     $("#ID_TRAIN").on("mousedown", function() {sendCmd("Cmd:Train")} );
     $("#ID_SAVE").on("mousedown", function() {sendCmd("Cmd:Save")} );
+	$("#ID_LOAD").on("mousedown", function() {sendCmd("Cmd:Load")} );
+	$("#ID_SET_FNAME").on("mousedown", function() {sendCmd("Cmd:SetFilename")} );
     $("#ID_BACKUP").on("mousedown", function() {sendCmd("Cmd:Backup")} );
     $("#ID_SPEEDUP").on("mousedown", function() {sendCmd("Cmd:SpeedUp")} );
     $("#ID_SPEEDDOWN").on("mousedown", function() {sendCmd("Cmd:SpeedDown")} );
@@ -188,6 +190,11 @@ function onOpen() {
      }
  }
 
+ function setFilename() {
+    var fname = $("#ID_TRAINING_DATA_NAME").val()
+    sendCmd("Cmd:setFilename-" + fname)
+	
+ 
  function startMT() {
     // Gather parameters to send to motion tester
     var repetitions = $("#ID_MT_REPETITIONS").val()

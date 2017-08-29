@@ -1,4 +1,5 @@
 import struct
+from utilities import user_config
 
 class Scenario(object):
     """
@@ -12,6 +13,7 @@ class Scenario(object):
 
     def __init__(self):
         import socket
+
         self.SignalSource = None
         self.SignalClassifier = None
         self.FeatureExtract = None
@@ -19,14 +21,13 @@ class Scenario(object):
         self.TrainingInterface = None
         self.Plant = None
         self.DataSink = None
-
         # Debug socket for streaming Features
         #self.DebugSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         # Training parameters
         self.add_data = False
         self.add_data_previous = False  # Tracks whether data was added on previous update, necessary to know when to autosave
-        self.auto_save = True  # Boolean, if true, will save out training data every time new data finished beind added
+        self.auto_save = user_config.get_user_config_var('AUTO_SAVE_BOOL', True) # Boolean, if true, will save out training data every time new data finished beind added
         self.training_motion = 'No Movement'
         self.training_id = 0
 
@@ -36,12 +37,12 @@ class Scenario(object):
 
         self.__pause = {'All': False, 'Arm': False, 'Hand': False}
         self.precision_mode = False
-        self.__gain_value = 1.0
-        self.__gain_value_default = 1.0
-        self.__gain_value_precision = 0.1
-        self.__hand_gain_value = 1.0
-        self.__hand_gain_value_default = 1.0
-        self.__hand_gain_value_precision = 0.1
+        self.__gain_value = user_config.get_user_config_var('ARM_GAIN', 1.0)
+        self.__gain_value_default = user_config.get_user_config_var('ARM_GAIN', 1.0)
+        self.__gain_value_precision = user_config.get_user_config_var('ARM_GAIN_PRECISION', 0.1)
+        self.__hand_gain_value = user_config.get_user_config_var('HAND_GAIN', 1.0)
+        self.__hand_gain_value_default = user_config.get_user_config_var('HAND_GAIN', 1.0)
+        self.__hand_gain_value_precision = user_config.get_user_config_var('HAND_GAIN_PRECISION', 0.1)
 
     def is_paused(self, scope='All'):
         # return the pause value for the given context ['All' 'Arm' 'Hand']
@@ -128,6 +129,8 @@ class Scenario(object):
                 ClearAll - Clear all the labeled training data
                 Train - Recompute the classifier based on the current data
                 Save - Save all labeled training data to TRAINING_DATA.hdf5 file (note this also issues a backup)
+                Load - Load all labeled training data from TRAINING_DATA.hdf5 file (note this also issues a backup)
+                SetFilename - Set the filename for loading/saving training data (TRAINING_DATA is the default)
                 Backup - Copy the data in TRAINING_DATA.hdf5 to a timestamped backup file
                 Pause - Temporarily Suspend Motion of the limb system
                 SpeedUp - Increase speed of all arm joints
@@ -183,6 +186,12 @@ class Scenario(object):
             elif cmd_data == 'Save':
                 self.TrainingData.copy()
                 self.TrainingData.save()
+            elif cmd_data == 'Load':
+                self.TrainingData.copy()
+                self.TrainingData.load()
+            elif 'SetFilename' in cmd_data:
+                fname = cmd_data.split('-')[1]
+                self.TrainingData.filename = fname
             elif cmd_data == 'Backup':
                 self.TrainingData.copy()
             elif cmd_data == 'AutoSaveOn':

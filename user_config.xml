@@ -20,8 +20,9 @@
     <add key="Scenario"         value="Scenarios.MiniVDisplayScenario()"/>
 
     <!--Pattern Recognition Parameters-->
-    <add key="FeatureExtract.zcThreshold" value="0.05"/>
-    <add key="FeatureExtract.sscThreshold" value="0.05"/>    
+    <add key="FeatureExtract.zcThreshold" value="0.15"/>
+    <add key="FeatureExtract.sscThreshold" value="0.15"/>
+    <add key="FeatureExtract.sampleRate" value="200.0"/>    	
     
     <!--joystick Training Parameters -->
     <add key="joystickId"                   value="0"/><!--System ID for desired joystick-->
@@ -117,5 +118,13 @@
 
     <!-- Joint direction parameters to flip joint direction +/- 1 -->    
     <add key="WRIST_FE_DIRECTION"        value="+1" />
-    
+	
+	<!-- Gain Settings -->
+	<add key="HAND_GAIN"              value="1.0"/>
+	<add key="ARM_GAIN"               value="1.0"/>
+	<add key="HAND_GAIN_PRECISION"    value="0.1"/>
+	<add key="ARM_GAIN_PRECISION"     value="0.1"/>
+	
+	<!-- Training Settings -->
+    <add key="AUTO_SAVE_BOOL"              value="true"/>
 </userConfig>

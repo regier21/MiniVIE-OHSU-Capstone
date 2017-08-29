@@ -314,7 +314,8 @@ classdef PostProcessing
                 s = [rdir(fullfile(dataPath,'*.tacAssessment')); rdir(fullfile(dataPath,'*TAC*LOG*.hdf5'))];
                 
                 if isempty(s)
-                    error('No files found: %s\n',fullfile(dataPath,'*.tacAssessment'))
+                    return
+                    %error('No files found: %s\n',fullfile(dataPath,'*.tacAssessment'))
                 end
                 
                 % sort by date

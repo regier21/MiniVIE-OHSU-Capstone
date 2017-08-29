@@ -49,6 +49,8 @@ def get_user_config_var(key, default_value):
                 return int(str_value)
             elif type(default_value) is float:
                 return float(str_value)
+            elif type(default_value) is bool:
+                return str_value in ['True', 'true', '1', 't', 'Y', 'y', 'Yes', 'yes']
             elif type(default_value) is tuple:
                 return tuple(float(i) for i in str_value.split(','))
             else:
