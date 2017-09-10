@@ -1,13 +1,3 @@
-var MyoBluetooth  = require('MyoNodeBluetoothAPL');
-var MyoAgent = new MyoBluetooth();
-var maacAddress = ["f01ccda72c85"];
-var port = [15001];
-var ipAdd = ["127.0.0.1"];
-console.log("Number of arguments : " + process.argv.length);
-var numBands = 1;
-var debug = 0
-
-for(var i = 0; i<process.argv.length; i++){
 //looping through args
 //command format
 /*
@@ -27,35 +17,95 @@ OPTIONS:
 --IP    Destination IP.
     Default is localhost. Include values as necessary in same order as maac address.
 */
-    if(process.argv[i] == "--ADD"){ //maac addresses
-        for(var j = 1; j<=numBands;j++){
-            maacAddress[j-1] = process.argv[i+j];
-        }   }
+var MyoBluetooth  = require('MyoNodeBluetoothAPL');
+var MyoAgent = new MyoBluetooth();
+var argv = require('minimist')(process.argv.slice(2));
+console.dir(argv);
+
+var help = 'Streaming Myo Bluetooth in NodeJS.';
+var mac = ['f01ccda72c85'];
+var port = [15001];
+var ip = ['127.0.0.1'];
+var numBands = 1;
+var debug = 0
+
+// Get help and EXIT
+if ( (argv.h) || (argv.help) ) {
+    console.log(help);
+    process.exit(0);
+}
+
+// Get Armband count
+if (argv.n === undefined) {
+    numBands = 1;
+} else {
+    numBands = argv.n;
+}
+
+console.log('numBands: ' + numBands);
+
+// Get MAC only arg
+if (argv._.length) {
+    console.log('standAlone arg: ' + argv._);
+    mac = argv._;
+}
+
+
+// Get MAC Addresses
+mac = argv.MAC
+if ( (mac === undefined) || (mac.length < numBands)) {
+    console.log('ERROR: Expected ' + numBands + ' MAC Address arguments');
+    process.exit(0);
+} else {
+    console.log('MAC: ' + mac);
+}
+
+// Get IP Addresses
+ip = argv.IP
+if ( (ip === undefined) || (ip.length < numBands)) {
+    console.log('ERROR: Expected ' + numBands + ' IP Address arguments');
+    process.exit(0);
+} else {
+    console.log('IP: ' + ip);
+}
+
+
+
+
+
+/*
+
+    else if(process.argv[i] == "--ADD"){ //maac addresses
+        for(var j = 1; j <= numBands;j++){
+            macAddress[j-1] = process.argv[iArg+j];
+        }
+   }
     else if(process.argv[i] == "--PORT"){ //ports
-        for(var k = 1; k<=numBands;k++){
-            port[k-1] = process.argv[i+k];
+        for(var k = 1; k <= numBands;k++){
+            port[k-1] = process.argv[iArg+k];
         }
     }
     else if(process.argv[i] == "--IP"){ //ip addresses
-        for(var m = 1; m<=numBands;m++){
-            ipAdd[m-1] = process.argv[i+m];
+        for(var m = 1; m <= numBands;m++){
+            ipAdd[m-1] = process.argv[iArg+m];
         }
     }
-    else if(process.argv[i] == "--n"){ //number of armbands
-        numBands = process.argv[i+1];
-    }
     else if(process.argv[i] == "--DEBUG"){
-        debug = process.argv[i+1];
+        debug = process.argv[iArg+1];
     }
 }
+*/
 
-MyoAgent.setAddress(maacAddress);
+process.exit(0)
+
+
+MyoAgent.setAddress(macAddress);
 MyoAgent.setPort(port);
 MyoAgent.setIP(ipAdd);
 MyoAgent.setDebug(debug);
 
 //Comment this out to remove logging. Logs MAAC addresses, ports, and IP addresses******
-console.log("Agent MAAC address:" + MyoAgent.MAACaddress);
+console.log("Agent MAC address:" + MyoAgent.MAACaddress);
 console.log("Port:" + MyoAgent.port);
 console.log("IP Addresses:" + MyoAgent.ipAdd);
 if(debug > 0){
@@ -74,7 +124,7 @@ MyoAgent.on('discovered', function(armband){
             // armband disconnected
         }
     });
-    
+
     // Armband receives the ready event when all services/characteristics are discovered and emg/imu/classifier mode is enabled
     armband.on('ready', function(){
         // register for events
@@ -94,7 +144,7 @@ MyoAgent.on('discovered', function(armband){
             }
             process.stdout.clearLine();
             process.stdout.cursorTo(0);
-        }); 
+        });
     });
     armband.connect();
 });
