@@ -1,4 +1,5 @@
 import struct
+from mpl.open_nfu import NfuUdp
 
 class Scenario(object):
     """
@@ -81,7 +82,6 @@ class Scenario(object):
                 self.__hand_gain_value_precision = self.__hand_gain_value  # preserve this for later
                 self.__hand_gain_value = self.__hand_gain_value_default
 
-
     def pause(self, scope='All', state=None):
         # Toggles pause state which suspends motion of arm
         #
@@ -92,13 +92,15 @@ class Scenario(object):
         # pause('All', False) Force RESUME
 
         if state is not None:
+            # set state manually from input argument
             self.__pause[scope] = state
-            return
-
-        if self.__pause[scope]:
-            self.__pause[scope] = False
         else:
-            self.__pause[scope] = True
+            # toggle state
+            self.__pause[scope] = not self.__pause[scope]
+
+        if self.__pause['All'] and isinstance(self.DataSink, NfuUdp):
+            # Send the pause command to the data sink
+            self.DataSink.send_mud_command('reset')
 
     def gain(self, factor):
         self.__gain_value *= factor

@@ -1054,15 +1054,15 @@ classdef MiniVIE < Common.MiniVieObj
         % Callback (cb) functions
         function cbTabChanged(obj, ~, eventdata)
             
-            if obj.Verbose
-                fprintf('[%s.m] Disable %s\n', mfilename, eventdata.OldValue.Title)
-                fprintf('[%s.m] Enable %s\n\n', mfilename, eventdata.NewValue.Title)
-            end
+            % if obj.Verbose
+            %     fprintf('[%s.m] Disable %s\n', mfilename, eventdata.OldValue.Title)
+            %     fprintf('[%s.m] Enable %s\n\n', mfilename, eventdata.NewValue.Title)
+            % end
             
-            obj.SignalViewer
+            % obj.SignalViewer
             
             % If 'Signal Input' was the previous tab, disable refresh
-            if strcmp(eventdata.OldValue.Title, obj.TabTitleInput) && ~isempty(obj.SignalViewer);
+            if strcmp(eventdata.OldValue.Title, obj.TabTitleInput) && ~isempty(obj.SignalViewer)
                 stop(obj.SignalViewer.hTimer);
                 fprintf('[%s.m] Setting default channels\n', mfilename);
                 obj.SignalViewer.hChannelSelect.setLastChannels(obj.SignalViewer.hChannelSelect.SelectedChannels)

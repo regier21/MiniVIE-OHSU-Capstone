@@ -100,6 +100,24 @@ class NfuUdp(DataSink):
 
         return msg
 
+    def send_mud_command(self, mode):
+        # Send a command from python to nfu_event to set state of MPL Limb Controller.
+        # 
+        # TODO These commands are hard coded for expediancy, but should be formed as:
+        # uint16(msgLength) (uint8)msgId (uint8)msgPayload (uint8)chkSum
+        if (mode == 'idle'):
+            # UDPMSGID_NFU_IDLE = 10;
+            msg = bytearray([3,0,10,10,23])
+        elif (mode == 'reset'):
+            # UDPMSGID_NFU_SOFTRESET = 11;
+            msg = bytearray([3,0,11,11,25])
+        else:
+            return
+            
+        self.send_udp_command(msg)
+
+        
+        
     def connect(self):
         # open up the socket and bind to IP address
 
