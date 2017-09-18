@@ -19,6 +19,7 @@ class TrainingManagerSpacebrew(TrainingInterface):
 
         # Initialize superclass
         super(TrainingInterface, self).__init__()
+        
         # handle to spacebrew websocket interface
         self.brew = None
         
@@ -28,6 +29,7 @@ class TrainingManagerSpacebrew(TrainingInterface):
                          'strTACJoint1Bar': '','strTACJoint1Target': '','strTACJoint1Error': '','strTACJoint1Name': '',
                          'strTACJoint2Bar': '','strTACJoint2Target': '','strTACJoint2Error': '','strTACJoint2Name': '',
                          'strTACJoint3Bar': '','strTACJoint3Target': '','strTACJoint3Error': '','strTACJoint3Name': '',
+                         'strNormalizeMyoPosition': '', 'strNormalizeMyoPositionImage': ''
                          }
         
         # keep count of skipped messages so we can send at some nominal rate

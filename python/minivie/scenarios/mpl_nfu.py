@@ -31,15 +31,15 @@ def setup():
     vie = Scenario()
 
     # attach inputs
-    # vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001'), myo.MyoUdp(source='//0.0.0.0:15002')])
-    vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001')])
+    #vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001')])
+    vie.attach_source([myo.MyoUdp(source='//0.0.0.0:15001'), myo.MyoUdp(source='//0.0.0.0:15002')])
 
     # Training Data holds data labels
     # training data manager
-    vie.TrainingData = pr.TrainingData(vie)
+    vie.TrainingData = pr.TrainingData()
     vie.TrainingData.load()
     vie.TrainingData.num_channels = vie.num_channels
-    vie.FeatureExtract = pr.FeatureExtract()
+    vie.FeatureExtract = pr.FeatureExtract(zc_thresh=0.05, ssc_thresh=0.05, sample_rate=200)
 
     # Classifier parameters
     vie.SignalClassifier = pr.Classifier(vie.TrainingData)

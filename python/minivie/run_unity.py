@@ -10,7 +10,8 @@
 # Python 2 and 3:
 from utilities import user_config
 import scenarios.mpl_nfu
-from pattern_rec import training, assessment, features, features_selected
+from pattern_rec import training, assessment
+from inputs import myo_normalization
 
 def main():
 
@@ -31,10 +32,9 @@ def main():
     vie.TrainingInterface.add_message_handler(motion_test.command_string)
     vie.TrainingInterface.add_message_handler(tac.command_string)
 
-    #setup features
-    select_features = features_selected.Features_selected(vie)
-    vie.TrainingInterface.add_message_handler(select_features.command_string)
-    select_features.create_instance_list()
+    #Setup Myo Position Normalization
+    normalize = myo_normalization.NormalizeMyoPosition(vie, vie.TrainingInterface)
+    vie.TrainingInterface.add_message_handler(normalize.command_string)
 
     scenarios.mpl_nfu.run(vie)
 

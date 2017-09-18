@@ -50,6 +50,7 @@ function setupSpacebrew() {
     $("#ID_REBOOT").on("mousedown", function() {sendCmd("Cmd:Reboot")} );
     $("#ID_SHUTDOWN").on("mousedown", function() {sendCmd("Cmd:Shutdown")} );
     $("#ID_ASSESSMENT_MT").on("mousedown", function() {startMT()} );
+	$("#ID_NORMALIZE_MYO_POSITION").on("mousedown", function() {startNMP()} );
     $("#ID_ASSESSMENT_TAC1").on("mousedown", function() {startTAC1()} );
     $("#ID_ASSESSMENT_TAC3").on("mousedown", function() {startTAC3()} );
     
@@ -138,6 +139,12 @@ function onOpen() {
              $("#mt_output").text(cmd_data);
              $("#tac_output").text(cmd_data);
          }
+		 if (cmd_type == "strNormalizeMyoPosition") {
+             $("#nmp_status").text(cmd_data);
+         }
+         if (cmd_type == "strNormalizeMyoPositionImage") {
+             updateNMPImage(cmd_data);
+		 }
          if (cmd_type == "strMotionTester") {
              $("#mt_status").text(cmd_data);
          }
@@ -186,7 +193,7 @@ function onOpen() {
          if (cmd_type == "strTACJoint3Error") {
             updateTACJointError(cmd_data, "tacJoint3Target");
          }
-     }
+	 }
  }
 
  function startMT() {
@@ -195,6 +202,16 @@ function onOpen() {
     var timeout = $("#ID_MT_TIMEOUT").val()
     var max_classifications = $("#ID_MT_MAX_CLASSIFICATIONS").val()
     sendCmd("Cmd:StartMotionTester-" + repetitions + "-" + timeout + "-" + max_classifications)
+ }
+ 
+ function startNMP() {
+    // Gather parameters to send to myo normalize
+	if(document.getElementById('ID_WEO').checked) {
+	var norm_class= 'Wrist Extend Out'
+	}else if(document.getElementById('ID_EF').checked) {
+	var norm_class= 'Elbow Flexion'
+	}
+    sendCmd("Cmd:StartNormalizeMyo-" + norm_class)
  }
 
  function startTAC1() {
@@ -228,6 +245,11 @@ function updateMTProgressBar(percent) {
 // Function to update motion tester image based on class being assessed
 function updateMTImage(imageFile){
     document.getElementById("ID_MT_IMAGE").src=imageFile
+}
+
+// Function to update normalize myo position image based on class being assessed
+function updateNMPImage(imageFile){
+    document.getElementById("ID_NMP_IMAGE").src=imageFile
 }
 
 function updateTACJointBar(value, barId, labelId) {

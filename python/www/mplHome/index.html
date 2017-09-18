@@ -101,6 +101,7 @@
             <h4>Configure</h4>
             <ul data-role="listview" data-inset="false">
 			<li><a href="#ID_FEATURES_PAGE" data-transition="slidefade" class="ui-btn ui-btn-icon-right ui-icon-star">Features...</a></li>
+			<li><a href="#ID_NORMALIZE_MYO_POSITION_PAGE" data-transition="slidefade" class="ui-btn ui-btn-icon-right ui-icon-star">Nomalize Myo Position...</a></li>
             <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-plus" id="ID_SPEEDUP">Increase Arm Speed</a></li>
             <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-minus" id="ID_SPEEDDOWN">Decrease Arm Speed</a></li>
             <li><a href="#" class="ui-btn ui-btn-icon-right ui-icon-plus" id="ID_HAND_SPEED_UP">Increase Hand Speed</a></li>
@@ -212,42 +213,6 @@
 
         </div><!-- /content -->
     </div><!-- /page -->
-
-    <!-- Motion Tester Page -->
-    <div data-role="page" id="ID_MT_PAGE">
-        <div data-role="header" data-theme="b" >
-            <h1>Motion Tester</h1>
-            <a href="#ID_MAIN_PAGE" data-role="button" data-icon="arrow-l">Back</a>
-        </div><!-- /header -->
-        <div data-role="content">
-            <a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-r" id="ID_ASSESSMENT_MT">Start Motion Tester</a>
-            <div data-role="collapsible" data-collapsed-icon="bullets" data-expanded-icon="bullets">
-                <h4>Options</h4>
-                <ul data-role="listview" data-inset="false">
-                <div class="ui-field-contain">
-                  <label for="ID_MT_REPETITIONS">Repetitions:</label>
-                  <input type="number" name="Repetitions" id="ID_MT_REPETITIONS" value="3">
-                </div>
-                <div class="ui-field-contain">
-                  <label for="ID_MT_TIMEOUT">Timeout (s):</label>
-                  <input type="number" name="name" id="ID_MT_TIMEOUT" value="5">
-                </div>
-                <div class="ui-field-contain">
-                  <label for="ID_MT_MAX_CLASSIFICATIONS">Max Classifications:</label>
-                  <input type="number" name="name" id="ID_MT_MAX_CLASSIFICATIONS" value="10">
-                </div>
-                </ul>
-            </div>
-            <p>Status: <span id="mt_status"></span></p>
-            <p>Classifying: <span id="mt_output"></span></p>
-            <img style="max-width: 100%;" src="img_arm_motions/No_Movement.png" id="ID_MT_IMAGE" alt="Motion Image">
-            <div id="mtProgressBackground">
-                <div id="mtProgressBar">
-                    <div id="mtProgressLabel">0%</div>
-                 </div>
-            </div>
-        </div><!-- /content -->
-    </div><!-- /page -->
 	
 	    <!-- Features Page -->
     <div data-role="page" id="ID_FEATURES_PAGE">
@@ -297,8 +262,8 @@
             <div class="ui-field-contain">
                 <label for="wamp">Willison Amplitude:</label>
                 <select type="checkbox" id="wamp" data-role="flipswitch">
-                     <option value="Off" selected="selected">Off</option>
-                    <option value="On">On</option>
+                     <option value="Off">Off</option>
+                    <option value="On" selected="selected">On</option>
                 </select>
             </div>
             </li>
@@ -315,8 +280,8 @@
             <div class="ui-field-contain">
                 <label for="vorder">V-order:</label>
                 <select type="checkbox" id="vorder" data-role="flipswitch">
-                     <option value="Off" selected="selected">Off</option>
-                    <option value="On">On</option>
+                     <option value="Off">Off</option>
+                    <option value="On" selected="selected">On</option>
                 </select>
             </div>
             </li>
@@ -351,14 +316,73 @@
             <div class="ui-field-contain">
                 <label for="ceps">Cepstrum Coefficients:</label>
                 <select type="checkbox" id="ceps" data-role="flipswitch">
-                     <option value="Off" selected="selected">Off</option>
-                    <option value="On">On</option>
+                     <option value="Off">Off</option>
+                    <option value="On" selected="selected">On</option>
                 </select>
             </div>
             </li>
         </div><!-- /content -->
     </div><!-- /page -->
+	
+	    <!-- Normalize Myo Position Page -->
+    <div data-role="page" id="ID_NORMALIZE_MYO_POSITION_PAGE">
+        <div data-role="header" data-theme="b" >
+            <h1>Normalize Myo Position</h1>
+            <a href="#ID_MAIN_PAGE" data-role="button" data-icon="arrow-l">Back</a>
+        </div><!-- /header -->
+        <div data-role="content">
+            <a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-r" id="ID_NORMALIZE_MYO_POSITION">Start Normalization</a>
+			<div data-role="collapsible" data-collapsed-icon="bullets" data-expanded-icon="bullets">
+                <h4>Normalization Class</h4>
+                <ul data-role="listview" data-inset="false">
+                <div class="ui-field-contain">
+					<label for="ID_WEO"> Wrist Extend Out </label>
+					<input type="radio" name="normalization_class" id="ID_WEO" value="Wrist_Extend_Out" checked>
+					<label for="ID_EF"> Elbow Flextion </label>
+					<input type="radio" name="normalization_class" id="ID_EF" value="Elbow_Flextion">
+                </div>
+			</div>
+            <p>Status: <span id="nmp_status"></span></p>
+            <img style="max-width: 100%;" src="img_arm_motions/No_Movement.png" id="ID_NMP_IMAGE" alt="Motion Image">
+            </div>			
+        </div><!-- /content -->
+    </div><!-- /page -->
 
+	    <!-- Motion Tester Page -->
+    <div data-role="page" id="ID_MT_PAGE">
+        <div data-role="header" data-theme="b" >
+            <h1>Motion Tester</h1>
+            <a href="#ID_MAIN_PAGE" data-role="button" data-icon="arrow-l">Back</a>
+        </div><!-- /header -->
+        <div data-role="content">
+            <a href="#" class="ui-btn ui-btn-icon-right ui-icon-arrow-r" id="ID_ASSESSMENT_MT">Start Motion Tester</a>
+            <div data-role="collapsible" data-collapsed-icon="bullets" data-expanded-icon="bullets">
+                <h4>Options</h4>
+                <ul data-role="listview" data-inset="false">
+                <div class="ui-field-contain">
+                  <label for="ID_MT_REPETITIONS">Repetitions:</label>
+                  <input type="number" name="Repetitions" id="ID_MT_REPETITIONS" value="3">
+                </div>
+                <div class="ui-field-contain">
+                  <label for="ID_MT_TIMEOUT">Timeout (s):</label>
+                  <input type="number" name="name" id="ID_MT_TIMEOUT" value="5">
+                </div>
+                <div class="ui-field-contain">
+                  <label for="ID_MT_MAX_CLASSIFICATIONS">Max Classifications:</label>
+                  <input type="number" name="name" id="ID_MT_MAX_CLASSIFICATIONS" value="10">
+                </div>
+                </ul>
+            </div>
+            <p>Status: <span id="mt_status"></span></p>
+            <p>Classifying: <span id="mt_output"></span></p>
+            <img style="max-width: 100%;" src="img_arm_motions/No_Movement.png" id="ID_MT_IMAGE" alt="Motion Image">
+            <div id="mtProgressBackground">
+                <div id="mtProgressBar">
+                    <div id="mtProgressLabel">0%</div>
+                 </div>
+            </div>
+        </div><!-- /content -->
+    </div><!-- /page -->
 
     <!-- TAC Page -->
     <div data-role="page" id="ID_TAC_PAGE">

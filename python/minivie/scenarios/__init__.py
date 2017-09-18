@@ -258,6 +258,9 @@ class Scenario(object):
         # initialize output
         self.output = {'status': 'RUNNING', 'features': None, 'decision': 'None', 'vote': None}
 
+        #send first myo
+        self.FeatureExtract.myo = 0
+
         # get data / features
         self.output['features'], f, imu = self.FeatureExtract.get_features(self.SignalSource)
 
