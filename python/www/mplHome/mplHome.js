@@ -51,6 +51,7 @@ function setupSpacebrew() {
     $("#ID_SHUTDOWN").on("mousedown", function() {sendCmd("Cmd:Shutdown")} );
     $("#ID_ASSESSMENT_MT").on("mousedown", function() {startMT()} );
 	$("#ID_NORMALIZE_MYO_POSITION").on("mousedown", function() {startNMP()} );
+	$("#ID_Reset_MYO_POSITION").on("mousedown", function() {sendCmd("Cmd:ResetOrientation")} );
     $("#ID_ASSESSMENT_TAC1").on("mousedown", function() {startTAC1()} );
     $("#ID_ASSESSMENT_TAC3").on("mousedown", function() {startTAC3()} );
     
