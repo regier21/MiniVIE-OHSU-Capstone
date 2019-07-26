@@ -1180,158 +1180,88 @@ classdef MiniVIE < Common.MiniVieObj
             end
             
             MiniVIE.configurePath();
+            basePath = fileparts(which('MiniVIE'));
             
-            iconDir = fullfile( ...
-                matlabroot, ...
-                'toolbox', ...
-                'shared', ...
-                'dastudio', ...
-                'resources');
+            % setup labels
+            
+            %%%%%%%%%%%%%%%%
+            % Launch MiniVIE
+            %%%%%%%%%%%%%%%%
+            commandSet(1).label = strcat('MiniVIE',suffix);
+            commandSet(1).code = ...
+                [sprintf('cd(''%s'');\n',basePath) ...
+                sprintf('MiniVIE.configurePath;\n') ...
+                sprintf('UserConfig.getInstance(''%s'');\n',fullfile(basePath,'user_config.xml')) ...
+                sprintf('obj = MiniVIE;\n')];
+            commandSet(1).iconName = 'MiniVIE Icon 24.jpg';
+            commandSet(1).iconPath = fullfile(fileparts(which('MiniVIE')),'Deploy','MiniVIE_resources');
+            
+            %%%%%%%%%%%%%%%%
+            % goto MiniVIE
+            %%%%%%%%%%%%%%%%
+            commandSet(2).label = strcat('goto MiniVIE',suffix);
+            commandSet(2).code = ...
+                [sprintf('cd(''%s'');\n',basePath) ...
+                sprintf('MiniVIE.configurePath;\n')...
+                sprintf('UserConfig.getInstance(''%s'');\n',fullfile(basePath,'user_config.xml'))];
+            commandSet(2).iconName = '';
+            commandSet(2).iconPath = '';
+            
+            %%%%%%%%%%%%%%%%
+            % Cleanup MiniVIE
+            %%%%%%%%%%%%%%%%
+            commandSet(3).label = strcat('Cleanup',suffix);
+            commandSet(3).code = sprintf('run(''%s'');\n',which('cleanup'));
+            commandSet(3).iconName = 'TTE_delete.gif';
+            commandSet(3).iconPath = fullfile(matlabroot, 'toolbox', 'shared', 'dastudio', 'resources');
             
             if verLessThan('matlab', '9.4')
                 % Create shortcuts in matlab < R2018a
                 
-                shortcutUtils = com.mathworks.mlwidgets.shortcuts.ShortcutUtils;
-                
-                % shortcutUtils.addShortcutToBottom(label, callback, icon, ...
-                %    category, editable);
-                
-                % goto MiniVIE
-                % cd('C:\svn\myopen\MiniVIE');
-                % MiniVIE.configurePath;
-                cb = sprintf('cd(''%s'') \nMiniVIE.configurePath();',...
-                    fileparts(which('MiniVIE')));
-                shortcutUtils.addShortcutToBottom(strcat('goto MiniVIE',suffix),cb,'','Shortcuts', 'true');
-                
-                % MiniVIE
-                % cd('C:\git\MiniVIE');
-                % MiniVIE.configurePath;
-                % obj = MiniVIE;
-                cb = sprintf('cd(''%s'') \nMiniVIE.configurePath \nobj = MiniVIE;',...
-                    fileparts(which('MiniVIE')));
-                iconPath = fullfile(fileparts(which('MiniVIE')),'Deploy','MiniVIE_resources','MiniVIE Icon 24.jpg');
-                shortcutUtils.addShortcutToBottom(strcat('MiniVIE',suffix),cb,iconPath,'Shortcuts', 'true');
-                
-                %cleanup
-                % run('C:\svn\myopen\MiniVIE\Utilities\cleanup.m')
-                cb = sprintf('run(''%s'');',which('cleanup'));
-                iconPath = fullfile(iconDir,'TTE_delete.gif');
-                shortcutUtils.addShortcutToBottom(strcat('cleanup',suffix),cb,iconPath,'Shortcuts', 'true');
-                
-                %mpltest
-                % mpltest();
-                cb = 'mpltest()';
-                shortcutUtils.addShortcutToBottom(strcat('mpltest',suffix),cb,'','Shortcuts', 'true');
-                
-                %RunMpl
-                % RunMpl();
-                cb = 'obj = RunMpl()';
-                shortcutUtils.addShortcutToBottom(strcat('RunMpl',suffix),cb,'','Shortcuts', 'true');
-                
-                %RunTakeHome
-                % cd('C:\svn\myopen\MiniVIE');
-                % MiniVIE.configurePath;
-                % obj = RunTakeHome();
-                
-                %cb = sprintf('cd(''%s'');\nMiniVIE.configurePath();\nobj = RunTakeHome();',...
-                %    fileparts(which('MiniVIE')));
-                %shortcutUtils.addShortcutToBottom(strcat('RunTakeHome',suffix),cb,'','Shortcuts', 'true');
-                
+                for i = 1:length(commandSet)
+                    shortcutUtils = com.mathworks.mlwidgets.shortcuts.ShortcutUtils;
+                    shortcutUtils.addShortcutToBottom(commandSet(i).label, commandSet(i).code, ...
+                        fullfile(commandSet(i).iconPath,commandSet(i).iconName) , 'Shortcuts', 'true');
+                end
             else
                 % Create favorites in matlab >= R2018a
                 
-                % Getting all available categories
-                my_cat = 'JHU/APL MiniVIE';
+                % Get all available categories
+                category_name = 'JHU/APL MiniVIE';
                 already_exists = false;
-                iconDir = fullfile( ...
-                    matlabroot, ...
-                    'toolbox', ...
-                    'shared', ...
-                    'dastudio', ...
-                    'resources');
                 
                 % Search for existing category:
                 
                 fc = com.mathworks.mlwidgets.favoritecommands.FavoriteCommands.getInstance();
-                %method = fc.getClass().getMethod("getCategories", [])       % only works for public methods
                 method = fc.getClass().getDeclaredMethod("getCategories", []);   % works also for private or protected methods
                 method.setAccessible(true);
                 categories = method.invoke(fc,[]);       % returns a Java List with all categories
                 for i = 0:categories.size-1
                     cat = categories.get(i);     % returns the first category
-                    %     cat.getLabel()
-                    %     cat.getName()
-                    %     cat.getDescription()
-                    if strcmp(cat.getLabel(), my_cat)
+                    if strcmp(cat.getLabel(), category_name)
                         already_exists = true;
                     end
                 end
+                
                 if ~already_exists
                     
                     % Create Categories
                     fc = com.mathworks.mlwidgets.favoritecommands.FavoriteCommands.getInstance();
                     newCategory = com.mathworks.mlwidgets.favoritecommands.FavoriteCategoryProperties();
-                    newCategory.setLabel(my_cat);
-                    newCategory.getName();  % returns []
-                    retCat = fc.addCategory(newCategory);     % create the new category
-                    newCategory.getName();   % returns the create UIID after adding the category to the favorites GUI
+                    newCategory.setLabel(category_name);
+                    fc.addCategory(newCategory);     % create the new category
                     
-                    
-                    %%%%%%%%%%%%%%%%
-                    %cleanup
-                    %%%%%%%%%%%%%%%%
-                    % run('C:\svn\myopen\MiniVIE\Utilities\cleanup.m')
-                    cb = sprintf('run(''%s'');',which('cleanup'));
-                    iconPath = fullfile(iconDir,'TTE_delete.gif');
-                    label = strcat('cleanup',suffix);
-                    
-                    newFavoriteCommand = com.mathworks.mlwidgets.favoritecommands.FavoriteCommandProperties();
-                    newFavoriteCommand.setLabel(label);
-                    newFavoriteCommand.setCategoryLabel(my_cat);
-                    newFavoriteCommand.setCode(cb);
-                    newFavoriteCommand.setIconName('TTE_delete.gif');
-                    newFavoriteCommand.setIconPath(iconDir);
-                    
-                    newFavoriteCommand.setIsOnQuickToolBar(true);
-                    fc.addCommand(newFavoriteCommand);
-                    
-                    %%%%%%%%%%%%%%%%
-                    % goto MiniVIE
-                    %%%%%%%%%%%%%%%%
-                    % cd('C:\svn\myopen\MiniVIE');
-                    % MiniVIE.configurePath;
-                    cb = sprintf('cd(''%s'') \nMiniVIE.configurePath();',...
-                        fileparts(which('MiniVIE')));
-                    label = strcat('goto MiniVIE',suffix);
-                    
-                    newFavoriteCommand = com.mathworks.mlwidgets.favoritecommands.FavoriteCommandProperties();
-                    newFavoriteCommand.setLabel(label);
-                    newFavoriteCommand.setCategoryLabel(my_cat);
-                    newFavoriteCommand.setCode(cb);
-                    newFavoriteCommand.setIsOnQuickToolBar(true);
-                    fc.addCommand(newFavoriteCommand);
-                    
-                    %%%%%%%%%%%%%%%%
-                    % MiniVIE
-                    %%%%%%%%%%%%%%%%
-                    % cd('C:\git\MiniVIE');
-                    % MiniVIE.configurePath;
-                    % obj = MiniVIE;
-                    cb = sprintf('cd(''%s'') \nMiniVIE.configurePath \n UserConfig.getInstance(''%s'')\n obj = MiniVIE;',...
-                        fileparts(which('MiniVIE')),fullfile(fileparts(which('MiniVIE')),'user_config.xml'));
-                    iconPath = fullfile(fileparts(which('MiniVIE')),'Deploy','MiniVIE_resources');
-                    iconName = 'MiniVIE Icon 24.jpg';
-                    label = strcat('MiniVIE',suffix);
-                    
-                    newFavoriteCommand = com.mathworks.mlwidgets.favoritecommands.FavoriteCommandProperties();
-                    newFavoriteCommand.setLabel(label);
-                    newFavoriteCommand.setCategoryLabel(my_cat);
-                    newFavoriteCommand.setCode(cb);
-                    newFavoriteCommand.setIconName(iconName);
-                    newFavoriteCommand.setIconPath(iconPath);
-                    newFavoriteCommand.setIsOnQuickToolBar(true);
-                    fc.addCommand(newFavoriteCommand);
-                    
+                    for i = length(commandSet):-1:1 %backward add for better ordering
+                        
+                        newFavoriteCommand = com.mathworks.mlwidgets.favoritecommands.FavoriteCommandProperties();
+                        newFavoriteCommand.setLabel(commandSet(i).label);
+                        newFavoriteCommand.setCategoryLabel(category_name);
+                        newFavoriteCommand.setCode(commandSet(i).code);
+                        newFavoriteCommand.setIconName(commandSet(i).iconName);
+                        newFavoriteCommand.setIconPath(commandSet(i).iconPath);
+                        newFavoriteCommand.setIsOnQuickToolBar(true);
+                        fc.addCommand(newFavoriteCommand);
+                    end
                 end
                 
             end
