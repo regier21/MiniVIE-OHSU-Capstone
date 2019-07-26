@@ -29,7 +29,7 @@ classdef guiChannelSelect < Common.MiniVieObj
     properties (Constant = true)
         defaultFile = 'miniVieDefaultChannels.mat';
         lastFile = 'miniVieLastChannels.mat';
-        defaultChannels = [];
+        defaultChannels = 1:8;  % 7/26/2019 Updating from [] to 8 starting channels
     end
     events
         % Broadcast events when buttons are pressed
@@ -277,7 +277,8 @@ classdef guiChannelSelect < Common.MiniVieObj
             end
         end
         function selectedChannels = getDefaultChannels()
-            fullFile = fullfile(tempdir,GUIs.guiChannelSelect.defaultFile);            selectedChannels = GUIs.guiChannelSelect.getChannels(fullFile,GUIs.guiChannelSelect.defaultChannels);
+            fullFile = fullfile(tempdir,GUIs.guiChannelSelect.defaultFile);            
+            selectedChannels = GUIs.guiChannelSelect.getChannels(fullFile,GUIs.guiChannelSelect.defaultChannels);
         end
         function selectedChannels = getLastChannels()
             fullFile = fullfile(tempdir,GUIs.guiChannelSelect.lastFile);
