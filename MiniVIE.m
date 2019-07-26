@@ -12,6 +12,10 @@ classdef MiniVIE < Common.MiniVieObj
     % % Session startup (or use the shortcut button: "MiniVIE"
     % MiniVIE.configurePath()
     %
+    % Note if you want to avoid the prompt for config files and accept all
+    % defaults use:
+    % UserConfig.getInstance('user_config.xml')
+    %
     % % Launch the UI:
     % obj = MiniVIE
     %
