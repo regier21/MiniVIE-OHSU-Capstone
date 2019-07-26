@@ -19,22 +19,22 @@ classdef GraspConverter < handle
                 % setup a cell array of the enumerated grasps, with thos
                 % specified in ROC table.
                 graspNameMap = {
-                    'Tip', {'FinePinch(American)'}
-                    'Lateral', {'Lateral'}
-                    'Tripod', {'ThreeFingerPinch'}
-                    'Spherical', {'Spherical'}
-                    'Power', {'Cylindrical'}
-                    'Extension', {'Palmar(Tray)'}
-                    'Hook', {'Hook'}
-                    'Relaxed', {'rest'}
-                    'Index', {'Index Only'}
-                    'Middle', {'Middle Only'}
-                    'Ring', {'Ring Only'}
-                    'Little', {'Little Only'}
-                    'Thumb', {'Thumb Only'}
-                    'Cylindrical', {'Cylindrical'}
-                    'Point', {'Trigger(Drill)'}
-                    'Trigger', {'Trigger(Drill)'}
+                    'Tip', {'Tip Grasp'}
+                    'Lateral', {'Lateral Grasp'}
+                    'Tripod', {'Three Finger Pinch Grasp'}
+                    'Spherical', {'Spherical Grasp'}
+                    'Power', {'Power Grasp'}
+                    'Extension', {'Lateral Grasp'}
+                    'Hook', {'Lateral Grasp'}
+                    'Relaxed', {'Spherical Grasp'}
+                    'Index', {'Index'}
+                    'Middle', {'Middle'}
+                    'Ring', {'Ring'}
+                    'Little', {'Little'}
+                    'Thumb', {'Thumb'}
+                    'Cylindrical', {'Cylindrical Grasp'}
+                    'Point', {'Point Grasp'}
+                    'Trigger', {'Point Grasp'}
                     };
                 
                 thisGrasp = find(strcmp(char(enumGraspName),graspNameMap(:,1)),1);
