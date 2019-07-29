@@ -1227,7 +1227,7 @@ classdef MiniVIE < Common.MiniVieObj
                 % Create favorites in matlab >= R2018a
                 
                 % Get all available categories
-                category_name = 'JHU/APL MiniVIE';
+                category_name = strcat('JHU/APL MiniVIE',suffix);
                 already_exists = false;
                 
                 % Search for existing category:
