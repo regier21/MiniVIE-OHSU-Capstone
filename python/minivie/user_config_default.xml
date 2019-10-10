@@ -9,7 +9,7 @@
     <add key="Logging.use_combined_log"   value="1"/>
 
     <!--ROC Table to be loaded and interpolated locally during MiniVIE Session-->
-    <add key="MPL.roc_table"         value="mpl/#MPL_GEN3_ROC.xml"/>
+    <add key="MPL.roc_table"         value="brunel/#BRUNEL_ROC.xml"/>
 
     <!--Specify the Output Module [UnityUdp | NfuUdp] -->
     <add key="DataSink"         value="UnityUdp"/>
@@ -90,7 +90,7 @@
     <!-- Myo Data Server Streaming Ports
         Use these for establishing a Myo UDP Server that reads from BTLE and forwards
         Packets to UDP from the local port to the remote port -->
-    <add key="MyoUdpServer.num_devices" value="2"/>
+    <add key="MyoUdpServer.num_devices" value="1"/>
     <add key="MyoUdpServer.iface_1"    value="0"/>
     <add key="MyoUdpServer.iface_2"    value="0"/>
     <add key="MyoUdpServer.mac_address_1"    value="xx:xx:xx:xx:xx:xx"/>
@@ -102,7 +102,7 @@
 
     <!-- Myo Data Client Streaming Ports
         Use these parameters for reading from a Myo Data Source in a client application  -->
-    <add key="MyoUdpClient.num_devices" value="2"/>
+    <add key="MyoUdpClient.num_devices" value="1"/>
     <add key="MyoUdpClient.mac_address_1"    value="xx:xx:xx:xx:xx:xx"/>
     <add key="MyoUdpClient.mac_address_2"    value="xx:xx:xx:xx:xx:xx"/>
     <add key="MyoUdpClient.local_address_1"     value="//0.0.0.0:15001"/>

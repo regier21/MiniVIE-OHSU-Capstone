@@ -32,7 +32,8 @@ import math
 import numpy as np
 
 import mpl.roc as roc
-from mpl import JointEnum as MplId
+#from mpl import JointEnum as MplId
+from brunel import JointEnum as MplId
 from utilities import user_config
 
 from transforms3d.euler import mat2euler
