@@ -7,10 +7,9 @@ Documentation: https://openbionicslabs.com/obtutorials/beetroot-v1-0-firmware-us
 
 Revisions:
 2019OCT09 Rojas: Created
+2019OCT15 Rojas: Tested with brunel 
 
 """
-
-# TODO: wring log information to the global log file
 import time
 import serial
 import logging
@@ -19,7 +18,7 @@ import numpy as np
 # Define the actuator class
 class Brunel(object):
     def __init__(self):
-        self.port_dir = '/dev/ttyACM1' 
+        self.port_dir = '/dev/ttyACM0' 
 
         # Initial digit speed values
         self.speed = np.array([255,255,255,255])
@@ -63,7 +62,7 @@ class Brunel(object):
         # TODO: Ignore velocity.. or should we? digit speed command? 
         # Check to make sure that the values aren't outside of the MAX/MIN bounds
         for x in range(0,len(joint_position)):
-            joint_position[x] = np.clip(joint_position, self.min_value, self.max_value)
+            joint_position[x] = np.clip(joint_position[x], self.min_value, self.max_value)
 
         # New csv string line
         csv_string = ""
@@ -79,8 +78,25 @@ class Brunel(object):
         self.ser.write(csv_string.encode())
 
 def main():
-    # Read some commnad from the user and send to the brunel
-    print("Brunel Driver v0.1")
+    # Test basic serial communication with brunel hand by sending digit positions
+    # Connect to Brunel
+    b=Brunel()
+    b.connect()
+    print("Brunel serial connected")
+    # Send position commands
+    status = True
+    joint_position = np.zeros(4)
+    while(status==True):
+        for x in range(0,4):
+            joint_position[x] = int(input("Position {0}: ".format(x)))
+        b.send_joint_angles(joint_position,joint_position)
+
+        selection = str(input("Continue? [y/n]: "))
+        if selection == 'n':
+            status = False
+    # Close serial port
+    b.close()
+    print("Brunel serial closed")
     
 if __name__ == '__main__':
     main()

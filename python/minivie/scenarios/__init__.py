@@ -688,6 +688,7 @@ class MplScenario(Scenario):
         from inputs import myo_asyncio as myo
         import pattern_rec as pr
         # from mpl.unity import UnityUdp
+        from brunel.brunel_driver import Brunel 
         from mpl.unity_asyncio import UnityUdp
         from mpl.open_nfu import NfuUdp
         from controls.plant import Plant
@@ -776,6 +777,14 @@ class MplScenario(Scenario):
             remote_hostname, remote_port = get_address(get_config_var('NfuUdp.remote_address', '//127.0.0.1:9027'))
             sink = NfuUdp(hostname=remote_hostname, udp_telem_port=local_port, udp_command_port=remote_port)
             sink.connect()
+        elif data_sink == 'brunel':
+            # Brunel data_sink setup
+            sink = Brunel()
+            sink.port_dir = get_config_var('port_dir','/dev/ttyACM0')
+            sink.max_value = get_config_var('max_value',973)
+            sink.min_value = get_config_var('min_value',50)
+            sink.min_speed = get_config_var('min_speed',200)
+            sink.connect() # Establish serial connection with brunel hand
         else:
             import sys
             # unrecoverable

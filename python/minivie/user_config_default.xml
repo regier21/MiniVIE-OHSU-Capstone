@@ -10,9 +10,15 @@
 
     <!--ROC Table to be loaded and interpolated locally during MiniVIE Session-->
     <add key="MPL.roc_table"         value="brunel/#BRUNEL_ROC.xml"/>
+    
+    <!--Open Bionics Brunel Parameters>
+    <add key="port_dir"           value="/dev/ttyACM0"/>
+    <add key="max_value"      value="973"/>
+    <add key="min_value"      value="50"/>
+    <add key="min_speed"      value="200"/>
 
     <!--Specify the Output Module [UnityUdp | NfuUdp] -->
-    <add key="DataSink"         value="UnityUdp"/>
+    <add key="DataSink"         value="brunel"/>
     <add key="NfuUdp.remote_address" value="//127.0.0.1:9027"/>
     <add key="NfuUdp.local_address" value="//0.0.0.0:9028"/>
     <add key="UnityUdp.remote_address" value="//127.0.0.1:25000"/>
