@@ -546,16 +546,16 @@ class Scenario(object):
         pause_hand = self.is_paused('Hand') or self.is_paused('All')
         if class_info['IsGrasp'] and not pause_hand:
             # the motion class is either a grasp type or hand open
-            if class_info['GraspId'] is not None and self.Plant.grasp_position < 0.2:
+            if class_info['GraspId'] is not None and self.Plant.grasp_position < 0.4:
                 # change the grasp state if still early in the grasp motion
                 self.Plant.grasp_id = class_info['GraspId']
             self.Plant.set_grasp_velocity(class_info['Direction'] * self.hand_gain_value)
-
+        '''
         pause_arm = self.is_paused('Arm') or self.is_paused('All')
         if not class_info['IsGrasp'] and not pause_arm:
             # the motion class is an arm movement
             self.Plant.set_joint_velocity(class_info['JointId'], class_info['Direction'] * self.gain_value)
-
+        '''
         # Automatically open hand if auto open set and no movement class
         if self.TrainingData.motion_names[decision_id] == 'No Movement' and self.auto_open:
             self.Plant.set_grasp_velocity(-self.hand_gain_value)
@@ -571,6 +571,7 @@ class Scenario(object):
         if self.DataSink is not None:
             # self.Plant.joint_velocity[mpl.JointEnum.MIDDLE_MCP] = self.Plant.grasp_velocity
             self.DataSink.send_joint_angles(self.Plant.joint_position, self.Plant.joint_velocity)
+            print(self.Plant.joint_position)
 
         return
 
@@ -578,13 +579,15 @@ class Scenario(object):
         # send gui updates
 
         if self.TrainingInterface is None:
+            logging.info('skipping')
             return
 
         # Send new status only once a second based on date string changing
         current_time = time.strftime("%c")
         if current_time != self.loop_time:
             self.loop_time = current_time
-            msg = '<br>' + self.DataSink.get_status_msg()  # Limb Status
+            #msg = '<br>' + self.DataSink.get_status_msg()  # Limb Status
+            msg = ''
             msg += ' ' + self.output['status']  # Classifier Status
             for src in self.SignalSource:
                 msg += '<br>' + src.get_status_msg()

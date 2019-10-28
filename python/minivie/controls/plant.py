@@ -56,21 +56,32 @@ def class_map(class_name):
     # Class Name: IsGrasp, JointId, Direction, GraspId
     class_lookup = {
         'No Movement': [False, None, 0, None],
-        'Shoulder Flexion': [False, MplId.SHOULDER_FE, +1, None],
-        'Shoulder Extension': [False, MplId.SHOULDER_FE, -1, None],
-        'Shoulder Adduction': [False, MplId.SHOULDER_AB_AD, +1, None],
-        'Shoulder Abduction': [False, MplId.SHOULDER_AB_AD, -1, None],
-        'Humeral Internal Rotation': [False, MplId.HUMERAL_ROT, +1, None],
-        'Humeral External Rotation': [False, MplId.HUMERAL_ROT, -1, None],
-        'Elbow Flexion': [False, MplId.ELBOW, +1, None],
-        'Elbow Extension': [False, MplId.ELBOW, -1, None],
-        'Wrist Rotate In': [False, MplId.WRIST_ROT, +1, None],
-        'Wrist Rotate Out': [False, MplId.WRIST_ROT, -1, None],
-        'Wrist Adduction': [False, MplId.WRIST_AB_AD, +1, None],
-        'Wrist Abduction': [False, MplId.WRIST_AB_AD, -1, None],
-        'Wrist Flex In': [False, MplId.WRIST_FE, +1, None],
-        'Wrist Extend Out': [False, MplId.WRIST_FE, -1, None],
+        #'Shoulder Flexion': [False, MplId.SHOULDER_FE, +1, None],
+        #'Shoulder Extension': [False, MplId.SHOULDER_FE, -1, None],
+        #'Shoulder Adduction': [False, MplId.SHOULDER_AB_AD, +1, None],
+        #'Shoulder Abduction': [False, MplId.SHOULDER_AB_AD, -1, None],
+        #'Humeral Internal Rotation': [False, MplId.HUMERAL_ROT, +1, None],
+        #'Humeral External Rotation': [False, MplId.HUMERAL_ROT, -1, None],
+        #'Elbow Flexion': [False, MplId.ELBOW, +1, None],
+        #'Elbow Extension': [False, MplId.ELBOW, -1, None],
+        #'Wrist Rotate In': [False, MplId.WRIST_ROT, +1, None],
+        #'Wrist Rotate Out': [False, MplId.WRIST_ROT, -1, None],
+        #'Wrist Adduction': [False, MplId.WRIST_AB_AD, +1, None],
+        #'Wrist Abduction': [False, MplId.WRIST_AB_AD, -1, None],
+        #'Wrist Flex In': [False, MplId.WRIST_FE, +1, None],
+        #'Wrist Extend Out': [False, MplId.WRIST_FE, -1, None],
         'Hand Open': [True, None, -1, None],
+        'Spherical Grasp': [True, None, +1, 'Spherical Grasp'],
+        'Tip Grasp': [True, None, +1, 'Tip Grasp'],
+        'Index': [True, None, +1, 'Index'],
+        'Middle': [True, None, +1, 'Middle'],
+        'Ring': [True, None, +1, 'Ring'],
+        'Little': [True, None, +1, 'Little'],
+        'Thumb': [True, None, +1, 'Thumb'],
+        'Ring-Middle': [True, None, +1, 'Ring-Middle'],
+        'The Bird': [True, None, +1, 'The Bird'],
+        'Hang Loose': [True, None, +1, 'Hang Loose'],
+        'Thumbs Up': [True, None, +1, 'Thumbs Up']
         # 'Spherical Grasp': [True, None, +1, 'Spherical Grasp'],
         # 'Tip Grasp': [True, None, +1, 'Tip Grasp'],
     }
@@ -139,9 +150,11 @@ class Plant(object):
     def load_config_parameters(self):
         # Load parameters from xml config file
         for i in range(MplId.NUM_JOINTS):
-            limit = user_config.get_user_config_var(MplId(i).name + '_LIMITS', (0.0, 30.0))
-            self.lower_limit[i] = np.deg2rad(limit[0])
-            self.upper_limit[i] = np.deg2rad(limit[1])
+            limit = user_config.get_user_config_var(MplId(i).name + '_LIMITS', (50, 973))
+            self.lower_limit[i] = limit[0]
+            self.upper_limit[i] = limit[1]
+        # Initially set the default joint position to the lower limit
+        self.joint_position = self.lower_limit
 
     def load_roc(self):
         # load the roc table
