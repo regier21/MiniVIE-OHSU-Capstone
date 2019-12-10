@@ -116,6 +116,17 @@ If installing on a new windows build and you don't have other IDE preferences:
    * With run_www selected: Run -> Edit Configurations
 ![](pycharm_config.png)
 
+## Quick Start Guide for Windows Debug Setup
+1. Create new config file from user_config_default.xml
+    * Actually should not need to change anything from defaults
+2. Run the vMPL "JHUAPL vMPL Bimanual.exe"
+3. Run a myo emulator (if you don't want to use a physical myo)
+    * Option A: Random data
+        * "python myo.py --SIM_UNIX"  (make sure you are sitting in minivie/python/minivie/inputs when you execute this)
+    * Option B: Generate data using push button GUI, useful for debugging classifiers/assessments
+        * From minivia/+Inputs "MyoUdp.exe"
+4. "python run_www.py -x YOUR_CONFIG_FILE.xml"
+
 ## Style and Programming Best Practices
 
 ### UDP
