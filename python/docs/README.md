@@ -9,28 +9,28 @@ the JHUAPL Modular Prosthetic limb.
 
 The basic workflow of the _PythonVIE_ is as follows:
 
-### Input: 
+### Input: "python\inputs\"
 Signal Acquisition of a variety of signal types ranging from wireless surface electromyography (sEMG) devices such
 as the Thalmic Myo Armband, to generic data acquisition (DAQ) using National Instruments USB DAQ such as the USB-6001,
 to customized bio amplification hardware such as the Intan RHD chipset
     
-### Signal Analysis: 
+### Signal Analysis: "python\pattern_rec\"
 This module handles the data signal processing and links to machine learning tools.  Initially this is integrated
 with the sklearn toolbox, but others can be added or customized as necessary.
 An important submodule to this is 
 1) The ability to store and load data for machine learning approaches (TrainingData) and 
 2) An interface module for controlling data labeling and management (TrainingInterface).
     
-### Plant: 
+### Plant: "python\controls\"
 The _plant_ (used in the Control Theory sense) is the model of the control system (such as an arm) that has state information
 (i.e. hold the current position of the arm), as well as the range of motion and speed limits.  A new control command might send a 
 velocity command to the joint, in which case it is the job of the plant to store the incremented position and stop when the range
 of motion is exceeded
     
-### Presentation:  
+### Presentation: "python\mpl\"
 The 'presentation' refers generically to the output of the system, whether a physical or virtual arm. 
 
-### Scenario: 
+### Scenario: "python\scenarios\"
 Scenario objects contain different combinations of the above modules to develop specific use-cases.  This could be wireless electrodes
 controlling a virtual limb system, or synthetic (stored) data used to control a physical arm for testing, or any combination thereof.
 	
@@ -101,11 +101,20 @@ If installing on a new windows build and you don't have other IDE preferences:
 2. Download and Install Python3.6+
 3. Open Pycharm and select the MiniVIE project directory (e.g. c:\git\minivie)
 4. Set Project Settings (File->Settings...)
-    * Project Structure
-    * Content Root Default: c:\git\minivie\python
-    * Sources Root Default: minivie
+    * Project Structure (see image below)
+        * Content Root Default: c:\git\minivie\python
+        * Sources Root Default: minivie
+![](pycharm_structure.png)
+    * Project Interpreter (see image below)
+        * Project Interpreter Gear Icon -> Dropdown menu -> Add
+        * Select Virtualenv Environment -> New -> your python install, with defaults
+![](pycharm_interpreter.png)
 5. Once launched, pycharm should check for and install project dependencies (Note on windows bluepy is not supported)
 6. Click Install requirements
+   * Note, if certain required packages fail to install, or you don't get option to install packages, you may need to add all packages from requirements.txt via File->Settings->Project Interpreter-> +
+7. Helpful to set command line parameters while running run_www (see image below)
+   * With run_www selected: Run -> Edit Configurations
+![](pycharm_config.png)
 
 ## Style and Programming Best Practices
 
