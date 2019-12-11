@@ -180,7 +180,7 @@ class Wamp(EMGFeatures):
 
 
 class Var(EMGFeatures):
-    def __index__(self):
+    def __init__(self):
         super(Var, self).__init__()
 
         self.name = "Var"
@@ -206,7 +206,7 @@ class Var(EMGFeatures):
 
 
 class Vorder(EMGFeatures):
-    def __index__(self):
+    def __init__(self):
         super(Vorder, self).__init__()
 
         self.name = "Vorder"
@@ -241,7 +241,7 @@ class Vorder(EMGFeatures):
 
 
 class LogDetect(EMGFeatures):
-    def __index__(self):
+    def __init__(self):
         super(LogDetect, self).__init__()
 
         self.name = "Logdetect"
@@ -259,12 +259,13 @@ class LogDetect(EMGFeatures):
         :return: scalar feature value
         """
 
+        # TODO: log detect function needs to protect against log(0) (-INF) occuring
         logdetect_feature = math.e**(np.mean(np.log(abs(data_input)), axis=0))
         return logdetect_feature
 
 
 class EmgHist(EMGFeatures):
-    def __index__(self):
+    def __init__(self):
         super(EmgHist, self).__init__()
 
         self.name = "EmgHist"
@@ -300,7 +301,7 @@ class EmgHist(EMGFeatures):
 
 
 class AR(EMGFeatures):
-    def __index__(self):
+    def __init__(self):
         super(AR, self).__init__()
 
         self.name = "AR"
@@ -333,7 +334,7 @@ class AR(EMGFeatures):
 
 
 class Ceps(EMGFeatures):
-    def __index__(self):
+    def __init__(self):
         super(Ceps, self).__init__()
 
         self.name = "Ceps"

@@ -173,26 +173,50 @@ class FeatureExtract(object):
 
 def test_feature_extract():
     # Offline test code
+    # test with: python3 -c "from pattern_rec import *; test_feature_extract()"
     import matplotlib.pyplot as plt
     import math
     import timeit
+    from pattern_rec import features
 
-    NUM = 2000
-    emg_buffer = np.zeros((NUM, 8))
-    sinArray = np.sin(2 * math.pi * 10 * np.linspace(0, 1, num=NUM))
+    print('Testing Feature extraction')
+    print([cls.__name__ for cls in features.EMGFeatures.__subclasses__()])
 
-    emg_buffer[:, :1] = np.reshape(sinArray, (NUM, 1))
-    emg_buffer[:, :7] = np.reshape(sinArray, (NUM, 1))
-    plt.plot(sinArray)
+    sample_rate = 200
+    duration = 0.25
+    num_samples = math.floor(sample_rate*duration)
+    num_channels = 8
+    emg_buffer = np.zeros((num_samples, num_channels))
+    t = np.linspace(0, duration, num=num_samples)
 
-    start_time = timeit.default_timer()
-    # code you want to evaluate
-    f = FeatureExtract.feature_extract(emg_buffer)
-    # code you want to evaluate
-    elapsed = timeit.default_timer() - start_time
-    print(elapsed)
+    # add various sine wave shapes
+    for i in range(num_channels):
+        amplitude = i+1
+        frequency = 10*(i+1)
+        phase = i
+        offset = 0
+        emg_buffer[:, i] = amplitude * np.sin(2 * math.pi * frequency * (t + phase)) + offset
 
-    print(f)
+    fe = FeatureExtract()
+
+    for cls in features.EMGFeatures.__subclasses__():
+        fe = FeatureExtract()
+        feature = cls()
+        fe.attach_feature(feature)
+        py_time = timeit.timeit(lambda: fe.feature_extract(emg_buffer), number=1000)
+
+        print('*************')
+        print(f'Feature Class: {cls.__name__}  Feature Name: {feature.get_name()}  Time to complete: {py_time:.5f})')
+        print(fe.feature_extract(emg_buffer))
+
+    # separate the signals for visual reference  and save plot
+    for i in range(num_channels):
+        offset = i*num_channels
+        emg_buffer[:, i] += offset
+
+    # for signal in
+    plt.plot(t, emg_buffer)
+    plt.savefig('emg_profile.png')
 
 
 class Classifier:
