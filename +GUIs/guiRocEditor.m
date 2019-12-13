@@ -359,7 +359,10 @@ classdef guiRocEditor < handle
                     fprintf('Entry #%d, RocId=%d, %14s %6.2f Pct\n',...
                         idx,RocId,RocName,rocVal(iVal)*100);
                     
-                    allAngles = zeros(1,27);
+                    % 10/15/2019 RSA: changed starting angles from zeros to
+                    % the current position
+                    %allAngles = zeros(1,27);
+                    allAngles = obj.jointAngles;
                     allAngles(thisRoc.joints) = interp1(thisRoc.waypoint,thisRoc.angles,rocVal(iVal));
                     obj.jointAngles = allAngles;
                     obj.transmit();
@@ -381,7 +384,10 @@ classdef guiRocEditor < handle
                     fprintf('Entry #%d, RocId=%d, %14s %6.2f Pct\n',...
                         idx,RocId,RocName,rocVal(iVal)*100);
                     
-                    allAngles = zeros(1,27);
+                    % 10/15/2019 RSA: changed starting angles from zeros to
+                    % the current position
+                    %allAngles = zeros(1,27);
+                    allAngles = obj.jointAngles;
                     allAngles(thisRoc.joints) = interp1(thisRoc.waypoint,thisRoc.angles,rocVal(iVal));
                     obj.jointAngles = allAngles;
                     obj.transmit();
