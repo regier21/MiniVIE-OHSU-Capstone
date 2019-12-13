@@ -129,7 +129,7 @@ class UnityUdp(DataSink):
 
         print('Checking for valid percepts...')
 
-        while self.position['last_percept'] is None or self.get_packet_data_rate() is 0:
+        while self.position['last_percept'] is None or self.get_packet_data_rate() == 0:
             await asyncio.sleep(timestep)
             print('Waiting 20 ms for valid percepts...')
             self.get_packet_data_rate()

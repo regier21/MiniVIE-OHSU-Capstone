@@ -150,7 +150,7 @@ class NfuUdp(DataSink):
         # Note: this function allows setting a reduced rate for how many calls are made to the system
 
         # Bail out if Windows
-        if os_name is not 'posix':
+        if os_name != 'posix':
             return 0.0
 
         # set a rate reduction factor to decrease calls to system process
