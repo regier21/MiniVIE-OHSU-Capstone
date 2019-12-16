@@ -124,7 +124,7 @@ If installing on a new windows build and you don't have other IDE preferences:
     * Option A: Random data
         * "python myo.py --SIM_UNIX"  (make sure you are sitting in minivie/python/minivie/inputs when you execute this)
     * Option B: Generate data using push button GUI, useful for debugging classifiers/assessments
-        * From minivia/+Inputs "MyoUdp.exe"
+        * From minivia/+Inputs "UDPStreamLinux.exe"
 4. "python run_www.py -x YOUR_CONFIG_FILE.xml"
 
 ## Style and Programming Best Practices
