@@ -48,10 +48,6 @@ def main():
 
     """
 
-    # Hot fix for tornado to function with Python 3.8 and up
-    if sys.version_info > (3, 7):
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
     # Parse main function input parameters to get user_config xml file
     parser = argparse.ArgumentParser(description='run_www: Configure and run a full user VIE with web training.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s {version}'.format(version=__version__))
@@ -88,4 +84,8 @@ def main():
 
 
 if __name__ == '__main__':
+    # Hot fix for tornado to function with Python 3.8 and up
+    # See details in: https://github.com/tornadoweb/tornado/issues/2608
+    if sys.version_info > (3, 7):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())  # python-3.8.0a4
     main()

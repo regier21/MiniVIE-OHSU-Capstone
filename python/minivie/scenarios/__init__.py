@@ -684,7 +684,7 @@ class MplScenario(Scenario):
             Plant - Perform forward integration and apply joint limits
             DataSink - output destination of command signals (e.g. real or virtual arm)
         """
-        #from inputs import myo
+        # from inputs import myo
         from inputs import myo_asyncio as myo
         import pattern_rec as pr
         # from mpl.unity import UnityUdp

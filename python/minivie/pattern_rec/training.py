@@ -6,6 +6,7 @@ This class is designed to receive training commands. Training commands can be fo
 
 @author: R. Armiger
 """
+from typing import Optional, Awaitable
 
 import tornado.ioloop
 import tornado.web
@@ -77,7 +78,7 @@ class TrainingUdp(object):
         self.thread.join()
 
 
-#https://stackoverflow.com/questions/12479054/how-to-run-functions-outside-websocket-loop-in-python-tornado
+# https://stackoverflow.com/questions/12479054/how-to-run-functions-outside-websocket-loop-in-python-tornado
 wss = []  # list of websockets send commands
 func_handle = []  # list of callbacks for message recv
 
@@ -86,11 +87,13 @@ message_history = {'sys_status': '', 'output_class': '', 'training_class': '',
                    'motion_test_status': '', 'motion_test_setup': '', 'motion_test_update': '',
                    'TAC_status': '', 'TAC_setup': '', 'TAC_update': '',
                    'joint_cmd': '', 'joint_pos': '', 'joint_torque': '', 'joint_temp': '',
-                   'strNormalizeMyoPosition': '', 'strNormalizeMyoPositionImage': ''
-                         }
+                   'strNormalizeMyoPosition': '', 'strNormalizeMyoPositionImage': ''}
 
 
 class WSHandler(tornado.websocket.WebSocketHandler):
+    def data_received(self, chunk: bytes) -> Optional[Awaitable[None]]:
+        pass
+
     def open(self):
         logging.debug('Connection opened...')
         if self not in wss:
@@ -108,13 +111,20 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
 
 class TestHandler(tornado.web.RequestHandler):
+    def data_received(self, chunk: bytes) -> Optional[Awaitable[None]]:
+        pass
+
     def get(self):
         # self.render('../../www/mplTemplates/test_template.html', title='Testlist', items=('one', 'two', 'three'))
-        self.render('../../www/mplTemplates/index.html', title='Testlist', items=('one', 'two', 'three'), enableNfu=True, enableUnity=True)
+        self.render('../../www/mplTemplates/index.html', title='Testlist', items=('one', 'two', 'three'),
+                    enableNfu=True, enableUnity=True)
         pass
 
 
 class MainHandler(tornado.web.RequestHandler):
+    def data_received(self, chunk: bytes) -> Optional[Awaitable[None]]:
+        pass
+
     def get(self):
         from os import path
         homepath = get_user_config_var('MobileApp.path', "../www/mplHome")
@@ -152,7 +162,8 @@ class TrainingManagerWebsocket(TrainingInterface):
         self.thread = tornado.ioloop.IOLoop.instance
 
     def setup(self, port=9090):
-        self.application.listen(port)
+        server = self.application.listen(port)
+        return server
 
     def add_message_handler(self, func):
         # attach a function to receive commands from websocket

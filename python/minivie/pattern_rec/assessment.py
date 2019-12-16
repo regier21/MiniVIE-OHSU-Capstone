@@ -275,7 +275,7 @@ class MotionTester(AssessmentInterface):
         # Method to add data following each assessment
 
         # TODO: Better fix for this, should 'None' be an available classification in first place?
-        if current_class is 'None':
+        if current_class == 'None':
             current_class = 'No Movement'
 
         # Find ids
