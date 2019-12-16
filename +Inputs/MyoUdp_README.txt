@@ -35,4 +35,4 @@ Revisions:
 -------------
 
 1/18/2016 Armiger: Created
-1/10/2019 Armiger: Added a mac version of hte program and added enable/disable of wakeup vibration
+1/10/2019 Armiger: Added a mac version of the program and added enable/disable of wakeup vibration
