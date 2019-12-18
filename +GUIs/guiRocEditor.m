@@ -398,9 +398,10 @@ classdef guiRocEditor < handle
             end
             
             function cbAddROC
+                obj.IsDirty = true;
                 % TO-DO: need to add ability name a new ROC
                 idx = obj.CurrentRocId;
-                struct = obj.structRoc
+                struct = obj.structRoc;
                 
                 % insert copy of current ROC below current
                 obj.structRoc = [struct(1:idx) struct(idx:length(struct))];
@@ -410,6 +411,7 @@ classdef guiRocEditor < handle
             end
             
             function cbDeleteROC
+                obj.IsDirty = true;
                 % TO-DO: add warning for deleting a ROC
                 idx = obj.CurrentRocId;
                 struct = obj.structRoc
@@ -437,6 +439,7 @@ classdef guiRocEditor < handle
             end
             
             function cbAddWaypoint
+                obj.IsDirty = true;
                 % TO-DO: add ability to set waypoint time
                 idx = obj.CurrentRocId;
                 idw = obj.CurrentWaypointId;
@@ -453,6 +456,7 @@ classdef guiRocEditor < handle
             end
             
             function cbDeleteWaypoint
+                obj.IsDirty = true;
                 % TO-DO: add warning for deleting a waypoint
                 idx = obj.CurrentRocId;
                 idw = obj.CurrentWaypointId;
@@ -487,6 +491,7 @@ classdef guiRocEditor < handle
             end
             
             function cbEditRocName(src)
+                obj.IsDirty = true;
                 idx = obj.CurrentRocId;
                 idw = obj.CurrentWaypointId;
                 str = get(src,'string');
@@ -502,6 +507,7 @@ classdef guiRocEditor < handle
             end
             
             function cbEditWaypoint(src)
+                obj.IsDirty = true;
                 idx = obj.CurrentRocId;
                 idw = obj.CurrentWaypointId;
                 newVal = str2double(get(src,'string'));
@@ -518,7 +524,7 @@ classdef guiRocEditor < handle
             end
             
             function resetRocIDs
-                for (idx = 1:length(obj.structRoc))
+                for idx = 1:length(obj.structRoc)
                     obj.structRoc(idx).id = idx-1;
                 end
             end
@@ -650,7 +656,8 @@ classdef guiRocEditor < handle
             end
             
             xmlFileName = fullfile(pathName,fileName);
-            
+            obj.CurrentFilename = xmlFileName;
+
             obj.structRoc = MPL.RocTable.readRocTable(xmlFileName);
             obj.updateFigure();
         end
@@ -668,6 +675,8 @@ classdef guiRocEditor < handle
             xmlFileName = fullfile(pathName,fileName);
             
             MPL.RocTable.writeRocTable(xmlFileName,obj.structRoc);
+            
+            obj.CurrentFilename = xmlFileName;
             
             obj.IsDirty = false;
             obj.updateFigure()

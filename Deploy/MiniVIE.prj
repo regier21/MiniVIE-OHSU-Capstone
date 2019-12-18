@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="706942650" file="C:\git\minivie\Deploy\MiniVIE.prj" location="C:\git\minivie\Deploy" name="MiniVIE" preferred-package-location="C:\git\minivie\Deploy\MiniVIE\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="1858912800" file="C:\git\minivie\Deploy\MiniVIE.prj" location="C:\git\minivie\Deploy" name="MiniVIE" preferred-package-location="C:\git\minivie\Deploy\MiniVIE\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>MiniVIE</param.appname>
     <param.icon>${PROJECT_ROOT}\MiniVIE_resources\icon.ico</param.icon>
     <param.icons>
@@ -8,7 +8,7 @@
       <file>${PROJECT_ROOT}\MiniVIE_resources\icon_24.png</file>
       <file>${PROJECT_ROOT}\MiniVIE_resources\icon_16.png</file>
     </param.icons>
-    <param.version>2.1</param.version>
+    <param.version>2.20</param.version>
     <param.authnamewatermark>R. Armiger</param.authnamewatermark>
     <param.email>robert.armiger@jhuapl.edu</param.email>
     <param.company>JHU/APL</param.company>
@@ -17,8 +17,9 @@
 but is a separate and lightweight MATLAB based implementation. 
 
 Revisions:
-11/09/2016: v2.1 Compiled with dual arm motion tracking
-10/21/2016: v2.0 New GUI R2016a Release
+12/18/2019: v2.20 Compiled with updates to ROC Editor R2019a
+11/09/2016: v2.10 Compiled with dual arm motion tracking
+10/21/2016: v2.00 New GUI R2016a Release
 07/18/2016: v1.95 Fixed Multi DAQ bug, R2016a Release
 04/16/2016: v1.9 Fixed Unity Bug, R2016a Release
 04/07/2016: v1.8 Added Myo Arm Tracking
@@ -30,9 +31,9 @@ Revisions:
 07/28/2014: v1.2 Recompiled under MATLAB R2013b 64-bit</param.description>
     <param.screenshot>${PROJECT_ROOT}\MiniVIE_resources\MiniVIE Splash Screen.gif</param.screenshot>
     <param.guid />
-    <param.installpath.string>\JHU\APL\</param.installpath.string>
+    <param.installpath.string>\JHU_APL\</param.installpath.string>
     <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
-    <param.logo />
+    <param.logo>${PROJECT_ROOT}\MiniVIE_resources\MiniVIE Installer Splash.gif</param.logo>
     <param.install.notes />
     <param.target.install.notes />
     <param.intermediate>${PROJECT_ROOT}\MiniVIE\for_testing</param.intermediate>
@@ -41,7 +42,6 @@ Revisions:
     <param.logdir>${PROJECT_ROOT}\MiniVIE</param.logdir>
     <param.enable.clean.build>false</param.enable.clean.build>
     <param.user.defined.mcr.options />
-    <param.embed.ctf>true</param.embed.ctf>
     <param.target.type>subtarget.standalone</param.target.type>
     <param.support.packages />
     <param.web.mcr>true</param.web.mcr>
@@ -53,10 +53,36 @@ Revisions:
     <param.windows.command.prompt>true</param.windows.command.prompt>
     <param.create.log>false</param.create.log>
     <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text>Syntax 
+	  -? 
+	 
+ Input Arguments 
+	 -?  print help on how to use the application 
+	 input arguments 
+ Description 
+ 	 The MiniVIE code project reflects the concepts and workflow of the JHU/APL VIE platform, 
+but is a separate and lightweight MATLAB based implementation. 
+
+Revisions:
+12/18/2019: v2.20 Compiled with updates to ROC Editor R2019a
+11/09/2016: v2.10 Compiled with dual arm motion tracking
+10/21/2016: v2.00 New GUI R2016a Release
+07/18/2016: v1.95 Fixed Multi DAQ bug, R2016a Release
+04/16/2016: v1.9 Fixed Unity Bug, R2016a Release
+04/07/2016: v1.8 Added Myo Arm Tracking
+02/26/2016: v1.7 Added New Daq Session Based Inputs
+02/25/2016: v1.6 added L/R switch for Unity
+09/03/2015: v1.5 Recompiled for Myo Armband
+11/06/2014: v1.4 Recompiled for take-home final
+11/04/2014: v1.3 Recompiled for take-home
+07/28/2014: v1.2 Recompiled under MATLAB R2013b 64-bit</param.help.text>
     <unset>
       <param.guid />
       <param.installpath.combo />
-      <param.logo />
+      <param.install.notes />
       <param.target.install.notes />
       <param.intermediate />
       <param.files.only />
@@ -64,7 +90,6 @@ Revisions:
       <param.logdir />
       <param.enable.clean.build />
       <param.user.defined.mcr.options />
-      <param.embed.ctf />
       <param.target.type />
       <param.support.packages />
       <param.web.mcr />
@@ -75,11 +100,16 @@ Revisions:
       <param.windows.command.prompt />
       <param.create.log />
       <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
     </unset>
     <fileset.main>
       <file>C:\git\minivie\MiniVIE.m</file>
     </fileset.main>
-    <fileset.resources />
+    <fileset.resources>
+      <file>C:\git\minivie\Utilities\lspb_minivie.m</file>
+    </fileset.resources>
     <fileset.package />
     <fileset.depfun>
       <file>C:\git\minivie\+Common\DataBuffer.m</file>
@@ -92,6 +122,7 @@ Revisions:
       <file>C:\git\minivie\+Controls\graspInterpolation.m</file>
       <file>C:\git\minivie\+Controls\GraspTypes.m</file>
       <file>C:\git\minivie\+DataAnalysis\Assessments.m</file>
+      <file>C:\git\minivie\+DataAnalysis\ParsePythonData.m</file>
       <file>C:\git\minivie\+Db\MiniVieDb.m</file>
       <file>C:\git\minivie\+Db\MplDb.m</file>
       <file>C:\git\minivie\+Db\Record.m</file>
@@ -207,14 +238,15 @@ Revisions:
       <file>C:\git\minivie\ThirdParty\jsonlab\struct2jdata.m</file>
       <file>C:\git\minivie\ThirdParty\jsonlab\varargin2struct.m</file>
       <file>C:\git\minivie\ThirdParty\rdir.m</file>
+      <file>C:\git\minivie\ThirdParty\strfndw.m</file>
       <file>C:\git\minivie\ThirdParty\WinOnTop.m</file>
-      <file>C:\git\minivie\ThirdParty\xticklabel_rotate.m</file>
       <file>C:\git\minivie\Utilities\action_bus_definition.m</file>
       <file>C:\git\minivie\Utilities\action_bus_enum.m</file>
       <file>C:\git\minivie\Utilities\BluetoothTactor.m</file>
       <file>C:\git\minivie\Utilities\BluetoothTactor_UDP.m</file>
       <file>C:\git\minivie\Utilities\computePcaContour.m</file>
       <file>C:\git\minivie\Utilities\distinguishable_colors.m</file>
+      <file>C:\git\minivie\Utilities\distinguishable_colors_file_exchange.m</file>
       <file>C:\git\minivie\Utilities\extract_mpl_percepts_v2.m</file>
       <file>C:\git\minivie\Utilities\feature_extract.m</file>
       <file>C:\git\minivie\Utilities\getIntent.m</file>
@@ -225,7 +257,6 @@ Revisions:
       <file>C:\git\minivie\Utilities\JoyMEX.mexw64</file>
       <file>C:\git\minivie\Utilities\JoyMexClass.m</file>
       <file>C:\git\minivie\Utilities\LinAlg.m</file>
-      <file>C:\git\minivie\Utilities\lspb.m</file>
       <file>C:\git\minivie\Utilities\PlotUtils.m</file>
       <file>C:\git\minivie\Utilities\pnet.m</file>
       <file>C:\git\minivie\Utilities\pnet.mexw64</file>
@@ -248,8 +279,45 @@ Revisions:
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2016a</root>
-      <toolboxes />
+      <root>C:\Program Files\MATLAB\R2019a</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="gpucoder" />
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="neuralnetwork" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <gpucoder>
+          <enabled>true</enabled>
+        </gpucoder>
+      </toolbox>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <neuralnetwork>
+          <enabled>true</enabled>
+        </neuralnetwork>
+      </toolbox>
     </matlab>
     <platform>
       <unix>false</unix>
@@ -260,7 +328,7 @@ Revisions:
       <vista>false</vista>
       <linux>false</linux>
       <solaris>false</solaris>
-      <osver>6.2</osver>
+      <osver>10.0</osver>
       <os32>false</os32>
       <os64>true</os64>
       <arch>win64</arch>

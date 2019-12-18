@@ -1283,7 +1283,7 @@ if flag == true
     set(gca, 'xtick',1:size(movement_names,1),'XTickLabel', movement_names,...
         'ytick',1:size(movement_names,1),'YTickLabel', movement_names);
     
-    xticklabel_rotate;
+    %xticklabel_rotate;
     xlabel('Predicted Cues from Subject Movements');
     
 else

@@ -142,7 +142,7 @@ classdef MplSink < Common.DataSink
                 % compute minimum time
                 qf = targetPos(i);
                 q0 = jointAngles(i);
-                q = lspb(q0,qf,vMax,tFinal);
+                q = lspb_minivie(q0,qf,vMax,tFinal);
                 qAll(i,:) = q;
             end
             

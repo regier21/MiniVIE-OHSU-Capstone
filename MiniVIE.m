@@ -1145,9 +1145,9 @@ classdef MiniVIE < Common.MiniVieObj
         end
         function cbAbout(obj)
             %% Revision Information
-            verMajor = 1;
-            verMinor = 95;
-            verDate = '10-JUL-2016';
+            verMajor = 2;
+            verMinor = 20;
+            verDate = '18-DEC-2019';
             
             cellMsg = {
                 'MiniVIE'
