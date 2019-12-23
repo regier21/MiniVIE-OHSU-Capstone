@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="1673738745" file="C:\git\minivie\Deploy\MiniVIE.prj" location="C:\git\minivie\Deploy" name="MiniVIE" preferred-package-location="C:\git\minivie\Deploy\MiniVIE\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="377153620" file="C:\git\minivie\Deploy\MiniVIE.prj" location="C:\git\minivie\Deploy" name="MiniVIE" preferred-package-location="C:\git\minivie\Deploy\MiniVIE\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>MiniVIE</param.appname>
     <param.icon>${PROJECT_ROOT}\MiniVIE_resources\icon.ico</param.icon>
     <param.icons>
@@ -48,7 +48,7 @@ Revisions:
     <param.package.mcr>false</param.package.mcr>
     <param.no.mcr>false</param.no.mcr>
     <param.web.mcr.name>MiniVieInstaller_web</param.web.mcr.name>
-    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.package.mcr.name>MiniVieInstaller_mcr</param.package.mcr.name>
     <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
     <param.windows.command.prompt>true</param.windows.command.prompt>
     <param.create.log>true</param.create.log>
@@ -78,7 +78,6 @@ Revisions:
       <param.web.mcr />
       <param.package.mcr />
       <param.no.mcr />
-      <param.package.mcr.name />
       <param.no.mcr.name />
       <param.windows.command.prompt />
       <param.native.matlab />
@@ -211,6 +210,16 @@ Revisions:
       <file>C:\git\minivie\+SignalAnalysis\private\svmtrain.mexw64</file>
       <file>C:\git\minivie\+SignalAnalysis\Svm.m</file>
       <file>C:\git\minivie\+SignalAnalysis\SvmStatTlbx.m</file>
+      <file>C:\git\minivie\ThirdParty\ExportToPPTX\exportToPPTX.m</file>
+      <file>C:\git\minivie\ThirdParty\jsonlab\jsonopt.m</file>
+      <file>C:\git\minivie\ThirdParty\jsonlab\loadjson.m</file>
+      <file>C:\git\minivie\ThirdParty\jsonlab\mergestruct.m</file>
+      <file>C:\git\minivie\ThirdParty\jsonlab\savejson.m</file>
+      <file>C:\git\minivie\ThirdParty\jsonlab\struct2jdata.m</file>
+      <file>C:\git\minivie\ThirdParty\jsonlab\varargin2struct.m</file>
+      <file>C:\git\minivie\ThirdParty\rdir.m</file>
+      <file>C:\git\minivie\ThirdParty\strfndw.m</file>
+      <file>C:\git\minivie\ThirdParty\WinOnTop.m</file>
       <file>C:\git\minivie\Utilities\action_bus_definition.m</file>
       <file>C:\git\minivie\Utilities\action_bus_enum.m</file>
       <file>C:\git\minivie\Utilities\BluetoothTactor.m</file>
@@ -252,18 +261,12 @@ Revisions:
     <matlab>
       <root>C:\Program Files\MATLAB\R2019a</root>
       <toolboxes>
-        <toolbox name="matlabcoder" />
         <toolbox name="embeddedcoder" />
         <toolbox name="gpucoder" />
         <toolbox name="fixedpoint" />
         <toolbox name="matlabhdlcoder" />
         <toolbox name="neuralnetwork" />
       </toolboxes>
-      <toolbox>
-        <matlabcoder>
-          <enabled>true</enabled>
-        </matlabcoder>
-      </toolbox>
       <toolbox>
         <embeddedcoder>
           <enabled>true</enabled>
