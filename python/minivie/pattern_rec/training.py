@@ -165,6 +165,9 @@ class TrainingManagerWebsocket(TrainingInterface):
         server = self.application.listen(port)
         return server
 
+    def get_websocket_count(self):
+        return len(wss)
+
     def add_message_handler(self, func):
         # attach a function to receive commands from websocket
 
