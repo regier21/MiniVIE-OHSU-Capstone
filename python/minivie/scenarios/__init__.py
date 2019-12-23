@@ -118,7 +118,7 @@ class Scenario(object):
         # pause('All', False) Force RESUME
 
         # check if 2 args given (set versus toggle)
-        if state is not None: 
+        if state is not None:
             # need to toggle only if state not already set
             if state is not self.__pause[scope]:
                 # this should only happen once when state is changed
@@ -579,6 +579,12 @@ class Scenario(object):
 
         if self.TrainingInterface is None:
             return
+
+        # check to see if a connection to the gui exists
+        if self.TrainingInterface.get_websocket_count() > 0:
+            logging.info("Connected to GUI")
+        else:
+            logging.info("Not connected to GUI")
 
         # Send new status only once a second based on date string changing
         current_time = time.strftime("%c")
