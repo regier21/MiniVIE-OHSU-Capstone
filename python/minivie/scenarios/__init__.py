@@ -31,6 +31,7 @@ class Scenario(object):
         self.TrainingInterface = None
         self.Plant = None
         self.DataSink = None
+        self.gui_connections = {} # dict keeping track of the GUI connections {websocket (websockethandler) : connection id (int)}
 
         # Debug socket for streaming Features
         # self.DebugSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -580,12 +581,6 @@ class Scenario(object):
         if self.TrainingInterface is None:
             return
 
-        # check to see if a connection to the gui exists
-        if self.TrainingInterface.get_websocket_count() > 0:
-            logging.info("Connected to GUI")
-        else:
-            logging.info("Not connected to GUI")
-
         # Send new status only once a second based on date string changing
         current_time = time.strftime("%c")
         if current_time != self.loop_time:
@@ -599,6 +594,37 @@ class Scenario(object):
 
             # Forward status message (voltage, temp, etc) to mobile app
             self.TrainingInterface.send_message("sys_status", msg)
+
+            # Screen time logging (checking new and closed connections)
+            curr_socks = self.TrainingInterface.get_websockets()
+            for cs in curr_socks:
+                '''
+                if cs in gui_connections, no change - no need to log
+                if cs NOT in gui_connections, new connection
+                '''
+                if self.gui_connections.get(cs) is None:
+                    # New connection, this socket not known last time
+                    # Get new ID for it, increment the highest kept ID by one
+                    if len(self.gui_connections) > 0:
+                        nc_id = 1+max(self.gui_connections.values())
+                    else:
+                        nc_id = 1
+
+                    self.gui_connections[cs] = nc_id
+                    logging.info(f"GUI {nc_id} connected")
+            ended_conns = []
+            # Compare the old GUI connections against the current
+            for gs in self.gui_connections:
+                '''
+                if gs not in curr_socks, connection has been closed
+                '''
+                if not gs in curr_socks:
+                    ended_conns.append(gs)
+                    logging.info(f"GUI {self.gui_connections[gs]} disconnected")
+            # Remove the ended connections from record
+            for e in ended_conns:
+                del self.gui_connections[e]
+
 
         # Send classifier output to mobile app (e.g. Elbow Flexion)
         self.TrainingInterface.send_message("output_class", self.output['decision'])
