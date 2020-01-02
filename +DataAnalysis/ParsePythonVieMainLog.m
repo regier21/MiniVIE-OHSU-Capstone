@@ -307,43 +307,46 @@ classdef ParsePythonVieMainLog < handle
             % Find NFU Heartbeat
             statusId = contains(obj.textLines,'bus_voltage');
             obj.isRead(statusId) = true;
-            statusLines = obj.textLines(statusId)';
             
-            % extract date string
-            C = cellfun(@(x)regexp(x,'.*(?= [NfuUdp)','match'),statusLines);
-            % convert to date number
-            obj.heartbeatMsg.timeStamp = datetime(C,'InputFormat','yyyy-MM-dd HH:mm:ss,SSS');
-            
-            % add date stats
-            obj.firstDatetime = min(obj.heartbeatMsg.timeStamp);
-            obj.lastDatetime = max(obj.heartbeatMsg.timeStamp);
-            obj.elapsedTime = duration(obj.lastDatetime - obj.firstDatetime);
-            
-            % search after "bus_voltage': " for digits.digits
-            C = cellfun(@(x)regexp(x,'(?<=bus_voltage'':\s)\d+.\d+','match'),statusLines);
-            obj.heartbeatMsg.busVoltage = str2double(C);
-            assert(~any(isnan(obj.heartbeatMsg.busVoltage)),'Error parsing bus_voltage, check regexp')
-            
-            % add voltage stats
-            obj.maxVoltage = max(obj.heartbeatMsg.busVoltage);
-            obj.minVoltage = min(obj.heartbeatMsg.busVoltage);
-            
-            % lc_software_state': '        ', 'nfu_ms_per_CMDDOM
-            C = cellfun(@(x)regexp(x,'(?<=lc_software_state'':\s'')\w+','match'),statusLines);
-            obj.heartbeatMsg.lc_software_states = unique(C);
-            obj.heartbeatMsg.lc_software_state = C;
-            
-            C = cellfun(@(x)regexp(x,'(?<=nfu_ms_per_CMDDOM'':\s)\d+.\d+','match'),statusLines);
-            obj.heartbeatMsg.nfu_ms_per_CMDDOM = str2double(C);
-            
-            C = cellfun(@(x)regexp(x,'(?<=nfu_state'':\s'')\w+','match'),statusLines);
-            obj.heartbeatMsg.nfu_state = unique(C);
-            
-            C = cellfun(@(x)regexp(x,'(?<=nfu_ms_per_ACTUATEMPL'':\s)-?\d+.\d+','match'),statusLines);
-            obj.heartbeatMsg.nfu_ms_per_ACTUATEMPL = str2double(C);
-            
-            % ignore messages:
-            obj.isRead(contains(obj.textLines,'shutdown_voltage')) = true;
+            if any(statusId)
+                statusLines = obj.textLines(statusId)';
+                
+                % extract date string
+                C = cellfun(@(x)regexp(x,'.*(?= [NfuUdp)','match'),statusLines);
+                % convert to date number
+                obj.heartbeatMsg.timeStamp = datetime(C,'InputFormat','yyyy-MM-dd HH:mm:ss,SSS');
+                
+                % add date stats
+                obj.firstDatetime = min(obj.heartbeatMsg.timeStamp);
+                obj.lastDatetime = max(obj.heartbeatMsg.timeStamp);
+                obj.elapsedTime = duration(obj.lastDatetime - obj.firstDatetime);
+                
+                % search after "bus_voltage': " for digits.digits
+                C = cellfun(@(x)regexp(x,'(?<=bus_voltage'':\s)\d+.\d+','match'),statusLines);
+                obj.heartbeatMsg.busVoltage = str2double(C);
+                assert(~any(isnan(obj.heartbeatMsg.busVoltage)),'Error parsing bus_voltage, check regexp')
+                
+                % add voltage stats
+                obj.maxVoltage = max(obj.heartbeatMsg.busVoltage);
+                obj.minVoltage = min(obj.heartbeatMsg.busVoltage);
+                
+                % lc_software_state': '        ', 'nfu_ms_per_CMDDOM
+                C = cellfun(@(x)regexp(x,'(?<=lc_software_state'':\s'')\w+','match'),statusLines);
+                obj.heartbeatMsg.lc_software_states = unique(C);
+                obj.heartbeatMsg.lc_software_state = C;
+                
+                C = cellfun(@(x)regexp(x,'(?<=nfu_ms_per_CMDDOM'':\s)\d+.\d+','match'),statusLines);
+                obj.heartbeatMsg.nfu_ms_per_CMDDOM = str2double(C);
+                
+                C = cellfun(@(x)regexp(x,'(?<=nfu_state'':\s'')\w+','match'),statusLines);
+                obj.heartbeatMsg.nfu_state = unique(C);
+                
+                C = cellfun(@(x)regexp(x,'(?<=nfu_ms_per_ACTUATEMPL'':\s)-?\d+.\d+','match'),statusLines);
+                obj.heartbeatMsg.nfu_ms_per_ACTUATEMPL = str2double(C);
+                
+                % ignore messages:
+                obj.isRead(contains(obj.textLines,'shutdown_voltage')) = true;
+            end
             
             %% Print Remaining Lines
             obj.unreadLines = obj.textLines(~obj.isRead)';
