@@ -76,6 +76,10 @@ class Mav(EMGFeatures):
         super(Mav, self).__init__()
 
         self.name = "Mav"
+
+        # For feature computation, use a slice of input data. 
+        # In non-incremental mode, slice is entire passed in input
+        # In incremental mode, only use most recent 'window_slide' samples
         self.slice = 0
 
         self.incremental = incremental
@@ -105,11 +109,22 @@ class Mav(EMGFeatures):
 
 
 class CurveLen(EMGFeatures):
-    def __init__(self, fs=200):
+    def __init__(self, fs=200, incremental=False, window_size=None, window_slide=None, channels=None):
         super(CurveLen, self).__init__()
 
         self.fs = fs
         self.name = "Curve_len"
+
+        # For feature computation, use a slice of input data. 
+        # In non-incremental mode, slice is entire passed in input
+        # In incremental mode, only use most recent 'window_slide + 1' samples
+        self.slice = 0
+
+        self.incremental = incremental
+        if self.incremental:
+            self.slice = -(window_slide + 1) # +1 from sample difference used in calculation
+            self.scale = 1 / window_size
+            self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
     def get_name(self):
         return self.name
@@ -123,20 +138,38 @@ class CurveLen(EMGFeatures):
         :return: scalar feature value
         """
 
+        data_input = data_input[self.slice:]
+
         # Number of Samples
         n = data_input.shape[0]
 
-        curve_len_feature = np.sum(abs(np.diff(data_input, axis=0)), axis=0) * self.fs / n
-        return curve_len_feature
+        curve_len_feature = np.sum(abs(np.diff(data_input, axis=0)), axis=0) * self.fs
+
+        if self.incremental:
+            return self.inc_feature.update(curve_len_feature * self.scale)
+
+        return curve_len_feature / n
 
 
 class Zc(EMGFeatures):
-    def __init__(self, fs=200, zc_thresh=0.05):
+    def __init__(self, fs=200, zc_thresh=0.05, cross_val=0.0, incremental=False, window_size=None, window_slide=None, channels=None):
         super(Zc, self).__init__()
 
         self.fs = fs
         self.zc_thresh = zc_thresh
+        self.cross_val = cross_val
         self.name = "Zc"
+
+        # For feature computation, use a slice of input data. 
+        # In non-incremental mode, slice is entire passed in input
+        # In incremental mode, only use most recent 'window_slide + 1' samples
+        self.slice = 0
+
+        self.incremental = incremental
+        if self.incremental:
+            self.slice = -(window_slide + 1) # +1 from sample difference used in calculation
+            self.scale = 1 / window_size
+            self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
     def get_name(self):
         return self.name
@@ -153,27 +186,42 @@ class Zc(EMGFeatures):
         :param data_input: input samples to compute feature
         :return: scalar feature value
         """
+
+        data_input = data_input[self.slice:]
+
         # Number of Samples
         n = data_input.shape[0]
 
-        # Value to compute 'zero-crossing' around
-        t = 0.0
-
         zc_feature = np.sum(
-            ((data_input[0:n - 1, :] - t > 0) & (data_input[1:n, :] - t < 0) |
-             (data_input[0:n - 1, :] - t < 0) & (data_input[1:n, :] - t > 0)) &
-            (abs(data_input[0:n - 1, :] - t - data_input[1:n, :] - t) > self.zc_thresh),
-            axis=0) * self.fs / n
-        return zc_feature
+            ((data_input[0:n - 1, :] > self.cross_val) & (data_input[1:n, :] < self.cross_val) |
+             (data_input[0:n - 1, :] < self.cross_val) & (data_input[1:n, :] > self.cross_val)) &
+            (abs(np.diff(data_input, axis=0)) > self.zc_thresh),
+            axis=0) * self.fs
+
+        if self.incremental:
+            return self.inc_feature.update(zc_feature * self.scale)
+
+        return zc_feature / n
 
 
 class Ssc(EMGFeatures):
-    def __init__(self, fs=200, ssc_thresh=0.15):
+    def __init__(self, fs=200, ssc_thresh=0.15, incremental=False, window_size=None, window_slide=None, channels=None):
         super(Ssc, self).__init__()
 
         self.fs = fs
         self.ssc_thresh = ssc_thresh
         self.name = "Ssc"
+
+        # For feature computation, use a slice of input data. 
+        # In non-incremental mode, slice is entire passed in input
+        # In incremental mode, only use most recent 'window_slide + 2' samples
+        self.slice = 0
+
+        self.incremental = incremental
+        if self.incremental:
+            self.slice = -(window_slide + 2) # +2 from double difference used in calculation
+            self.scale = 1 / window_size
+            self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
     def get_name(self):
         return self.name
@@ -195,6 +243,9 @@ class Ssc(EMGFeatures):
         :param data_input: input samples to compute feature
         :return: scalar feature value
         """
+
+        data_input = data_input[self.slice:]
+
         # Number of Samples
         n = data_input.shape[0]
 
@@ -203,8 +254,12 @@ class Ssc(EMGFeatures):
              (data_input[1:n - 1, :] < data_input[0:n - 2, :]) & (data_input[1:n - 1, :] < data_input[2:n, :])) &
             ((abs(data_input[1:n - 1, :] - data_input[2:n, :]) > self.ssc_thresh) |
              (abs(data_input[1:n - 1, :] - data_input[0:n - 2, :]) > self.ssc_thresh)), axis=0
-        ) * self.fs / n
-        return ssc_feature
+        ) * self.fs
+
+        if self.incremental:
+            return self.inc_feature.update(ssc_feature * self.scale)
+
+        return ssc_feature / n
 
 
 class Wamp(EMGFeatures):

@@ -182,8 +182,8 @@ def test_feature_extract():
     print('Testing Feature extraction')
     print([cls.__name__ for cls in features.EMGFeatures.__subclasses__()])
 
-    sample_rate = 2000
-    window_slide_s = .02
+    sample_rate = 200
+    window_slide_s = .2
     window_slide_samples = math.floor(sample_rate * window_slide_s)
     slides_per_window = 10
     num_samples = math.floor(window_slide_samples * slides_per_window)
