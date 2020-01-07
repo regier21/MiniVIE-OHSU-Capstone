@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 import math
 from spectrum import aryule
+from collections import deque
 
 
 # Abstract base class
@@ -19,6 +20,55 @@ class EMGFeatures(object):
     @abstractmethod
     def extract_features(self, data_input):
         pass
+
+
+class IncrementalFeature(object):
+    """
+    Helper class for computing (linear) features incrementally.
+    Maintains a cache of feature increments and a running total of the feature. 
+    """
+
+    def __init__(self, window_size, window_slide, channels):
+        """ Constructor
+
+        Initializes cache and feature total.
+        window_size must be an integer multiple of window_slide to ensure
+        proper cache operation (i.e. collection of all samples computed in cache
+        equals the collection of samples that would be in a single window)
+
+        :param window_size: size of feature window, in samples
+        :param window_slide: size of feature slide, in samples
+        :param channels: number of channels computed for feature
+        :raises ValueError: checks if window_slide is a factor of window_size
+        """
+
+        if window_size % window_slide != 0:
+            raise ValueError('window_size must be an integer multiple of window_slide')
+
+        self.channels = channels
+        self.cache_length = window_size // window_slide
+        self.cache = deque(np.zeros(self.channels) for i in range(self.cache_length))
+        self.feature = np.zeros(self.channels)
+
+    def update(self, increment):
+        """ Update running total for feature
+
+        Add newest increment, subtract oldest, update cache
+
+        :param increment: feature increment to add to total and cache
+        :return: running total feature value
+        """
+        self.feature += (increment - self.cache.popleft())
+        self.cache.append(increment)
+        return self.feature
+
+    def clear(self):
+        """ Reset increment cache and feature value to 0 
+
+        :return: none
+        """
+        self.feature = np.zeros(self.channels)
+        self.cache = deque(np.zeros(self.channels) for i in range(self.cache_length))
 
 
 class Mav(EMGFeatures):
