@@ -72,10 +72,17 @@ class IncrementalFeature(object):
 
 
 class Mav(EMGFeatures):
-    def __init__(self):
+    def __init__(self, incremental=False, window_size=None, window_slide=None, channels=None):
         super(Mav, self).__init__()
 
         self.name = "Mav"
+        self.slice = 0
+
+        self.incremental = incremental
+        if self.incremental:
+            self.slice = -window_slide
+            self.scale = window_slide / window_size
+            self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
     def get_name(self):
         return self.name
@@ -89,7 +96,11 @@ class Mav(EMGFeatures):
         :return: scalar feature value
         """
 
-        mav_feature = np.mean(abs(data_input), 0)
+        mav_feature = np.mean(abs(data_input[self.slice:]), 0)
+
+        if self.incremental:
+            return self.inc_feature.update(mav_feature * self.scale)
+
         return mav_feature
 
 
