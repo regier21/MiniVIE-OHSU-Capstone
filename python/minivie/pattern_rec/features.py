@@ -178,7 +178,7 @@ class Zc(EMGFeatures):
         """ Zero-crossings
         Criteria for crossing zero
         zeroCross=(y[iSample] - t > 0 and y[iSample + 1] - t < 0) or (y[iSample] - t < 0 and y[iSample + 1] - t > 0)
-        overThreshold=abs(y[iSample] - t - y[iSample + 1] - t) > zc_thresh
+        overThreshold=abs(y[iSample] - y[iSample + 1]) > zc_thresh
         if zeroCross and overThreshold:
             # Count a zero cross
             zc[iChannel]=zc[iChannel] + 1
