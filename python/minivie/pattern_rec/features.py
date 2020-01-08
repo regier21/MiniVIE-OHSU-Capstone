@@ -80,11 +80,11 @@ class Mav(EMGFeatures):
         # For feature computation, use a slice of input data. 
         # In non-incremental mode, slice is entire passed in input
         # In incremental mode, only use most recent 'window_slide' samples
-        self.slice = 0
+        self.slice = None
 
         self.incremental = incremental
         if self.incremental:
-            self.slice = -window_slide
+            self.slice = window_slide
             self.scale = window_slide / window_size
             self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
@@ -100,7 +100,7 @@ class Mav(EMGFeatures):
         :return: scalar feature value
         """
 
-        mav_feature = np.mean(abs(data_input[self.slice:]), 0)
+        mav_feature = np.mean(abs(data_input[:self.slice]), 0)
 
         if self.incremental:
             return self.inc_feature.update(mav_feature * self.scale)
@@ -118,11 +118,11 @@ class CurveLen(EMGFeatures):
         # For feature computation, use a slice of input data. 
         # In non-incremental mode, slice is entire passed in input
         # In incremental mode, only use most recent 'window_slide + 1' samples
-        self.slice = 0
+        self.slice = None
 
         self.incremental = incremental
         if self.incremental:
-            self.slice = -(window_slide + 1) # +1 from sample difference used in calculation
+            self.slice = window_slide + 1 # +1 from sample difference used in calculation
             self.scale = 1 / window_size
             self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
@@ -138,7 +138,7 @@ class CurveLen(EMGFeatures):
         :return: scalar feature value
         """
 
-        data_input = data_input[self.slice:]
+        data_input = data_input[:self.slice]
 
         # Number of Samples
         n = data_input.shape[0]
@@ -163,11 +163,11 @@ class Zc(EMGFeatures):
         # For feature computation, use a slice of input data. 
         # In non-incremental mode, slice is entire passed in input
         # In incremental mode, only use most recent 'window_slide + 1' samples
-        self.slice = 0
+        self.slice = None
 
         self.incremental = incremental
         if self.incremental:
-            self.slice = -(window_slide + 1) # +1 from sample difference used in calculation
+            self.slice = window_slide + 1 # +1 from sample difference used in calculation
             self.scale = 1 / window_size
             self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
@@ -187,7 +187,7 @@ class Zc(EMGFeatures):
         :return: scalar feature value
         """
 
-        data_input = data_input[self.slice:]
+        data_input = data_input[:self.slice]
 
         # Number of Samples
         n = data_input.shape[0]
@@ -215,11 +215,11 @@ class Ssc(EMGFeatures):
         # For feature computation, use a slice of input data. 
         # In non-incremental mode, slice is entire passed in input
         # In incremental mode, only use most recent 'window_slide + 2' samples
-        self.slice = 0
+        self.slice = None
 
         self.incremental = incremental
         if self.incremental:
-            self.slice = -(window_slide + 2) # +2 from double difference used in calculation
+            self.slice = window_slide + 2 # +2 from double difference used in calculation
             self.scale = 1 / window_size
             self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
@@ -244,7 +244,7 @@ class Ssc(EMGFeatures):
         :return: scalar feature value
         """
 
-        data_input = data_input[self.slice:]
+        data_input = data_input[:self.slice]
 
         # Number of Samples
         n = data_input.shape[0]
