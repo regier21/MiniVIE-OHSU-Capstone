@@ -61,9 +61,8 @@ class FeatureExtract(object):
             # input is a data source so call it's get_data method
 
             # Get features from emg data
-            f = np.array([])
-            for s in data_input:
-                f = np.append(f, self.feature_extract(s.get_data()*0.01))
+            data = np.concatenate([s.get_data() for s in data_input], axis=1)
+            f = self.feature_extract(data * 0.01)
 
             imu = np.array([])
             for s in data_input:
@@ -222,7 +221,7 @@ def test_feature_extract():
             print(f'Feature Class: {cls.__name__}Inc  Feature Name: {feature.get_name()}  Time to complete: {py_time:.5f})')
             feature.inc_feature.clear()
             for i in range(slides_per_window):
-                feature_val = fe.feature_extract(emg_buffer[:((i + 1) * window_slide_samples)])
+                feature_val = fe.feature_extract(emg_buffer[-((i + 1) * window_slide_samples):])
             print(feature_val)
 
         except TypeError:
