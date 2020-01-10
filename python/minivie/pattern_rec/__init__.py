@@ -62,7 +62,7 @@ class FeatureExtract(object):
 
             # Get features from emg data
             data = np.concatenate([s.get_data() for s in data_input], axis=1)
-            f = self.feature_extract(data * 0.01)
+            f = np.squeeze(self.feature_extract(data * 0.01))
 
             imu = np.array([])
             for s in data_input:
