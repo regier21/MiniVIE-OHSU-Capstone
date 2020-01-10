@@ -129,6 +129,42 @@ If installing on a new windows build and you don't have other IDE preferences:
 
 ## Style and Programming Best Practices
 
+
+### Myo Data Input
+
+The myo interface is a little different on each system:
+
+Windows:
+============
+Use the Thalmic Labs Native Myo Connect Armband Manager to connect to one armband at a time.
+Use "\git\minivie\+Inputs\MyoUdp.exe" as a bridge between Bluetooth and streaming UDP that the minivie picks up.
+
+Mac:
+============
+Use the Thalmic Labs Native Myo Connect Armband Manager to connect to one armband at a time.
+Use "\git\minivie\+Inputs\MyoUdp-Mac.zip"
+
+Linux:
+============
+Since linux support direct comms with the myoband via the bluez library, we can connect the armband without any of the thalmic tools, and unlock some cool features like increased streaming rates and disabling sleep mode
+Native linux tools like:
+> hcitool dev
+> hcitool –lescan 
+are useful for ensuring your Bluetooth device is recognized and the armbands are found
+
+> /usr/bin/python3.7 -u -m inputs.myo_server -x vmpl_user_config.xml
+This starts the myo armband server, looking for the AMC addresses specified in the xml file under
+<add key="MyoUdpServer.mac_address_1"    value="xx:xx:xx:xx:xx:xx"/>
+
+
+Note: 
+============
+
+In any of these you can use the little GUI here to visualize the stream:
+"\git\minivie\python\minivie\gui\test_live_plot.py"
+
+
+
 ### UDP
 
 Many of the modules communicate via UDP.  UDP is chosen because it is a lightweight communications protocol suitable for real-time control. The
