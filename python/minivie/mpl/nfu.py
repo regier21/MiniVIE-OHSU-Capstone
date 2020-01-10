@@ -554,7 +554,7 @@ def main():
     Run NFU interface as standalone test function
     """
 
-    # Establish network inferface to MPL at address below
+    # Establish network interface to MPL at address below
     # h = NfuUdp(Hostname="192.168.1.111")
     h = NfuUdp(hostname="localhost")
     h.connect()
