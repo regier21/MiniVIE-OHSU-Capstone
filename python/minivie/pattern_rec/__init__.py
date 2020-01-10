@@ -232,17 +232,17 @@ class Classifier:
         """
 
         if self.TrainingData.num_samples == 0:
-            print('No Data')
+            logging.info('No Data')
             self.classifier = None
             return
             # raise ValueError('Training Data or Class array(s) is empty. Did you forget to save training data?')
 
         f_ = np.array(self.TrainingData.data)
-        print(f_)
+        logging.info(f_)
         y = np.array(self.TrainingData.id)
-        print('Training data Numpy arrays')
-        print('shape of X: ' + str(f_.shape))
-        print('shape of y: ' + str(y.shape))
+        logging.info('Training data Numpy arrays')
+        logging.info('shape of X: ' + str(f_.shape))
+        logging.info('shape of y: ' + str(y.shape))
 
         # self.classifier = QuadraticDiscriminantAnalysis()
         self.classifier = LinearDiscriminantAnalysis()
@@ -376,7 +376,7 @@ class TrainingData:
             self.motion_names = tuple(list(self.motion_names) + [new_class])
             return True
         else:
-            print('Error, "' + new_class + '" already contained in class list.')
+            logging.info('Error, "' + new_class + '" already contained in class list.')
             return False
         
     def add_data(self, data_, id_, name_, imu_=-1):
@@ -413,17 +413,17 @@ class TrainingData:
         # time_stamp, name, id, data, imu
 
         if not os.path.isfile(self.filename + self.file_ext):
-            print('File Not Found: ' + self.filename + self.file_ext)
+            logging.info('File Not Found: ' + self.filename + self.file_ext)
             return
 
         if not os.access(self.filename + self.file_ext, os.R_OK):
-            print('File Not Readable: ' + self.filename + self.file_ext)
+            logging.info('File Not Readable: ' + self.filename + self.file_ext)
             return
 
         try:
             h5 = h5py.File(self.filename + self.file_ext, 'r')
         except IOError:
-            print('Error Loading file: ' + self.filename + self.file_ext)
+            logging.info('Error Loading file: ' + self.filename + self.file_ext)
             return
 
         # Extract info from hdf5, but don't update object until we verify it's OK data
@@ -455,11 +455,11 @@ class TrainingData:
 
     def file_saved(self):
         if not os.path.isfile(self.filename + self.file_ext):
-            print('File Not Found: ' + self.filename + self.file_ext)
+            logging.info('File Not Found: ' + self.filename + self.file_ext)
             return False
 
         if not os.access(self.filename + self.file_ext, os.R_OK):
-            print('File Not Readable: ' + self.filename + self.file_ext)
+            logging.info('File Not Readable: ' + self.filename + self.file_ext)
             return False
             
         return True
@@ -481,17 +481,17 @@ class TrainingData:
         group.create_dataset('imu', data=self.imu)
         group.create_dataset('motion_names', data=[a.encode('utf8') for a in self.motion_names])  # utf-8
         h5.close()
-        print('Saved ' + self.filename)
+        logging.info('Saved ' + self.filename)
 
     def copy(self):
         # if a training file exists, copy it to a datestamped name
 
         if not os.path.isfile(self.filename + self.file_ext):
-            print('File Not Found: ' + self.filename + self.file_ext)
+            logging.info('File Not Found: ' + self.filename + self.file_ext)
             return
 
         if not os.access(self.filename + self.file_ext, os.R_OK):
-            print('File Not Readable: ' + self.filename + self.file_ext)
+            logging.info('File Not Readable: ' + self.filename + self.file_ext)
             return
 
         t = dt.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -500,25 +500,25 @@ class TrainingData:
         try:
             copyfile(src_, dst_)
         except IOError:
-            print('Failed to create file backup')
+            logging.info('Failed to create file backup')
 
     def delete(self):
         # if a training file exists, delete it
 
         f = self.filename + self.file_ext
         if not os.path.isfile(f):
-            print('File Not Found: ' + f)
+            logging.info('File Not Found: ' + f)
             return
 
         if not os.access(f, os.R_OK):
-            print('File Not Readable: ' + f)
+            logging.info('File Not Readable: ' + f)
             return
 
         try:
             os.remove(f)
-            print('Deleted ' + self.filename)
+            logging.info('Deleted ' + self.filename)
         except IOError:
-            print('Failed to delete file: ' + f)
+            logging.info('Failed to delete file: ' + f)
 
     def get_motion_image(self, motion_name):
         # Method to return motion image filename relative to www/mplHome directory
@@ -527,7 +527,7 @@ class TrainingData:
         try:
             self.motion_names.index(motion_name)
         except ValueError:
-            print('Motion name ' + motion_name + ' does not exist')
+            logging.info('Motion name ' + motion_name + ' does not exist')
             return None
 
         # Parse motion name - image map file
@@ -543,7 +543,7 @@ class TrainingData:
 
         # Check if queried motion name is in map file
         if motion_name not in mapped_motion_names:
-            print('Motion name ' + motion_name + ' does not have associated image file')
+            logging.info('Motion name ' + motion_name + ' does not have associated image file')
             return None
 
         # Pull mapped image name corresponding to motion name
