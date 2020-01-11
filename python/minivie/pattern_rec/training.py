@@ -141,6 +141,8 @@ class TrainingManagerWebsocket(TrainingInterface):
     """
 
     def __init__(self):
+        import threading
+
         # Initialize superclass
         super(TrainingInterface, self).__init__()
 
@@ -159,11 +161,13 @@ class TrainingManagerWebsocket(TrainingInterface):
         # keep count of skipped messages so we can send at some nominal rate
         self.msg_skip_count = 0
 
-        self.thread = tornado.ioloop.IOLoop.instance
+        # self.thread = tornado.ioloop.IOLoop.instance  # used this version for asyncio implementation
+
+        self.thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
 
     def setup(self, port=9090):
-        server = self.application.listen(port)
-        return server
+        self.application.listen(port)
+        self.thread.start()
 
     def get_websocket_count(self):
         return len(wss)

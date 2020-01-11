@@ -702,7 +702,7 @@ class MplScenario(Scenario):
             port = get_config_var('MobileApp.port', 9090)
             self.TrainingInterface = training.TrainingManagerWebsocket()
             self.TrainingInterface.setup(port)
-            print(f'Starting webserver at http://localhost:{port}')
+            print(f'Started webserver at http://localhost:{port}')
 
         elif server_type == 'Spacebrew':
             self.TrainingInterface = training.TrainingManagerSpacebrew()

@@ -75,12 +75,7 @@ def main():
     vie.setup_interfaces()  # setup web-app and user assessment functions
     vie.setup_load_cell()   # setup interface
 
-    # Run the VIE system
-    loop = asyncio.get_event_loop()
-    loop.create_task(vie.run())
-    if vie.futures is not None:
-        loop.run_until_complete(vie.futures())
-    loop.run_forever()
+    vie.run()
 
 
 if __name__ == '__main__':
