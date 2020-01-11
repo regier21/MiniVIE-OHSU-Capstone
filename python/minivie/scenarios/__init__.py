@@ -773,7 +773,7 @@ class MplScenario(Scenario):
         ################################################
         self.FeatureExtract = pr.FeatureExtract()
         select_features = features_selected.FeaturesSelected(self.FeatureExtract)
-        select_features.create_instance_list()
+        select_features.create_instance_list(self.num_channels)
 
         # Classifier parameters
         self.SignalClassifier = pr.Classifier(self.TrainingData)

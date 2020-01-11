@@ -61,9 +61,8 @@ class FeatureExtract(object):
             # input is a data source so call it's get_data method
 
             # Get features from emg data
-            f = np.array([])
-            for s in data_input:
-                f = np.append(f, self.feature_extract(s.get_data()*0.01))
+            data = np.concatenate([s.get_data() for s in data_input], axis=1)
+            f = self.feature_extract(data * 0.01)
 
             imu = np.array([])
             for s in data_input:
@@ -183,11 +182,13 @@ def test_feature_extract():
     print([cls.__name__ for cls in features.EMGFeatures.__subclasses__()])
 
     sample_rate = 200
-    duration = 0.25
-    num_samples = math.floor(sample_rate*duration)
+    window_slide_s = .2
+    window_slide_samples = math.floor(sample_rate * window_slide_s)
+    slides_per_window = 10
+    num_samples = math.floor(window_slide_samples * slides_per_window)
     num_channels = 8
     emg_buffer = np.zeros((num_samples, num_channels))
-    t = np.linspace(0, duration, num=num_samples)
+    t = np.linspace(0, window_slide_s * slides_per_window, num=num_samples)
 
     # add various sine wave shapes
     for i in range(num_channels):
@@ -196,6 +197,7 @@ def test_feature_extract():
         phase = i
         offset = 0
         emg_buffer[:, i] = amplitude * np.sin(2 * math.pi * frequency * (t + phase)) + offset
+    incremental_buffer = emg_buffer[:(2*window_slide_samples)]
 
     fe = FeatureExtract()
 
@@ -208,6 +210,22 @@ def test_feature_extract():
         print('*************')
         print(f'Feature Class: {cls.__name__}  Feature Name: {feature.get_name()}  Time to complete: {py_time:.5f})')
         print(fe.feature_extract(emg_buffer))
+
+        try:
+            fe = FeatureExtract()
+            feature = cls(incremental=True, window_size=num_samples, window_slide=window_slide_samples, channels=num_channels)
+            fe.attach_feature(feature)
+            py_time = timeit.timeit(lambda: fe.feature_extract(incremental_buffer), number=1000)
+
+            print('*************')
+            print(f'Feature Class: {cls.__name__}Inc  Feature Name: {feature.get_name()}  Time to complete: {py_time:.5f})')
+            feature.inc_feature.clear()
+            for i in range(slides_per_window):
+                feature_val = fe.feature_extract(emg_buffer[-((i + 1) * window_slide_samples):])
+            print(feature_val)
+
+        except TypeError:
+            pass
 
     # separate the signals for visual reference  and save plot
     for i in range(num_channels):
