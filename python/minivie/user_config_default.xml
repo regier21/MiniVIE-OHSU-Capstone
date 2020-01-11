@@ -27,7 +27,7 @@
     <add key="MobileApp.port"           value="9090"/>
     <add key="MobileApp.homepage"       value="index.html"/>
     <add key="MobileApp.path"           value="../www/mplHome"/>
-    <add key="MobileApp.server_type"      value="Tornado"/>    <!-- [Tornado | Spacebrew | None] -->
+    <add key="MobileApp.server_type"      value="Tornado"/>    <!-- [Tornado | None] -->
 
     <!--Specify the timestep in seconds -->
     <add key="timestep"         value="0.02"/>

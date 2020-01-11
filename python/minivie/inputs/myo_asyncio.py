@@ -120,7 +120,6 @@ that is buffered in the private variables.
 contributor: W. Haris
 """
 
-from __future__ import with_statement  # 2.5 only
 import struct
 import numpy as np
 import logging
@@ -142,7 +141,7 @@ MYOHW_GYROSCOPE_SCALE = 16.0
 
 
 class UdpProtocol(asyncio.DatagramProtocol):
-    """ Extend the UDP Protocol for unity data communication
+    """ Extend the UDP Protocol for myo data communication
 
     """
     def __init__(self, parent):

@@ -21,6 +21,7 @@ Revisions:
 2016OCT05 Armiger: Created
 2017SEP29 Armiger: Added input arguments so that a user config file can be added for different setups
 2019JAN19 Armiger: Added asyncio event loop
+2020JAN19 Armiger: Adjusted timing for embedded system
 
 See docs/README.md for more info and version information
 
@@ -37,7 +38,7 @@ MIN_PYTHON = (3, 6)
 if sys.version_info < MIN_PYTHON:
     sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 
 def main():
@@ -56,15 +57,13 @@ def main():
                         default=logging.INFO, help="Set the logging level")
     args = parser.parse_args()
 
-    if args.XML == 'VERSION':
-        print(__version__)
-        return 0
-
     # read the user parameter (xml) file
     user_config.read_user_config_file(file=args.XML)
 
     # Setup logging.  This will create a log file like: USER_2016-02-11_11-28-21.log to which all 'logging' calls go
     user_config.setup_file_logging(log_level=args.logLevel)
+
+    logging.critical(f'VIE SW Version = {__version__}')
 
     # Setup Default MPL scenario
     # A Scenario is the fundamental building blocks of the VIE: Inputs, Signal Analysis, System Plant, and Output Sink
@@ -75,7 +74,7 @@ def main():
     vie.setup_interfaces()  # setup web-app and user assessment functions
     vie.setup_load_cell()   # setup interface
 
-    vie.run()
+    vie.run()  # start the main VIE loop
 
 
 if __name__ == '__main__':

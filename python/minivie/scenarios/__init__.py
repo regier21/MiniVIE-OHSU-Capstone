@@ -704,10 +704,6 @@ class MplScenario(Scenario):
             self.TrainingInterface.setup(port)
             print(f'Started webserver at http://localhost:{port}')
 
-        elif server_type == 'Spacebrew':
-            self.TrainingInterface = training.TrainingManagerSpacebrew()
-            self.TrainingInterface.setup()
-
         # Assign modules to the app for assessments and rotational corrections
         if self.TrainingInterface is not None:
             # Setup Assessments
