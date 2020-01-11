@@ -118,7 +118,10 @@ class MotionTester(AssessmentInterface):
                 if self.task is not None:
                     self.cancel_task()
             else:
-                logging.info('Unknown motion tester command: ' + cmd_data)
+                # It's ok to have commands that don't match here.  another callback might use them
+                # logging.info('Unknown motion tester command: ' + cmd_data)
+                pass
+
 
     def cancel_task(self):
         """
@@ -435,7 +438,9 @@ class TargetAchievementControl(AssessmentInterface):
                 if self.task is not None:
                     self.cancel_task()
             else:
-                logging.info('Unknown TAC command: ' + cmd_data)
+                # It's ok to have commands that don't match here.  another callback might use them
+                # logging.info('Unknown TAC command: ' + cmd_data)
+                pass
 
     def cancel_task(self):
         """

@@ -357,6 +357,7 @@ function setupCallbacks() {
   $('#precisionMode').on("change", function() { this.checked === true ? sendCmd("Cmd:PrecisionModeOn") : sendCmd("Cmd:PrecisionModeOff"); });
   $('#pauseAll').on("change", function() { this.checked === true ? sendCmd("Cmd:PauseAllOn") : sendCmd("Cmd:PauseAllOff"); });
   $('#pauseHand').on("change", function() { this.checked === true ? sendCmd("Cmd:PauseHandOn") : sendCmd("Cmd:PauseHandOff"); });
+  $('#pauseWristFE').on("change", function() { this.checked === true ? sendCmd("Cmd:PauseWristFEOn") : sendCmd("Cmd:PauseWristFEOff"); });
 
   // Create slider based switch listeners:
   $('#resetTorque').on("change", function() { this.value === "On" ? sendCmd("Cmd:ResetTorqueOn") : sendCmd("Cmd:ResetTorqueOff"); });

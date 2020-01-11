@@ -57,7 +57,7 @@ class Scenario(object):
         self.output = None  # Will contain latest status message
 
         # User should access values through the is_paused method
-        self.__pause = {'All': False, 'Arm': False, 'Hand': False}
+        self.__pause = {'All': False, 'Arm': False, 'Hand': False, 'WristFE': False}
 
         # When set, this bypasses the classifier and add data methods to only send joint commands
         self.manual_override = False
@@ -398,6 +398,10 @@ class Scenario(object):
                 self.pause('Hand', True)
             elif cmd_data == 'PauseHandOff':
                 self.pause('Hand', False)
+            elif cmd_data == 'PauseWristFEOn':
+                self.pause('WristFE', True)
+            elif cmd_data == 'PauseWristFEOff':
+                self.pause('WristFE', False)
 
             else:
                 # It's ok to have commands that don't match here.  another callback might use them
@@ -529,6 +533,7 @@ class Scenario(object):
         # get decision name
         class_decision = self.TrainingData.motion_names[decision_id]
         self.output['decision'] = class_decision
+        logging.info(f'Class Decision: {class_decision}')
 
         # parse decision type as arm, grasp, etc
         class_info = controls.plant.class_map(class_decision)
@@ -556,6 +561,10 @@ class Scenario(object):
         if not class_info['IsGrasp'] and not pause_arm:
             # the motion class is an arm movement
             self.Plant.set_joint_velocity(class_info['JointId'], class_info['Direction'] * self.gain_value)
+
+        if self.is_paused('WristFE'):
+            # force velocity to zero if paused
+            self.Plant.set_joint_velocity(mpl.JointEnum.WRIST_FE, 0.0)
 
         # Automatically open hand if auto open set and no movement class
         if self.TrainingData.motion_names[decision_id] == 'No Movement' and self.auto_open:
