@@ -727,7 +727,7 @@ class MplScenario(Scenario):
             DataSink - output destination of command signals (e.g. real or virtual arm)
         """
         # from inputs import myo
-        from inputs import myo_asyncio as myo
+        from inputs import myo  # Note that myo_async causes timing issue on DART
         import pattern_rec as pr
         # from mpl.unity import UnityUdp
         from mpl.unity_asyncio import UnityUdp
