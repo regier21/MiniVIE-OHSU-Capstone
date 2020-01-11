@@ -122,7 +122,7 @@ class CurveLen(EMGFeatures):
 
         self.incremental = incremental
         if self.incremental:
-            self.slice = window_slide + 1 # +1 from sample difference used in calculation
+            self.slice = window_slide + 1  # +1 from sample difference used in calculation
             self.scale = 1 / window_size
             self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
@@ -167,7 +167,7 @@ class Zc(EMGFeatures):
 
         self.incremental = incremental
         if self.incremental:
-            self.slice = window_slide + 1 # +1 from sample difference used in calculation
+            self.slice = window_slide + 1  # +1 from sample difference used in calculation
             self.scale = 1 / window_size
             self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 
@@ -219,7 +219,7 @@ class Ssc(EMGFeatures):
 
         self.incremental = incremental
         if self.incremental:
-            self.slice = window_slide + 2 # +2 from double difference used in calculation
+            self.slice = window_slide + 2  # +2 from double difference used in calculation
             self.scale = 1 / window_size
             self.inc_feature = IncrementalFeature(window_size, window_slide, channels)
 

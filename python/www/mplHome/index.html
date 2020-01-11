@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>MPL Mobile Trainer</title>
+    <!--    Note this title block gets overwritten -->
+    <!--    <title>MPL Mobile Trainer</title>-->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" name="viewport">
     <link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="jquery.mobile/jquery.mobile-1.4.5.min.css" rel="stylesheet">
@@ -110,7 +111,7 @@
 <div data-role="page" id="ID_MAIN_PAGE">
     <!-- /header -->
     <div data-role="header" data-theme="b">
-        <h1>MPL Mobile Trainer</h1>
+        <h1>MPL Mobile Trainer v2.2</h1>
     </div>
     <div data-role="content">
         <!-- Speed Settings Dropdown -->
@@ -185,17 +186,17 @@
             </div>
         </div>
         <!-- Training and Motion Selection Section -->
-        <p>Selected Motion: <span id="msg_train"></span>
-        </p>
         <div class="blueimp-gallery blueimp-gallery-controls blueimp-gallery-carousel" id="blueimp-image-carousel">
             <div class="slides"></div>
             <h3 class="title"></h3>
             <a class="prev">‹</a>
             <a class="next">›</a>
         </div>
+        <p>Selected Motion: <span id="msg_train"></span>
+        </p>
         <!-- Training Switch -->
         <div class="ui-field-contain">
-            <label for="trainSwitch">Add_Data:</label>
+            <label for="trainSwitch">Add Data:</label>
             <input data-role="flipswitch" id="trainSwitch" type="checkbox"/>
         </div>
         <!-- Training Buttons -->

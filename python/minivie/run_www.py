@@ -38,7 +38,7 @@ MIN_PYTHON = (3, 6)
 if sys.version_info < MIN_PYTHON:
     sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"  # Synch with version number in index.html <h1>MPL Mobile Trainer v2.2</h1>
 
 
 def main():

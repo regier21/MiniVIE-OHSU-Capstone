@@ -52,10 +52,10 @@
     <add key="FeatureExtract.sample_rate" value="200"/>
 
     <!-- Incremental Feature Extraction Enables -->
-    <add key="FeatureExtract.incremental_mav" value="False"/>
-    <add key="FeatureExtract.incremental_curve_len" value="False"/>
-    <add key="FeatureExtract.incremental_zc" value="False"/>
-    <add key="FeatureExtract.incremental_ssc" value="False"/>
+    <add key="FeatureExtract.incremental_mav" value="True"/>
+    <add key="FeatureExtract.incremental_curve_len" value="True"/>
+    <add key="FeatureExtract.incremental_zc" value="True"/>
+    <add key="FeatureExtract.incremental_ssc" value="True"/>
 
     <!-- Feature Extraction Techniques
         Use this to set what feature extraction techniques will be used-->
