@@ -848,7 +848,7 @@ class MplScenario(Scenario):
                 log = logging.getLogger()
                 log.exception('Error from DCELL:')
 
-    async def run(self):
+    def run(self):
         """
             Main function that involves setting up devices,
             looping at a fixed time interval, and performing cleanup
@@ -878,7 +878,7 @@ class MplScenario(Scenario):
             # if self.TrainingInterface is not None:
             #     self.TrainingInterface.send_message("sys_status", 'Waiting for valid percepts...')
 
-            await self.DataSink.wait_for_connection()
+            self.DataSink.wait_for_connection()
             # Synchronize joint positions
             for i in range(0, len(self.Plant.joint_position)):
                 self.Plant.joint_position[i] = self.DataSink.position['last_percept'][i]
@@ -896,11 +896,11 @@ class MplScenario(Scenario):
                 time_elapsed = time_end - time_begin
                 self.loop_dt_last = time_elapsed
                 if dt > time_elapsed:
-                    # time.sleep(dt - time_elapsed)
-                    await asyncio.sleep(dt - time_elapsed)
+                    time.sleep(dt - time_elapsed)
+                    # await asyncio.sleep(dt - time_elapsed)
                 else:
-                    # print("Timing Overload: {}".format(time_elapsed))
-                    await asyncio.sleep(0.001)
+                    logging.warning("Timing Overload: {}".format(time_elapsed))
+                    # await asyncio.sleep(0.001)
                     pass
 
                 # print('{0} dt={1:6.3f}'.format(output['decision'],time_elapsed))
