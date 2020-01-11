@@ -1,3 +1,6 @@
+// ===========================
+// NOTE contents of this file should be minified in the production server *mplHome.min.js
+// ===========================
 // mplHome.js contains all the javascript for messaging between the mobile app webpage and the MPL Python VIE
 // This script file should be used in conjunction with either websocketSpacebrew or websocketNative for low-level messaging
 //
@@ -5,6 +8,8 @@
 //  28DEC2017 Armiger - Created initial revision and removed prior spacebrew implementation
 //  24FEB2018 Armiger - Modularized for either spacebrew or direct websockets
 //  27MAR2018 Armiger - Added CSV parsing as basic source of info for classes
+//  11JAN2020 Armiger - Added pause Wrist FE command
+
 
 // Load the class motion map info as CSV and store as global to generate images and UI buttons
 var global_motion_class_data = [];

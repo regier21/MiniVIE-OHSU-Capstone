@@ -53,6 +53,7 @@ class Scenario(object):
 
         # Create a buffer for storing recent class decisions for majority voting
         self.decision_buffer = deque([], get_user_config_var('PatternRec.num_majority_votes', 25))
+        self.last_decision = None
 
         self.output = None  # Will contain latest status message
 
@@ -533,7 +534,10 @@ class Scenario(object):
         # get decision name
         class_decision = self.TrainingData.motion_names[decision_id]
         self.output['decision'] = class_decision
-        logging.info(f'Class Decision: {class_decision}')
+
+        if class_decision != self.last_decision:
+            logging.info(f'New Class Decision: {class_decision}')
+            self.last_decision = class_decision
 
         # parse decision type as arm, grasp, etc
         class_info = controls.plant.class_map(class_decision)
