@@ -13,7 +13,8 @@ from utilities import user_config
 import time
 import numpy as np
 import pattern_rec as pr
-from mpl.open_nfu import NfuUdp
+from mpl.open_nfu_sink import NfuSink
+import threading
 
 user_config.setup_file_logging(prefix='MPL_')
 
@@ -21,11 +22,14 @@ user_config.setup_file_logging(prefix='MPL_')
 vie = mpl_nfu.setup()
 vie.DataSink.close()
 # Replace sink with actual arm
-hSink = NfuUdp(hostname="127.0.0.1", udp_telem_port=9028, udp_command_port=9027)
-#t = threading.Thread(name='MPLNFU', target=connection_manager, args=(hSink,))
-#t.setDaemon(True)
-#t.start()
-hSink.connect()
+hSink = NfuSink()
+hSink.mpl_connection_check = True
+hSink.connect(local_address='//0.0.0.0:9028', remote_address='//127.0.0.1:9027')
+
+# start network services
+thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
+thread.start()
+
 vie.DataSink = hSink
 
 

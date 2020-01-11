@@ -123,14 +123,15 @@ class UnityUdp(DataSink):
         self.transport, self.protocol = self.loop.run_until_complete(listen)
         pass
 
-    async def wait_for_connection(self):
+    def wait_for_connection(self):
         # After connecting, this function can be used as a blocking call to ensure the desired percepts are received
         # before continuing program execution.  E.g. ensure valid joint percepts are received to ensure smooth start
 
         print('Checking for valid percepts...')
 
         while self.position['last_percept'] is None or self.get_packet_data_rate() == 0:
-            await asyncio.sleep(timestep)
+            # await asyncio.sleep(timestep)
+            time.sleep(timestep)
             print('Waiting 20 ms for valid percepts...')
             self.get_packet_data_rate()
             logging.info('Waiting 20 ms for valid percepts...')
@@ -266,7 +267,7 @@ class UnityUdp(DataSink):
         self.transport.close()
 
 
-async def run_loop(sender):
+async def test_loop(sender):
     # test asyncio loop commands
     # create a positive / negative ramp to command the arm
 
@@ -295,15 +296,20 @@ async def run_loop(sender):
 
 
 def main():
+    # main function serves as a simple test for verifying module functionality
+    #
+    # start the vMPL unity environment
+    # from the command line, run the module as follows:
+    # c:\git\minivie\python\minivie> py -m mpl.unity_asyncio
+    #
+    # Last tested 12/13/2019
 
     # create socket
-    vie = UnityUdp(local_address='//0.0.0.0:25001', remote_address='//127.0.0.1:25000')
-
+    sink = UnityUdp(local_address='//0.0.0.0:25001', remote_address='//127.0.0.1:25000')
+    sink.connect()
     loop = asyncio.get_event_loop()
-    loop.create_task(run_loop(vie))
+    loop.create_task(test_loop(sink))
     loop.run_forever()
-
-    pass
 
 
 if __name__ == '__main__':

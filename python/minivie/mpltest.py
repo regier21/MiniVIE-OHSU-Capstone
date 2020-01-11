@@ -12,9 +12,11 @@ import time
 import numpy as np
 from builtins import input
 import logging
+import threading
+import tornado.ioloop
 
 import utilities.sys_cmd
-from mpl.open_nfu import NfuUdp
+from mpl.open_nfu_sink import NfuSink
 # from mpl.unity import UnityUdp
 import mpl.roc as roc
 
@@ -46,7 +48,8 @@ AA = -0.3
 EL = 0
 armTestStart = [0, AA, 0, EL, 0, 0, 0]
 
-udp_params = dict(hostname="192.168.7.2", udp_telem_port=9028, udp_command_port=9027)
+#udp_params = dict(hostname="192.168.7.2", udp_telem_port=9028, udp_command_port=9027)
+udp_params = dict(hostname="localhost", udp_telem_port=9028, udp_command_port=9027)
 
 # Take action as per selected menu-option #
 if choice == 0:
@@ -65,9 +68,13 @@ if choice == 1:
 elif choice == 2:
     print("Starting MPL Wrist...")
     # hSink = UnityUdp()  commands on cmd_port, telem 9028
-    hSink = NfuUdp(**udp_params)
+    hSink = NfuSink()
     hSink.mpl_connection_check = True
-    hSink.connect()
+    hSink.connect(local_address='//0.0.0.0:9028', remote_address='//127.0.0.1:9027')
+
+    # start network services
+    thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
+    thread.start()
 
     hSink.send_joint_angles([0, AA, 0, EL, -0.7, -0.5, -0.5])
     time.sleep(1.0)
@@ -82,8 +89,13 @@ elif choice == 2:
 elif choice == 3:
     print("Starting MPL Grasps...")
     # hSink = UnityUdp()
-    hSink = NfuUdp(**udp_params)
-    hSink.connect()
+    hSink = NfuSink()
+    hSink.mpl_connection_check = True
+    hSink.connect(local_address='//0.0.0.0:9028', remote_address='//127.0.0.1:9027')
+
+    # start network services
+    thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
+    thread.start()
 
     # Read ROC Table
     filename = "../../WrRocDefaults.xml"
@@ -111,9 +123,14 @@ elif choice == 3:
 
 elif choice == 4:
     logging.basicConfig(level=logging.INFO)
-    hSink = NfuUdp(**udp_params)
+    hSink = NfuSink()
     hSink.mpl_connection_check = True
-    hSink.connect()
+    hSink.connect(local_address='//0.0.0.0:9028', remote_address='//127.0.0.1:9027')
+
+    # start network services
+    thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
+    thread.start()
+
     while True:
         try:
             print(hSink.get_status_msg())

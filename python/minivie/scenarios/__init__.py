@@ -9,7 +9,7 @@ import mpl
 import controls.plant
 from inputs import daqEMGDevice
 from pattern_rec import features_selected
-from utilities.user_config import get_user_config_var as get_config_var
+from utilities.user_config import get_user_config_var
 
 
 class Scenario(object):
@@ -52,7 +52,7 @@ class Scenario(object):
         self.auto_open = False  # Automatically open hand if in rest state
 
         # Create a buffer for storing recent class decisions for majority voting
-        self.decision_buffer = deque([], get_config_var('PatternRec.num_majority_votes', 25))
+        self.decision_buffer = deque([], get_user_config_var('PatternRec.num_majority_votes', 25))
 
         self.output = None  # Will contain latest status message
 
@@ -67,15 +67,15 @@ class Scenario(object):
 
         # Control gains and speeds for precision control mode
         self.precision_mode = False
-        self.gain_value = get_config_var('MPL.ArmSpeedDefault', 1.4)
+        self.gain_value = get_user_config_var('MPL.ArmSpeedDefault', 1.4)
         self.gain_value_last = self.gain_value
-        self.gain_value_precision = get_config_var('MPL.ArmSpeedPrecision', 0.2)
-        self.hand_gain_value = get_config_var('MPL.HandSpeedDefault', 1.2)
+        self.gain_value_precision = get_user_config_var('MPL.ArmSpeedPrecision', 0.2)
+        self.hand_gain_value = get_user_config_var('MPL.HandSpeedDefault', 1.2)
         self.hand_gain_value_last = self.hand_gain_value
-        self.hand_gain_value_precision = get_config_var('MPL.HandSpeedPrecision', 0.15)
+        self.hand_gain_value_precision = get_user_config_var('MPL.HandSpeedPrecision', 0.15)
 
         # Motion Tracking parameters
-        self.motion_track_enable = get_config_var('MotionTrack.enable', False)
+        self.motion_track_enable = get_user_config_var('MotionTrack.enable', False)
 
         # Futures for event loop
         self.futures = None
@@ -136,18 +136,18 @@ class Scenario(object):
     def gain(self, factor):
         # Increase the speed of the arm and apply max / min constraints
         self.gain_value *= factor
-        if self.gain_value < get_config_var('MPL.ArmSpeedMin', 0.1):
-            self.gain_value = get_config_var('MPL.ArmSpeedMin', 0.1)
-        if self.gain_value > get_config_var('MPL.ArmSpeedMax', 5):
-            self.gain_value = get_config_var('MPL.ArmSpeedMax', 5)
+        if self.gain_value < get_user_config_var('MPL.ArmSpeedMin', 0.1):
+            self.gain_value = get_user_config_var('MPL.ArmSpeedMin', 0.1)
+        if self.gain_value > get_user_config_var('MPL.ArmSpeedMax', 5):
+            self.gain_value = get_user_config_var('MPL.ArmSpeedMax', 5)
 
     def hand_gain(self, factor):
         # Increase the speed of the hand and apply max / min constraints
         self.hand_gain_value *= factor
-        if self.hand_gain_value < get_config_var('MPL.HandSpeedMin', 0.1):
-            self.hand_gain_value = get_config_var('MPL.HandSpeedMin', 0.1)
-        if self.hand_gain_value > get_config_var('MPL.HandSpeedMax', 5):
-            self.hand_gain_value = get_config_var('MPL.HandSpeedMax', 5)
+        if self.hand_gain_value < get_user_config_var('MPL.HandSpeedMin', 0.1):
+            self.hand_gain_value = get_user_config_var('MPL.HandSpeedMin', 0.1)
+        if self.hand_gain_value > get_user_config_var('MPL.HandSpeedMax', 5):
+            self.hand_gain_value = get_user_config_var('MPL.HandSpeedMax', 5)
 
     def command_string(self, value):
         """
@@ -318,14 +318,14 @@ class Scenario(object):
                 logging.info('Received Myo 1 Shutdown Command')
                 import socket
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                addr = utilities.get_address(get_config_var('MyoUdpClient.remote_address_1', '//127.0.0.1:16001'))
+                addr = utilities.get_address(get_user_config_var('MyoUdpClient.remote_address_1', '//127.0.0.1:16001'))
                 sock.sendto(bytearray([1]), addr)
                 sock.close()
             elif cmd_data == 'ShutdownMyo2':
                 logging.info('Received Myo 2 Shutdown Command')
                 import socket
                 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                addr = utilities.get_address(get_config_var('MyoUdpClient.remote_address_2', '//127.0.0.1:16001'))
+                addr = utilities.get_address(get_user_config_var('MyoUdpClient.remote_address_2', '//127.0.0.1:16001'))
                 sock.sendto(bytearray([1]), addr)
                 sock.close()
             elif cmd_data == 'ChangeMyoSet1':
@@ -384,7 +384,7 @@ class Scenario(object):
                 # Then set plant position to percept position
 
                 # synchronize the data sink with the plant model
-                if get_config_var('MPL.connection_check', 1):
+                if get_user_config_var('MPL.connection_check', 1):
                     time.sleep(0.1)
                     self.DataSink.wait_for_connection()
                 # Synchronize joint positions
@@ -473,20 +473,20 @@ class Scenario(object):
                 # self.Plant.joint_velocity[mpl.JointEnum.MIDDLE_MCP] = self.Plant.grasp_velocity
                 self.DataSink.send_joint_angles(self.Plant.joint_position, self.Plant.joint_velocity)
 
-                # Adding a hidden feature here to (re-send) commands to the ghost arms while manual control is on.
-                # At some point this should be on a Unity-specific configuration page
-                # send some default config parameters on setup for ghost arms (turn them off)
-                enable = get_config_var('UnityUdp.ghost_default_enable', 0.0)
-                color = get_config_var('UnityUdp.ghost_default_color', (0.3, 0.4, 0.5))
-                alpha = get_config_var('UnityUdp.ghost_default_alpha', 0.8)
-                # TODO: this is a hard-coding to force the arms off on startup.  not ideal...
-                self.DataSink.config_port = 27000
-                self.DataSink.send_config_command(enable, color, alpha)
-                self.DataSink.config_port = 27100
-                self.DataSink.send_config_command(enable, color, alpha)
+                # # Adding a hidden feature here to (re-send) commands to the ghost arms while manual control is on.
+                # # At some point this should be on a Unity-specific configuration page
+                # # send some default config parameters on setup for ghost arms (turn them off)
+                # enable = get_user_config_var('UnityUdp.ghost_default_enable', 0.0)
+                # color = get_user_config_var('UnityUdp.ghost_default_color', (0.3, 0.4, 0.5))
+                # alpha = get_user_config_var('UnityUdp.ghost_default_alpha', 0.8)
+                # # TODO: this is a hard-coding to force the arms off on startup.  not ideal...
+                # self.DataSink.config_port = 27000
+                # self.DataSink.send_config_command(enable, color, alpha)
+                # self.DataSink.config_port = 27100
+                # self.DataSink.send_config_command(enable, color, alpha)
                 # Now read the user parameter for which arm the user wants to control
-                self.DataSink.command_port = get_config_var('UnityUdp.ghost_command_port', 25010)
-                self.DataSink.config_port = get_config_var('UnityUdp.ghost_config_port', 27000)
+                # self.DataSink.command_port = get_user_config_var('UnityUdp.ghost_command_port', 25010)
+                # self.DataSink.config_port = get_user_config_var('UnityUdp.ghost_config_port', 27000)
 
             return
 
@@ -697,9 +697,9 @@ class MplScenario(Scenario):
         from inputs import normalization
 
         # Setup web/websocket interface
-        server_type = get_config_var('MobileApp.server_type', 'None')
+        server_type = get_user_config_var('MobileApp.server_type', 'None')
         if server_type == 'Tornado':
-            port = get_config_var('MobileApp.port', 9090)
+            port = get_user_config_var('MobileApp.port', 9090)
             self.TrainingInterface = training.TrainingManagerWebsocket()
             self.TrainingInterface.setup(port)
             print(f'Started webserver at http://localhost:{port}')
@@ -731,32 +731,31 @@ class MplScenario(Scenario):
         import pattern_rec as pr
         # from mpl.unity import UnityUdp
         from mpl.unity_asyncio import UnityUdp
-        from mpl.open_nfu import NfuUdp
         from controls.plant import Plant
 
         ################################################
         # Configure Inputs
         ################################################
         source_list = None
-        input_device = get_config_var('input_device', 'myo')
+        input_device = get_user_config_var('input_device', 'myo')
         if input_device == 'myo':
-            if get_config_var('MyoUdpClient.num_devices', 1) == 1:
-                local_port_1 = get_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
+            if get_user_config_var('MyoUdpClient.num_devices', 1) == 1:
+                local_port_1 = get_user_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
                 source_list = [myo.MyoUdp(source=local_port_1)]
-            elif get_config_var('MyoUdpClient.num_devices', 1) == 2:
+            elif get_user_config_var('MyoUdpClient.num_devices', 1) == 2:
                 # Dual Armband Case
-                local_port_1 = get_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
-                local_port_2 = get_config_var('MyoUdpClient.local_address_2', '//0.0.0.0:15002')
+                local_port_1 = get_user_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
+                local_port_2 = get_user_config_var('MyoUdpClient.local_address_2', '//0.0.0.0:15002')
                 source_list = [myo.MyoUdp(source=local_port_1), myo.MyoUdp(source=local_port_2)]
             self.attach_source(source_list)
         elif input_device == 'daq':
-            src = daqEMGDevice.DaqEMGDevice(get_config_var('DaqDevice.device_name_and_channels', 'Dev1/ai0:7'))
+            src = daqEMGDevice.DaqEMGDevice(get_user_config_var('DaqDevice.device_name_and_channels', 'Dev1/ai0:7'))
 
             self.attach_source([src])
         elif input_device == 'ctrl':
             from inputs import emg_device_client
-            ws_address = get_config_var('EmgDevice.ws_address', 'ws://localhost:5678')
-            buffer_len = get_config_var('EmgDevice.buffer_len', 200)
+            ws_address = get_user_config_var('EmgDevice.ws_address', 'ws://localhost:5678')
+            buffer_len = get_user_config_var('EmgDevice.buffer_len', 200)
             src = emg_device_client.EmgSocket(source=ws_address, num_samples=buffer_len)
             self.SignalSource = [src]
             self.num_channels += src.num_channels
@@ -784,8 +783,8 @@ class MplScenario(Scenario):
         # Configure 'Plant' model to hold system state
         ################################################
         # Plant maintains current limb state (positions) during velocity control
-        filename = get_config_var('MPL.roc_table', '../../WrRocDefaults.xml')
-        dt = get_config_var('timestep', 0.02)
+        filename = get_user_config_var('MPL.roc_table', '../../WrRocDefaults.xml')
+        dt = get_user_config_var('timestep', 0.02)
         self.Plant = Plant(dt, filename)
 
         ################################################
@@ -793,30 +792,28 @@ class MplScenario(Scenario):
         ################################################
         # Sink is the output to outside world (in this case to VIE)
         # For MPL, this might be: real MPL/NFU, Virtual Arm, etc.
-        data_sink = get_config_var('DataSink', 'Unity')
+        data_sink = get_user_config_var('DataSink', 'Unity')
         if data_sink in ['Unity', 'UnityUdp']:
             # The main output is to unity here, however output also supports additional 'ghost' limb control
-            local_address = get_config_var('UnityUdp.local_address', '//0.0.0.0:25001')
-            remote_address = get_config_var('UnityUdp.remote_address', '//127.0.0.1:25000')
+            local_address = get_user_config_var('UnityUdp.local_address', '//0.0.0.0:25001')
+            remote_address = get_user_config_var('UnityUdp.remote_address', '//127.0.0.1:25000')
             sink = UnityUdp(local_address=local_address, remote_address=remote_address)
             sink.connect()
             # send some default config parameters on setup for ghost arms (turn them off)
-            enable = get_config_var('UnityUdp.ghost_default_enable', 0.0)
-            color = get_config_var('UnityUdp.ghost_default_color', (0.3, 0.4, 0.5))
-            alpha = get_config_var('UnityUdp.ghost_default_alpha', 0.8)
+            enable = get_user_config_var('UnityUdp.ghost_default_enable', 0.0)
+            color = get_user_config_var('UnityUdp.ghost_default_color', (0.3, 0.4, 0.5))
+            alpha = get_user_config_var('UnityUdp.ghost_default_alpha', 0.8)
             # TODO: this is a hard-coding to force the arms off on startup.  not ideal...
             sink.config_port = 27000
             sink.send_config_command(enable, color, alpha)
             sink.config_port = 27100
             sink.send_config_command(enable, color, alpha)
             # Now read the user parameter for which arm the user wants to control
-            sink.command_port = get_config_var('UnityUdp.ghost_command_port', 25010)
-            sink.config_port = get_config_var('UnityUdp.ghost_config_port', 27000)
+            sink.command_port = get_user_config_var('UnityUdp.ghost_command_port', 25010)
+            sink.config_port = get_user_config_var('UnityUdp.ghost_config_port', 27000)
         elif data_sink == 'NfuUdp':
-            get_address = utilities.get_address
-            local_hostname, local_port = get_address(get_config_var('NfuUdp.local_address', '//0.0.0.0:9028'))
-            remote_hostname, remote_port = get_address(get_config_var('NfuUdp.remote_address', '//127.0.0.1:9027'))
-            sink = NfuUdp(hostname=remote_hostname, udp_telem_port=local_port, udp_command_port=remote_port)
+            import mpl.open_nfu_sink
+            sink = mpl.open_nfu_sink.NfuSink()
             sink.connect()
         else:
             import sys
@@ -831,9 +828,9 @@ class MplScenario(Scenario):
         from inputs import dcell
 
         # Setup Additional Logging
-        if get_config_var('DCell.enable', 0):
+        if get_user_config_var('DCell.enable', 0):
             # Start DCell Streaming
-            port = get_config_var('DCell.serial_port', '/dev/ttymxc2')
+            port = get_user_config_var('DCell.serial_port', '/dev/ttymxc2')
             dc = dcell.DCellSerial(port)
             # Connect and start streaming
             dc.enable_data_logging = True
@@ -868,7 +865,7 @@ class MplScenario(Scenario):
         print(dt)
 
         # synchronize the data sink with the plant model
-        if get_config_var('MPL.connection_check', 1):
+        if get_user_config_var('MPL.connection_check', 1):
 
             # TODO: Give some kind of system status that we are waiting for limb connection
             # if self.TrainingInterface is not None:

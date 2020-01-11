@@ -24,7 +24,6 @@ class DataSink(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        self.active_connection = False  # marked for removal.  only used by NfuUdp
 
         # store the last known limb position; None indicates no valid percepts received
         self.position = {'last_percept': None, 'home': [0.0] * Mpl.NUM_JOINTS, 'park': [0.0] * Mpl.NUM_JOINTS}

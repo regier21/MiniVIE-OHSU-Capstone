@@ -10,13 +10,15 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib import style
 import numpy as np
+import threading
+import tornado.ioloop
 
 # Ensure that the minivie specific modules can be found on path allowing execution from the 'inputs' folder
 import os
 if os.path.split(os.getcwd())[1] == 'gui':
     import sys
     sys.path.insert(0, os.path.abspath('..'))
-from mpl import open_nfu
+from mpl import open_nfu_sink
 from mpl import JointEnum as MplId
 
 
@@ -26,14 +28,21 @@ num_samples = 50
 class DataBuffer(object):
     def __init__(self):
         self.data_buffer = np.zeros((num_samples, 27))
+
     def add_data(self, d):
         self.data_buffer = np.roll(self.data_buffer, 1, axis=0)
         self.data_buffer[:1][:] = d
 
 
 # Setup Data Source
-m = open_nfu.NfuUdp()
+m = open_nfu_sink.NfuSink()
+m.mpl_connection_check = True
 m.connect()
+
+# start network services
+thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
+thread.start()
+
 m.wait_for_connection()
 
 buff = DataBuffer()
@@ -60,6 +69,7 @@ for legline, origline in zip(leg.get_lines(), lines):
         legline.set_alpha(1.0)
     else:
         legline.set_alpha(0.2)
+
 
 def onpick(event):
     print('got event')
