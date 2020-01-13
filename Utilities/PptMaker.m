@@ -22,7 +22,7 @@ classdef PptMaker < handle
             
             % Add title slide
             exportToPPTX('new','Title',obj.Title, ...
-                'Author',obj.Author);
+                'Author',obj.Author,'Dimensions',[13.333 7.5]);
             exportToPPTX('addslide');
             if iscell(obj.SubTitle)
                 subTitle = obj.SubTitle(:);
@@ -60,7 +60,7 @@ classdef PptMaker < handle
                 exportToPPTX('addpicture',hFig,'Scale','maxfixed');
                 
                 if obj.EnableTOC
-                    exportToPPTX('addtext','Table of Contents','Position',[1 7.25 8 0.25],...
+                    exportToPPTX('addtext','Table of Contents','Position',[0 7.25 13.33 0.2],...
                         'OnClick',2,'HorizontalAlignment','center','FontSize',10);
                 end
             end
