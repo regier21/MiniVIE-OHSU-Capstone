@@ -511,6 +511,9 @@ class Scenario(object):
 
         # save out training data if auto_save is on, data just finished being added
         if self.auto_save and self.add_data_last and not self.add_data:
+            if get_user_config_var('PatternRec.auto_backup', 0):
+                # create data copies of in progress data for detailed logging
+                self.TrainingData.copy()
             self.TrainingData.delete()  # Lets delete so we have a clean file to write to
             self.TrainingData.save()
         # track previous add_data state

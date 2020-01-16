@@ -45,6 +45,8 @@
     <add key="DCell.serial_port"    value="/dev/ttymxc2"/>
 
     <!--Pattern Recognition Parameters-->
+    <add key="PatternRec.auto_save" value="1"/>
+    <add key="PatternRec.auto_backup" value="0"/>
     <add key="PatternRec.num_majority_votes" value="5"/>
     <add key="FeatureExtract.zc_threshold" value="0.2"/>
     <add key="FeatureExtract.ssc_threshold" value="0.2"/>
