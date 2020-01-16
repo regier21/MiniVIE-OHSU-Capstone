@@ -165,10 +165,10 @@ class NfuSink(DataSink):
             logging.warning('MPL Connection is closed; not sending joint angles.')
             return
 
-        if len(values) == controls.NUM_UPPER_ARM_JOINTS:
+        if len(values) == mpl.NUM_UPPER_ARM_JOINTS:
             # append hand angles
             # TODO: consider keeping hand in current position
-            values = np.append(values, controls.NUM_HAND_JOINTS * [0.0])
+            values = np.append(values, mpl.NUM_HAND_JOINTS * [0.0])
 
         if velocity is None:
             velocity = [0.0] * mpl.JointEnum.NUM_JOINTS

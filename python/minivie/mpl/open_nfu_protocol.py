@@ -219,7 +219,7 @@ def encode_impedance_reset(position, velocity):
     @return: Python string of encoded bytes
     """
 
-    magic_impedance = [40.0] * controls.NUM_UPPER_ARM_JOINTS + [15.6288] * controls.NUM_HAND_JOINTS
+    magic_impedance = [40.0] * mpl.NUM_UPPER_ARM_JOINTS + [15.6288] * mpl.NUM_HAND_JOINTS
     return encode_position_velocity_impedance_command(position, velocity, magic_impedance)
 
 
