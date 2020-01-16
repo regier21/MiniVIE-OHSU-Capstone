@@ -1,5 +1,5 @@
 import keyboard
-from utilities import Udp
+from utilities.udp_comms import Udp
 from mpl import JointEnum
 
 # Simple program to control keyboard with PythonVIE and Myo bands

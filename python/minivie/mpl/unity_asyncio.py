@@ -49,7 +49,6 @@ from mpl.data_sink import DataSink
 from utilities.user_config import get_user_config_var
 from utilities import get_address
 from mpl.unity import extract_percepts
-from controls import timestep
 
 
 class UdpProtocol(asyncio.DatagramProtocol):
@@ -123,18 +122,8 @@ class UnityUdp(DataSink):
         self.transport, self.protocol = self.loop.run_until_complete(listen)
         pass
 
-    def wait_for_connection(self):
-        # After connecting, this function can be used as a blocking call to ensure the desired percepts are received
-        # before continuing program execution.  E.g. ensure valid joint percepts are received to ensure smooth start
-
-        print('Checking for valid percepts...')
-
-        while self.position['last_percept'] is None or self.get_packet_data_rate() == 0:
-            # await asyncio.sleep(timestep)
-            time.sleep(timestep)
-            print('Waiting 20 ms for valid percepts...')
-            self.get_packet_data_rate()
-            logging.info('Waiting 20 ms for valid percepts...')
+    def data_received(self):
+        return self.position['last_percept'] is not None and self.get_packet_data_rate() > 0
 
     def get_status_msg(self):
         """

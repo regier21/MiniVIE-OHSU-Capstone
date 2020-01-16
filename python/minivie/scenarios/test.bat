@@ -1,1 +1,0 @@
-python MyoUDPTrainer.py -t 100 -p -1 -e UnityTrainer

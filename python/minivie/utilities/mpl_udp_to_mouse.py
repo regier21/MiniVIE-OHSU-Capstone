@@ -1,6 +1,6 @@
 import keyboard
 import mouse
-from utilities import Udp
+from utilities.udp_comms import Udp
 from mpl import JointEnum
 
 # Simple program to control mouse movements with PythonVIE and Myo bands

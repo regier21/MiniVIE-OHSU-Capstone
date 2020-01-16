@@ -34,17 +34,6 @@ class DataSink(object):
         for i in range(Mpl.NUM_JOINTS):
             self.position['home'][i] = np.deg2rad(uc.get_user_config_var(Mpl(i).name + '_POS_HOME', 0.0))
 
-    def wait_for_connection(self):
-        # After connecting, this function can be used as a blocking call to ensure the desired percepts are received
-        # before continuing program execution.  E.g. ensure valid joint percepts are received to ensure smooth start
-
-        print('Checking for valid percepts...')
-
-        while self.position['last_percept'] is None:
-            time.sleep(controls.timestep)
-            print('Waiting 20 ms for valid percepts...')
-            logging.info('Waiting 20 ms for valid percepts...')
-
     def goto_smooth(self, new_position):
         # Smoothly move to a new position
 
@@ -79,6 +68,16 @@ class DataSink(object):
     # All methods with this decorator must be overloaded
     @abstractmethod
     def connect(self):
+        pass
+
+    @abstractmethod
+    def data_received(self):
+        """
+        After connecting, this function can be used to flag when percepts are received
+        E.g. ensure valid joint percepts are received to ensure smooth start
+
+        @return:
+        """
         pass
 
     @abstractmethod

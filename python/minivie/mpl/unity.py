@@ -66,7 +66,7 @@ import logging
 import numpy as np
 from mpl import JointEnum as MplId
 from mpl.data_sink import DataSink
-from utilities import Udp
+from utilities.udp_comms import Udp
 from utilities.user_config import get_user_config_var
 
 
