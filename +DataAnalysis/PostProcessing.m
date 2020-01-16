@@ -44,9 +44,12 @@ classdef PostProcessing
                 
                 f.Name = fullfile(lastFolder,fname);
                 
-                if hData(i).SampleCount > 0
-                    [~] = hData(i).plot_features_sorted_class(); % output arg disables image export
+                if hData(i).SampleCount == 0
+                    warning('No Data in %s',hData(i).fullFileName)
+                    continue
                 end
+
+                [~] = hData(i).plot_features_sorted_class(); % output arg disables image export
                 
                 drawnow
                 
