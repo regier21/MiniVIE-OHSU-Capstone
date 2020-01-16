@@ -65,8 +65,7 @@ print('Current path: ' + os.path.split(os.getcwd())[1])
 from pattern_rec import TrainingData, FeatureExtract, Classifier
 
 from inputs.myo import MyoUdp
-from controls.plant import Plant
-from pattern_rec.commands import class_map
+from controls.plant import Plant, class_map
 
 from mpl.unity import UnityUdp
 

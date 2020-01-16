@@ -8,7 +8,7 @@ import h5py
 import datetime as dtime
 from mpl import JointEnum as MplId
 import random
-from pattern_rec.commands import class_map
+from controls.plant import class_map
 from abc import ABCMeta, abstractmethod
 import os.path
 
