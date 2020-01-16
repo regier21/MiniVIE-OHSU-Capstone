@@ -406,7 +406,8 @@ class MplScenario(object):
             DataSink - output destination of command signals (e.g. real or virtual arm)
         """
         # from inputs import myo
-        from inputs import myo  # Note that myo_async causes timing issue on DART
+        # from inputs import myo  # Note that myo_async causes timing issue on DART
+        from inputs.myo import myo_client
         import pattern_rec as pr
         # from mpl.unity import UnityUdp
         from mpl.unity_asyncio import UnityUdp
@@ -421,12 +422,12 @@ class MplScenario(object):
         if input_device == 'myo':
             if get_user_config_var('MyoUdpClient.num_devices', 1) == 1:
                 local_port_1 = get_user_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
-                source_list = [myo.MyoUdp(source=local_port_1)]
+                source_list = [myo_client.MyoUdp(source=local_port_1)]
             elif get_user_config_var('MyoUdpClient.num_devices', 1) == 2:
                 # Dual Armband Case
                 local_port_1 = get_user_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
                 local_port_2 = get_user_config_var('MyoUdpClient.local_address_2', '//0.0.0.0:15002')
-                source_list = [myo.MyoUdp(source=local_port_1), myo.MyoUdp(source=local_port_2)]
+                source_list = [myo_client.MyoUdp(source=local_port_1), myo_client.MyoUdp(source=local_port_2)]
             self.attach_source(source_list)
         elif input_device == 'daq':
             from inputs import daqEMGDevice

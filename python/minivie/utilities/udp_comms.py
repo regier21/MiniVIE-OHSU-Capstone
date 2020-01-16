@@ -90,6 +90,9 @@ class Udp(threading.Thread):
 
                 self.packet_count += 1
 
+                # Execute the callback function assigned to self.onmessage
+                self.onmessage(data_bytes)
+
             except socket.timeout:
                 # the data stream has stopped.  don't break the thread, just continue to wait
                 self.is_data_received = False
@@ -104,9 +107,6 @@ class Udp(threading.Thread):
                 # break so that the thread can terminate
                 self.run_control = False
                 break
-
-            # Execute the callback function assigned to self.onmessage
-            self.onmessage(data_bytes)
 
     def send(self, msg_bytes, address=None):
         """
