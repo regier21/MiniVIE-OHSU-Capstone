@@ -2,6 +2,8 @@ import logging
 import time
 import numpy as np
 from collections import Counter, deque
+
+import pattern_rec.commands
 import utilities
 import utilities.user_config
 import utilities.sys_cmd
@@ -426,7 +428,7 @@ class Scenario(object):
                 return
 
             # parse manual command type as arm, grasp, etc
-            class_info = controls.plant.class_map(cmd_data)
+            class_info = pattern_rec.commands.class_map(cmd_data)
 
             if class_info['IsGrasp']:
                 # the motion class is either a grasp type or hand open
@@ -540,7 +542,7 @@ class Scenario(object):
             self.last_decision = class_decision
 
         # parse decision type as arm, grasp, etc
-        class_info = controls.plant.class_map(class_decision)
+        class_info = pattern_rec.commands.class_map(class_decision)
 
         # Set joint velocities
         self.Plant.new_step()

@@ -13,7 +13,8 @@ import time
 import numpy as np
 
 from inputs.myo import MyoUdp
-from controls.plant import Plant, class_map
+from controls.plant import Plant
+from pattern_rec.commands import class_map
 from mpl.unity import UnityUdp
 from pattern_rec import training, feature_extract
 
