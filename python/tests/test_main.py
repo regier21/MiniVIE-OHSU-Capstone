@@ -11,6 +11,8 @@ import logging
 import sys
 import time
 # Need both these lines to allow double click in windows
+import pattern_rec.feature_extract
+
 sys.path.insert(0, os.path.abspath('../minivie'))
 os.chdir('../minivie')  # change directory so xml files can be found as expected
 
@@ -25,7 +27,7 @@ from controls import plant
 plant.main()
 
 import pattern_rec
-pattern_rec.test_feature_extract()
+pattern_rec.feature_extract.test_feature_extract()
 
 from mpl import roc
 roc.main()

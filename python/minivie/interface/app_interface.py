@@ -13,7 +13,7 @@ minivie.
 from abc import ABCMeta, abstractmethod
 
 
-class TrainingInterface(object):
+class AppInterface(object):
     __metaclass__ = ABCMeta
 
     def __init__(self):

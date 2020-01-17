@@ -13,6 +13,9 @@ import numpy as np
 
 # Ensure that the minivie specific modules can be found on path allowing execution from the 'inputs' folder
 import os
+
+import pattern_rec.feature_extract
+
 if os.path.split(os.getcwd())[1] == 'gui':
     import sys
     sys.path.insert(0, os.path.abspath('..'))
@@ -34,7 +37,7 @@ fig = plt.figure()
 ax1 = fig.add_subplot(1, 1, 1)
 fig.canvas.set_window_title('EMG Preview')
 
-FeatureExtract = pattern_rec.FeatureExtract()
+FeatureExtract = pattern_rec.feature_extract.FeatureExtract()
 select_features = features_selected.FeaturesSelected(FeatureExtract)
 # select_features.create_instance_list()
 

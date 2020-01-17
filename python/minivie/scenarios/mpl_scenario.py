@@ -3,6 +3,9 @@ import time
 import numpy as np
 from collections import Counter, deque
 
+import pattern_rec.classifier
+import pattern_rec.feature_extract
+import pattern_rec.training_data
 import utilities
 import utilities.sys_cmd
 from utilities.user_config import get_user_config_var, read_user_config_file
@@ -447,19 +450,19 @@ class MplScenario(object):
         ################################################
         # Configure Training Data Manager
         ################################################
-        self.TrainingData = pr.TrainingData()
+        self.TrainingData = pattern_rec.training_data.TrainingData()
         self.TrainingData.load()
         self.TrainingData.num_channels = self.num_channels
 
         ################################################
         # Configure Pattern Recognition Classifier and Feature Extraction
         ################################################
-        self.FeatureExtract = pr.FeatureExtract()
+        self.FeatureExtract = pattern_rec.feature_extract.FeatureExtract()
         select_features = features_selected.FeaturesSelected(self.FeatureExtract)
         select_features.create_instance_list(self.num_channels)
 
         # Classifier parameters
-        self.SignalClassifier = pr.Classifier(self.TrainingData)
+        self.SignalClassifier = pattern_rec.classifier.Classifier(self.TrainingData)
         self.SignalClassifier.fit()
 
         ################################################
