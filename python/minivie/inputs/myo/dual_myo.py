@@ -18,7 +18,7 @@ from bluepy.btle import ADDR_TYPE_PUBLIC as btleADDR_TYPE_PUBLIC
 # Ensure that the minivie specific modules can be found on path allowing execution from the 'inputs' folder
 if os.path.split(os.getcwd())[1] == 'inputs':
     import sys
-    sys.path.insert(0, os.path.abspath('..'))
+    sys.path.insert(0, os.path.abspath('../..'))
 import inputs
 import utilities
 

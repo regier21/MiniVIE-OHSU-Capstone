@@ -4,7 +4,6 @@ import logging
 import time
 import numpy as np
 import mpl
-import controls
 from mpl.data_sink import DataSink
 from mpl import JointEnum as MplId, extract_percepts
 from mpl import open_nfu_protocol as nfu
@@ -89,9 +88,14 @@ class NfuSink(DataSink):
         if remote_address is None:
             remote_address = get_user_config_var('NfuUdp.remote_address', '//127.0.0.1:9027')
 
-        self.comm_obj = open_nfu_comms.AsyncUdp(local_address, remote_address)
-        self.comm_obj.name = 'AsyncOpenNfu'
-        self.comm_obj.add_message_handler(self.parse_messages)
+        # self.comm_obj = open_nfu_comms.AsyncUdp(local_address, remote_address)
+        # self.comm_obj.name = 'AsyncOpenNfu'
+        # self.comm_obj.add_message_handler(self.parse_messages)
+        # self.comm_obj.connect()
+        from utilities import udp_comms
+        self.comm_obj = udp_comms.Udp(local_address, remote_address)
+        self.comm_obj.name = 'ThreadedOpenNfu'
+        self.comm_obj.onmessage = self.parse_messages
         self.comm_obj.connect()
 
     def get_voltage(self):
@@ -144,12 +148,14 @@ class NfuSink(DataSink):
         msg += '<br>NFU:{} '.format(self.mpl_status['nfu_state'])
         msg += '<br>LC:{} '.format(self.mpl_status['lc_software_state'])
         msg += '<br>dt:{:.1f}ms '.format(self.mpl_status['nfu_ms_per_ACTUATEMPL'])
+        msg += f'<br>Percepts:{self.comm_obj.get_packet_data_rate():.0f} Hz'
 
         return msg
 
     def close(self):
         logging.info("Closing Nfu Data Sink")
-        self.comm_obj.transport.close()
+        # self.comm_obj.transport.close()
+        self.comm_obj.close()
 
     def send_joint_angles(self, values, velocity=None):
         # Transmit joint angle command in radians
@@ -165,10 +171,10 @@ class NfuSink(DataSink):
             logging.warning('MPL Connection is closed; not sending joint angles.')
             return
 
-        if len(values) == controls.NUM_UPPER_ARM_JOINTS:
+        if len(values) == mpl.NUM_UPPER_ARM_JOINTS:
             # append hand angles
             # TODO: consider keeping hand in current position
-            values = np.append(values, controls.NUM_HAND_JOINTS * [0.0])
+            values = np.append(values, mpl.NUM_HAND_JOINTS * [0.0])
 
         if velocity is None:
             velocity = [0.0] * mpl.JointEnum.NUM_JOINTS
@@ -280,14 +286,5 @@ class NfuSink(DataSink):
             log_msg = 'Temp: ' + ','.join(['%d' % elem for elem in values])  # DART Time: 220 us
             logging.info(log_msg)  # 60 us
 
-    def wait_for_connection(self):
-        # After connecting, this function can be used as a blocking call to ensure the desired percepts are received
-        # before continuing program execution.  E.g. ensure valid joint percepts are received to ensure smooth start
-
-        print(f'Waiting 20 ms for valid percepts at {self.comm_obj.local_addr}')
-
-        while self.position['last_percept'] is None or self.comm_obj.get_packet_data_rate() == 0:
-            time.sleep(0.02)
-            print(f'Waiting 20 ms for valid percepts at {self.comm_obj.local_addr}: '
-                  f'Rate = {self.comm_obj.get_packet_data_rate()}')
-            logging.info('Waiting 20 ms for valid percepts...')
+    def data_received(self):
+        return self.position['last_percept'] is not None and self.comm_obj.get_packet_data_rate() > 0

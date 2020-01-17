@@ -278,7 +278,7 @@ Pack a fixed length list of values
     sock.send(packed_data)
 
 Unpack fixed length byte values
-([**For example see myo.py**](../minivie/inputs/myo.py))
+([**For example see myo.py**](../minivie/inputs/myo/myo.py))
 
     import struct
     import socket

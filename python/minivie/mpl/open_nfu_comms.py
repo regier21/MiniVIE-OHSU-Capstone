@@ -45,12 +45,6 @@ class AsyncUdp(object):
         self.is_connected = True
         self.transport, self.protocol = self.loop.run_until_complete(listen)
 
-    def data_received(self):
-        if self.packet_count == 0:
-            return False
-        else:
-            return True
-
     def send(self, packed_data):
         if self.is_connected:
             self.transport.sendto(packed_data, self.remote_addr)

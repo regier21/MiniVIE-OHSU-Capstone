@@ -22,9 +22,6 @@ Revisions:
 @author: R. Armiger
 """
 
-# Initial pass and simulating MiniVIE processing using python so that this runs on an embedded device
-#
-# Created 1/23/2016 Armiger
 import os
 import time
 import logging
@@ -36,58 +33,6 @@ from mpl import JointEnum as MplId
 from utilities import user_config
 
 from transforms3d.euler import mat2euler
-
-
-def class_map(class_name):
-    """ Map a pattern recognition class name to a joint command
-
-     The objective of this function is to decide how to interpret a class decision
-     as a movement action.
-
-     return JointId, Direction, IsGrasp, Grasp
-
-       'No Movement' is not necessary in dict_Joint with '.get default return
-     JointId, Direction = self.Joint.get(class_name,[ [], 0 ])
-    """
-    class_info = {'IsGrasp': None, 'JointId': None, 'Direction': 0, 'GraspId': None}
-
-    # Map classes to joint id and direction of motion
-    # Class Name: IsGrasp, JointId, Direction, GraspId
-    class_lookup = {
-        'No Movement': [False, None, 0, None],
-        'Shoulder Flexion': [False, MplId.SHOULDER_FE, +1, None],
-        'Shoulder Extension': [False, MplId.SHOULDER_FE, -1, None],
-        'Shoulder Adduction': [False, MplId.SHOULDER_AB_AD, +1, None],
-        'Shoulder Abduction': [False, MplId.SHOULDER_AB_AD, -1, None],
-        'Humeral Internal Rotation': [False, MplId.HUMERAL_ROT, +1, None],
-        'Humeral External Rotation': [False, MplId.HUMERAL_ROT, -1, None],
-        'Elbow Flexion': [False, MplId.ELBOW, +1, None],
-        'Elbow Extension': [False, MplId.ELBOW, -1, None],
-        'Wrist Rotate In': [False, MplId.WRIST_ROT, +1, None],
-        'Wrist Rotate Out': [False, MplId.WRIST_ROT, -1, None],
-        'Wrist Adduction': [False, MplId.WRIST_AB_AD, +1, None],
-        'Wrist Abduction': [False, MplId.WRIST_AB_AD, -1, None],
-        'Wrist Flex In': [False, MplId.WRIST_FE, +1, None],
-        'Wrist Extend Out': [False, MplId.WRIST_FE, -1, None],
-        'Hand Open': [True, None, -1, None],
-        # 'Spherical Grasp': [True, None, +1, 'Spherical Grasp'],
-        # 'Tip Grasp': [True, None, +1, 'Tip Grasp'],
-    }
-
-    # rather than listing out all grasps, just list the arm motions and assume others are grasps
-
-    if class_name in class_lookup:
-        class_info['IsGrasp'], class_info['JointId'], class_info['Direction'], class_info['GraspId'] = class_lookup[
-            class_name]
-    else:
-        # Assume this is a grasp in the ROC table
-        # logging.warning('Unmatched class name {}'.format(class_name))
-        class_info['IsGrasp'] = True
-        class_info['JointId'] = None
-        class_info['Direction'] = +1
-        class_info['GraspId'] = class_name
-
-    return class_info
 
 
 class Plant(object):
@@ -150,7 +95,7 @@ class Plant(object):
 
     def new_step(self):
         # set all velocities to 0 to prepare for a new time step
-        # Typically followed by a call to setVelocity
+        # Typically followed by a call to set_joint_velocity
 
         # reset velocity
         self.joint_velocity[:] = 0.0
@@ -290,29 +235,87 @@ class Plant(object):
         self.joint_position = np.clip(self.joint_position, self.lower_limit, self.upper_limit)
 
 
+def class_map(class_name):
+    """Provide names for directional motions of joint commands.
+
+     The objective of this function is to map motion names to a movement action.
+
+     Thus: Elbow Flexion maps to the Elbow Joint in the (+) direction
+
+    @param class_name: provide a string for a desired joint motion
+    @return: dictionary with JointId(int) Direction(int) IsGrasp(bool) GraspId(int)
+    """
+
+    # Map classes to joint id and direction of motion
+    # Class Name: (IsGrasp, JointId, Direction, GraspId)
+    class_lookup = {
+        'No Movement': (False, None, 0, None),
+        'Shoulder Flexion': (False, MplId.SHOULDER_FE, +1, None),
+        'Shoulder Extension': (False, MplId.SHOULDER_FE, -1, None),
+        'Shoulder Adduction': (False, MplId.SHOULDER_AB_AD, +1, None),
+        'Shoulder Abduction': (False, MplId.SHOULDER_AB_AD, -1, None),
+        'Humeral Internal Rotation': (False, MplId.HUMERAL_ROT, +1, None),
+        'Humeral External Rotation': (False, MplId.HUMERAL_ROT, -1, None),
+        'Elbow Flexion': (False, MplId.ELBOW, +1, None),
+        'Elbow Extension': (False, MplId.ELBOW, -1, None),
+        'Wrist Rotate In': (False, MplId.WRIST_ROT, +1, None),
+        'Wrist Rotate Out': (False, MplId.WRIST_ROT, -1, None),
+        'Wrist Adduction': (False, MplId.WRIST_AB_AD, +1, None),
+        'Wrist Abduction': (False, MplId.WRIST_AB_AD, -1, None),
+        'Wrist Flex In': (False, MplId.WRIST_FE, +1, None),
+        'Wrist Extend Out': (False, MplId.WRIST_FE, -1, None),
+        'Hand Open': (True, None, -1, None),
+        # Rather than listing out all grasps, just list the arm motions.  Unmatched strings will be tried as grasps
+        # 'Spherical Grasp': (True, None, +1, 'Spherical Grasp'),
+        # 'Tip Grasp': (True, None, +1, 'Tip Grasp'),
+    }
+
+    if class_name in class_lookup:
+        class_info = dict(zip(('IsGrasp', 'JointId', 'Direction', 'GraspId'), class_lookup[class_name]))
+    else:
+        # Unmatched string.  Assume this is an entry in the ROC table
+        class_info = {'IsGrasp': True, 'JointId': None, 'Direction': +1, 'GraspId': class_name}
+
+    return class_info
+
+
 def main():
-    # for demo
+    """
+    For demonstration of the basic function of this module.
+    This starts the plant (state model) and then sets both joint velocity and
+    grasp velocity.  At each timestep the state model updates position (unless it reaches
+    a limit).  Similarly, the requested grasp is set resulting in a Reduced Order Control
+    (ROC) table lookup to increment multiple joints at once.
+
+    Results are printed to screen but can also be viewed using the Virtual Modular Prosthetic
+    Limb (VMPL) visualization model in Unity
+
+    @return:
+    """
+    import mpl
+    import controls
     from mpl.unity import UnityUdp as hSink
 
     # get default roc file.  This should be run from python\minivie as home, but 
-    # also support calling from module directory (Utilities)
-    roc_filename = "../../WrRocDefaults.xml"
+    # also support calling from module directory (controls)
+    roc_filename = "mpl/#VMPL_ROC.xml"
     if os.path.split(os.getcwd())[1] == 'controls':
         roc_filename = '../' + roc_filename
 
-    dt = 0.02
+    dt = controls.timestep
     p = Plant(dt, roc_filename)
 
     sink = hSink()
     sink.connect()
 
-    print('LOWER LIMITS:')
-    print(p.lower_limit)
-    print('UPPER LIMITS:')
-    print(p.upper_limit)
+    print('LOWER LIMITS (deg):')
+    print(np.rad2deg(p.lower_limit[:mpl.NUM_UPPER_ARM_JOINTS]))
+    print('UPPER LIMITS (deg):')
+    print(np.rad2deg(p.upper_limit[:mpl.NUM_UPPER_ARM_JOINTS]))
 
     time_begin = time.time()
-    while time.time() < (time_begin + 1.5):  # main loop
+    duration = 1.5  # seconds
+    while time.time() < (time_begin + duration):  # main loop
         time.sleep(dt)
         class_name = 'Shoulder Flexion'
         class_info = class_map(class_name)
@@ -324,17 +327,16 @@ def main():
         # set a few other joints with a new velocity
         p.set_joint_velocity([MplId.ELBOW, MplId.WRIST_AB_AD], 2.5)
 
-        # set a grasp state        
-        # p.GraspId = 'rest'
-        p.grasp_id = 'Spherical'
-        p.set_grasp_velocity(0.5)
+        # set a grasp state
+        p.grasp_id = 'Spherical Grasp'
+        p.set_grasp_velocity(0.7)
 
         p.update()
 
         sink.send_joint_angles(p.joint_position)
 
-        # Print first 7 joints
-        ang = ' '.join('{:6.1f}'.format(np.rad2deg(k)) for k in p.joint_position[:7])
+        # Print first 7 (upper arm) joints
+        ang = ' '.join('{:6.1f}'.format(np.rad2deg(k)) for k in p.joint_position[:mpl.NUM_UPPER_ARM_JOINTS])
         print('Angles (deg):' + ang + ' | Grasp Value: {:6.3f}'.format(p.grasp_position))
 
     class_map('Unmatched')

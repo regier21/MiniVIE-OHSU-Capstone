@@ -1,5 +1,8 @@
 from enum import IntEnum, unique
 
+NUM_UPPER_ARM_JOINTS = 7
+NUM_HAND_JOINTS = 20
+
 
 @unique
 class JointEnum(IntEnum):
