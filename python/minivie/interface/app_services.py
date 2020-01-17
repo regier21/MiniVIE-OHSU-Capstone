@@ -2,7 +2,7 @@
 """
 Created on Tue Jan 26 18:03:38 2016
 
-This class is designed to receive training commands. Training commands can be found in scenarios/init
+This class is designed to web services for the mobile app
 
 @author: R. Armiger
 """

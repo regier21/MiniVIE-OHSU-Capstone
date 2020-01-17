@@ -1,4 +1,9 @@
-# take in a vie object and perform a control assessment
+'''
+
+take in a vie object and perform a control assessment with mobile app updates
+
+'''
+
 
 import asyncio
 import logging

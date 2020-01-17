@@ -31,7 +31,7 @@ import asyncio
 import logging
 import argparse
 from utilities import user_config
-import scenarios
+from interface.mpl_scenario import MplScenario
 import sys
 
 MIN_PYTHON = (3, 6)
@@ -67,7 +67,7 @@ def main():
 
     # Setup Default MPL scenario
     # A Scenario is the fundamental building blocks of the VIE: Inputs, Signal Analysis, System Plant, and Output Sink
-    vie = scenarios.MplScenario()
+    vie = MplScenario()
 
     # Perform setup operations based on settings above
     vie.setup()

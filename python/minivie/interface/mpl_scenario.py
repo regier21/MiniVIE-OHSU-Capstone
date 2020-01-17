@@ -37,7 +37,10 @@ class MplScenario(object):
         self.TrainingInterface = None
         self.Plant = None
         self.DataSink = None
-        self.gui_connections = {} # dict keeping track of the GUI connections {websocket (websockethandler) : {connection id: (int), connection start time: (float)}}
+
+        # dict keeping track of the GUI connections
+        # {websocket (websockethandler) : {connection id: (int), connection start time: (float)}}
+        self.gui_connections = {}
 
         # Debug socket for streaming Features
         # self.DebugSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -411,7 +414,6 @@ class MplScenario(object):
         # from inputs import myo
         # from inputs import myo  # Note that myo_async causes timing issue on DART
         from inputs.myo import myo_client
-        import pattern_rec as pr
         # from mpl.unity import UnityUdp
         from mpl.unity_asyncio import UnityUdp
         from controls.plant import Plant
@@ -511,14 +513,14 @@ class MplScenario(object):
         self.DataSink = sink
 
     def setup_interfaces(self):
-        from pattern_rec import training, assessment
+        from interface import assessment, app_services
         from inputs import normalization
 
         # Setup web/websocket interface
         server_type = get_user_config_var('MobileApp.server_type', 'None')
         if server_type == 'Tornado':
             port = get_user_config_var('MobileApp.port', 9090)
-            self.TrainingInterface = training.TrainingManagerWebsocket()
+            self.TrainingInterface = app_services.TrainingManagerWebsocket()
             self.TrainingInterface.setup(port)
             print(f'Started webserver at http://localhost:{port}')
 
