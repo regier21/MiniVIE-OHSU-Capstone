@@ -18,7 +18,7 @@ import os
 if os.path.split(os.getcwd())[1] == 'gui':
     import sys
     sys.path.insert(0, os.path.abspath('..'))
-from mpl import open_nfu_sink
+from mpl.open_nfu import open_nfu_sink
 from mpl import JointEnum as MplId
 
 

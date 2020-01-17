@@ -3,28 +3,30 @@ import socket
 import threading
 import time
 
-from utilities import get_address
-
 
 class Udp(threading.Thread):
-    # Basic Template for thread based udp communications
-    #
-    # key function is the onmessage attribute that is called on data receive
+    def __init__(self, local_address=None, remote_address=None):
+        """
+            Handles UDP communications layer
 
-    def __init__(self, local_address='//0.0.0.0:9027', remote_address='//127.0.0.1:9028'):
+            Once created and connected, user can use send() to transmit data.  Receiving data involves adding a
+            message_handler function to process incoming data
+
+
+        @param local_address: tuple of ('IP_ADDRESS', Port)
+        @param remote_address: tuple of ('IP_ADDRESS', Port)
+        """
 
         threading.Thread.__init__(self)
         self.run_control = False  # Used by the start and terminate to control thread
         self.read_buffer_size = 1024
         self.sock = None
 
-        remote_hostname, remote_port = get_address(remote_address)
-        local_hostname, local_port = get_address(local_address)
-        self.udp = {'RemoteHostname': remote_hostname, 'RemotePort': remote_port,
-                    'LocalHostname': local_hostname, 'LocalPort': local_port}
+        self.local_addr = local_address
+        self.remote_addr = remote_address
 
-        self.is_data_received = False
-        self.is_connected = False
+        self.is_data_received = False  # This is True when packets are actively coming in without timout
+        self.is_connected = False  # This is True once socket open, but no guarantee of data incoming
         self.timeout = 3.0
 
         # store some rate counting parameters
@@ -33,20 +35,24 @@ class Udp(threading.Thread):
         self.packet_rate = 0.0
         self.packet_update_time = 1.0  # seconds
 
-        # default callback is just the print function.  this can be overwritten. also for i in callbacks??
-        self.onmessage = lambda s: 1 + 1
-        # self.onmessage = print
-        pass
+        # store functions to be called on for incoming data
+        self.message_handlers = []
 
     def data_received(self):
         return self.is_data_received
 
+    def add_message_handler(self, message_handler):
+        # attach a function to subscribe to messages
+        if message_handler not in self.message_handlers:
+            self.message_handlers.append(message_handler)
+
     def connect(self):
-        logging.info("{} local port: {}:{}".format(self.name, self.udp['LocalHostname'], self.udp['LocalPort']))
-        logging.info("{} remote port: {}:{}".format(self.name, self.udp['RemoteHostname'], self.udp['RemotePort']))
+
+        logging.info(f"Udp local address: {self.local_addr}, remote address: {self.remote_addr}")
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1) # Enable broadcasting
-        self.sock.bind((self.udp['LocalHostname'], self.udp['LocalPort']))
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)  # Enable broadcasting
+        self.sock.bind(self.local_addr)
         self.sock.settimeout(self.timeout)
         self.is_connected = True
 
@@ -56,14 +62,11 @@ class Udp(threading.Thread):
             self.start()
 
     def terminate(self):
-        logging.info('Terminating receive thread: {}'.format(self.name))
+        logging.info(f'Terminating receive thread: {self.name}')
         self.run_control = False
 
     def on_connection_lost(self):
-        msg = "{} timed out during recvfrom() on IP={} Port={}".format(
-            self.name, self.udp['LocalHostname'], self.udp['LocalPort'])
-        logging.warning(msg)
-        logging.info('{} Connection is Lost'.format(self.name))
+        logging.warning(f"Timed out during recvfrom() on address: {self.local_addr}")
 
     def run(self):
         # Loop forever to receive data via UDP
@@ -85,13 +88,14 @@ class Udp(threading.Thread):
 
                 # if the above function returns (without error) it means we have a connection
                 if not self.is_data_received:
-                    logging.info('{} Connection is Active: Data received'.format(self.name))
+                    logging.info('Connection is Active: Data received')
                     self.is_data_received = True
 
                 self.packet_count += 1
 
-                # Execute the callback function assigned to self.onmessage
-                self.onmessage(data_bytes)
+                # Execute the callback function assigned to message_handlers
+                for message_handler in self.message_handlers:
+                    message_handler(data_bytes)
 
             except socket.timeout:
                 # the data stream has stopped.  don't break the thread, just continue to wait
@@ -101,9 +105,7 @@ class Udp(threading.Thread):
 
             except socket.error:
                 # The connection has been closed
-                msg = "{} Socket Closed on IP={} Port={}.".format(
-                    self.name, self.udp['LocalHostname'], self.udp['LocalPort'])
-                logging.info(msg)
+                logging.info(f"Socket Closed at {self.local_addr}")
                 # break so that the thread can terminate
                 self.run_control = False
                 break
@@ -120,14 +122,14 @@ class Udp(threading.Thread):
             None
         """
 
-        address = address if address is not None else (self.udp['RemoteHostname'], self.udp['RemotePort'])
+        address = address if address is not None else self.remote_addr
 
         if self.is_connected:
             # Note this command can error if socket disconnected
             try:
                 self.sock.sendto(msg_bytes, address)
             except Exception as e:
-                logging.ERROR(e)
+                logging.error(e)
         else:
             logging.warning('Socket disconnected')
 
@@ -159,8 +161,6 @@ class Udp(threading.Thread):
         """
         self.run_control = False
         if self.sock is not None:
-            logging.info("{} Closing Socket IP={} Port={} to IP={} Port={}".format(
-                self.name, self.udp['LocalHostname'], self.udp['LocalPort'],
-                self.udp['RemoteHostname'], self.udp['RemotePort']))
+            logging.info(f"Closing Socket Address {self.local_addr} --> {self.remote_addr}")
             self.sock.close()
         self.join()

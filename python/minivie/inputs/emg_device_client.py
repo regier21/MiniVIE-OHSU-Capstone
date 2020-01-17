@@ -48,7 +48,6 @@ Revisions
 
 """
 
-
 import asyncio
 import websockets
 import time
@@ -59,11 +58,12 @@ import json
 
 # Ensure that the minivie specific modules can be found on path allowing execution from the 'inputs' folder
 import os
+
 if os.path.split(os.getcwd())[1] == 'inputs':
     import sys
+
     sys.path.insert(0, os.path.abspath('..'))
 from inputs.signal_input import SignalInput
-
 
 logger = logging.getLogger(__name__)
 
@@ -121,20 +121,19 @@ class EmgSocket(SignalInput):
             try:
                 async with websockets.connect(port) as websocket:
 
-
                     print('Sending Start')
 
                     start_msg = {
-						"api_version": "0.10",
-						"api_request": {
-							"request_id": 1,
-							"start_stream_request": {
-								"stream_id": "MiniVIE-stream",
-								"app_id": "MiniVIE",
-								"raw_emg_target": {}
-							}
-						}
-					}
+                        "api_version": "0.10",
+                        "api_request": {
+                            "request_id": 1,
+                            "start_stream_request": {
+                                "stream_id": "MiniVIE-stream",
+                                "app_id": "MiniVIE",
+                                "raw_emg_target": {}
+                            }
+                        }
+                    }
 
                     await websocket.send(json.dumps(start_msg))
                     print('Done Starting CTRL')
@@ -144,9 +143,9 @@ class EmgSocket(SignalInput):
 
                     while True:  # this inner loop will perpetually check for packets
                         try:
-                            #print('Getting Data')
+                            # print('Getting Data')
                             msg = await websocket.recv()  # get websocket bytes
-                            #print('Got Data')
+                            # print('Got Data')
                         except websockets.exceptions.ConnectionClosed:
                             break
 
@@ -194,7 +193,6 @@ class EmgSocket(SignalInput):
 
 
 def main():
-
     import asyncio
 
     print('Running')
@@ -203,7 +201,7 @@ def main():
     # try https://bastibe.de/2013-05-30-speeding-up-matplotlib.html
     async def display():
         while True:
-            samples = (src.get_data()[0]-2047) * 0.01
+            samples = (src.get_data()[0] - 2047) * 0.01
             msg = 'EMG: ' + ','.join(['%4.1f' % elem for elem in samples])
             print(msg)
             await asyncio.sleep(0.01)

@@ -8,12 +8,11 @@
 # 2016OCT05 Armiger: Created
 
 # Python 2 and 3:
-import scenarios
 from utilities import user_config
 import time
 import numpy as np
 import pattern_rec as pr
-from mpl.open_nfu_sink import NfuSink
+from mpl.open_nfu.open_nfu_sink import NfuSink
 import threading
 
 user_config.setup_file_logging(prefix='MPL_')

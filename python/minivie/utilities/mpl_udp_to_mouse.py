@@ -79,7 +79,7 @@ def main():
     udp = Udp()
     udp.name = 'MplUdpKeyboard'
     udp.timeout = 0.5
-    udp.onmessage = mud_to_mouse
+    udp.add_message_handler(mud_to_mouse)
 
     # Add a bail out key to terminate emulation
     keyboard.add_hotkey('esc', lambda: udp.close())

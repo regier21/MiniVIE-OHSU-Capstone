@@ -5,7 +5,7 @@ import numpy as np
 from transforms3d.euler import quat2euler
 from transforms3d.quaternions import quat2mat
 
-import utilities
+from utilities import udp_comms, get_address
 from inputs.myo import MYOHW_ORIENTATION_SCALE, MYOHW_ACCELEROMETER_SCALE, MYOHW_GYROSCOPE_SCALE
 from inputs.signal_input import SignalInput
 import logging
@@ -24,7 +24,7 @@ class MyoUdp(SignalInput):
 
     """
 
-    def __init__(self, source='//127.0.0.1:10001', num_samples=50):
+    def __init__(self, local_addr_str='//0.0.0.0:15001', remote_addr_str='//127.0.0.1:16001', num_samples=50):
 
         # Initialize superclass
         super(MyoUdp, self).__init__()
@@ -45,48 +45,35 @@ class MyoUdp(SignalInput):
         # Treat as private.  use get_data to access since it is thread-safe
         self.__dataEMG = np.zeros((num_samples, 8))
 
-        # UDP Port setup
-        self.addr = utilities.get_address(source)
-
         # Internal values
         self.__battery_level = -1  # initial value is unknown
         self.__rate_emg = 0.0
         self.__count_emg = 0  # reset counter
         self.__time_emg = None
 
-        self.comm_obj = None
+        self.transport = udp_comms.Udp()
+        self.transport.name = 'MyoUdpRcv'
+        self.transport.local_addr = get_address(local_addr_str)
+        self.transport.remote_addr = get_address(remote_addr_str)
+        self.transport.add_message_handler(self.parse_messages)
 
     def connect(self):
         """
             Connect to the udp server and receive Myo Packets
-
         """
-        from utilities.user_config import get_user_config_var
-        from utilities import udp_comms
-
-        local_address = None
-        remote_address = None
-
-        if local_address is None:
-            local_address = get_user_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
-        if remote_address is None:
-            remote_address = get_user_config_var('MyoUdpClient.remote_address_1', '//127.0.0.1:16001')
-
-        self.comm_obj = udp_comms.Udp(local_address, remote_address)
-        self.comm_obj.name = 'MyoUdpRcv'
-        self.comm_obj.onmessage = self.parse_messages
-        self.comm_obj.connect()
+        self.transport.connect()
 
     def parse_messages(self, data):
         """ Convert incoming bytes to emg, quaternion, accel, and ang rate """
 
+        num_emg_samples = 0
         if len(data) == 48:  # NOTE: This is the packet size for MyoUdp.exe
             # -------------------------------
             # Handles data from MyoUdp.exe
             # -------------------------------
             # unpack formatted data bytes
             # Note: these have been scaled in MyoUdp from the raw hardware values
-            output = struct.unpack("8b4f3f3f", data)
+            output = struct.unpack("8b 4f 3f 3f", data)
 
             if self.log_handlers is not None:
                 self.log_handlers(output[0:8])
@@ -94,68 +81,35 @@ class MyoUdp(SignalInput):
             # Populate EMG Data Buffer (newest on top)
             self.__dataEMG = np.roll(self.__dataEMG, 1, axis=0)
             self.__dataEMG[:1, :] = output[:8]  # insert in first buffer entry
+            num_emg_samples = 1
 
             # IMU Data Update
             self.__quat = output[8:12]
             self.__accel = output[12:15]
             self.__gyro = output[15:18]
 
-            # compute data rate
-            if self.__count_emg == 0:
-                # mark time
-                self.__time_emg = time.time()
-            self.__count_emg += 1  # 2 data points per packet
-
-            t_now = time.time()
-            t_elapsed = t_now - self.__time_emg
-
-            if t_elapsed > 3.0:
-                # compute rate (every second)
-                self.__rate_emg = self.__count_emg / t_elapsed
-                self.__count_emg = 0  #reset counter
-
         elif len(data) == 16:  # EMG data only
-            # -------------------------------------
-            # Handles data from unix direct stream
-            # -------------------------------------
-
             #    Myo UNIX  Data packet information:
-            #    Data packet size either 16 or 20 bytes.
             #        <case> 16
             #            # EMG Samples (8 channels 2 samples per packet)
-            #            d = double(typecast(bytes,'int8'))
-            #            emgData = reshape(d,8,2)
-            #        <case> 20
-            #            # IMU sample
-            #            MYOHW_ORIENTATION_SCALE = 16384.0
-            #            MYOHW_ACCELEROMETER_SCALE = 2048.0
-            #            MYOHW_GYROSCOPE_SCALE = 16.0
-            #            dataInt16 = double(typecast(bytes,'int16'))
-            #            orientation = dataInt16(1:4) ./ MYOHW_ORIENTATION_SCALE
-            #            accelerometer = dataInt16(5:7) ./ MYOHW_ACCELEROMETER_SCALE
-            #            gyroscope = dataInt16(8:10) ./ MYOHW_GYROSCOPE_SCALE
+
             output = struct.unpack('16b', data)
+
             # Populate EMG Data Buffer (newest on top)
             self.__dataEMG = np.roll(self.__dataEMG, 1, axis=0)
             self.__dataEMG[:1, :] = output[0:8]  # insert in first buffer entry
             self.__dataEMG = np.roll(self.__dataEMG, 1, axis=0)
             self.__dataEMG[:1, :] = output[8:16]  # insert in first buffer entry
-
-            # compute data rate
-            if self.__count_emg == 0:
-                # mark time
-                self.__time_emg = time.time()
-            self.__count_emg += 2  # 2 data points per packet
-
-            t_now = time.time()
-            t_elapsed = t_now - self.__time_emg
-
-            if t_elapsed > 3.0:
-                # compute rate (every second)
-                self.__rate_emg = self.__count_emg / t_elapsed
-                self.__count_emg = 0  #reset counter
+            num_emg_samples = 2
 
         elif len(data) == 20:  # IMU data only
+            #    Myo UNIX  Data packet information:
+            #        <case> 20
+            #            # IMU sample
+            #            dataInt16 = double(typecast(bytes,'int16'))
+            #            orientation = dataInt16(1:4) ./ MYOHW_ORIENTATION_SCALE
+            #            accelerometer = dataInt16(5:7) ./ MYOHW_ACCELEROMETER_SCALE
+            #            gyroscope = dataInt16(8:10) ./ MYOHW_GYROSCOPE_SCALE
             # create array of 10 int16
             output = struct.unpack('10h', data)
             unscaled = np.array(output, dtype=np.int16)
@@ -166,12 +120,29 @@ class MyoUdp(SignalInput):
 
         elif len(data) == 1:  # BATT Value
             self.__battery_level = ord(data)
-            msg = 'Socket {} Battery Level: {}'.format(self.addr, self.__battery_level)
+            msg = f'Socket {self.transport.local_addr} Battery Level: {self.__battery_level}'
             logger.info(msg)
 
         else:
             # incoming data is not of length = 8, 20, 40, or 48
-            logger.warning('MyoUdp: Unexpected packet size. len=({})'.format(len(data)))
+            logger.warning(f'MyoUdp: Unexpected packet size. len=({len(data)})')
+
+        if num_emg_samples == 0:
+            return
+
+        # compute data rate
+        if self.__count_emg == 0:
+            # mark time
+            self.__time_emg = time.time()
+        self.__count_emg += num_emg_samples
+
+        t_now = time.time()
+        t_elapsed = t_now - self.__time_emg
+
+        if t_elapsed > 3.0:
+            # compute rate (every second)
+            self.__rate_emg = self.__count_emg / t_elapsed
+            self.__count_emg = 0  # reset counter
 
     def get_data(self):
         """ Return data buffer [nSamples][nChannels] """
@@ -205,7 +176,7 @@ class MyoUdp(SignalInput):
         return battery
 
     def get_data_rate_emg(self):
-        # Data rate is just EMG rate, not IMU or packet rate and should be calcualted accordingly
+        # Data rate is just EMG rate, not IMU or packet rate and should be calculated accordingly
         # Return the emg data rate
         return self.__rate_emg
 
@@ -216,7 +187,7 @@ class MyoUdp(SignalInput):
         battery = self.get_battery()
         if battery < 0:
             battery = '--'
-        return 'MYO: {:.0f}Hz {}%'.format(self.get_data_rate_emg(), battery)
+        return f'MYO: {self.get_data_rate_emg():.0f}Hz {battery}%'
 
     def close(self):
-        self.comm_obj.close()
+        self.transport.close()

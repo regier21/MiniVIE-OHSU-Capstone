@@ -145,7 +145,7 @@ class UnityUdp(Udp, DataSink):
         self.command_port = 25010  # integer port for ghost arm position commands
         self.config_port = 27000    # integer port for ghost arm display commands
         self.name = "UnityUdp"
-        self.onmessage = self.message_handler
+        self.add_message_handler(self.message_handler)
         self.percepts = None
         self.joint_offset = None
         self.load_config_parameters()

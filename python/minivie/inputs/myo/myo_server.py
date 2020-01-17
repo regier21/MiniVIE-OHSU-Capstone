@@ -57,7 +57,6 @@ Start service and check status
 
 """
 
-import os
 import logging
 import time
 import socket
@@ -65,10 +64,6 @@ import struct
 import binascii
 from bluepy import btle
 
-# Ensure that the project modules can be found on path allowing execution from the 'inputs' folder
-if os.path.split(os.getcwd())[1] == 'inputs':
-    import sys
-    sys.path.insert(0, os.path.abspath('../..'))
 from utilities import user_config as uc
 from utilities import get_address
 
@@ -77,19 +72,15 @@ __version__ = "1.1.0"
 
 class MyoUdpServer(object):
 
-    def __init__(self, iface=0, mac_address='xx:xx:xx:xx:xx:xx',
-                 local_port=('localhost', 16001),
-                 remote_port=('localhost', 15001),
-                 data_logger=None,
-                 name='Myo'):
+    def __init__(self, data_logger=None, name='Myo'):
         import threading
         import subprocess
 
-        # Process input arguments
-        self.iface = iface
-        self.mac_address = mac_address.upper()  # note this needs to be upper when finding handle to peripheral
-        self.local_port = local_port
-        self.remote_port = remote_port
+        # These are defaults but can be changed prior to connecting
+        self.iface = 0
+        self.mac_address = 'XX:XX:XX:XX:XX:XX'  # note this needs to be upper when finding handle to peripheral
+        self.local_port = ('localhost', 16001)
+        self.remote_port = ('localhost', 15001)
 
         # Setup file and console logging
         self.logger = data_logger
@@ -114,7 +105,7 @@ class MyoUdpServer(object):
         self.thread.name = name
 
         self.logger.debug('Running subprocess command: hcitool dev')
-        hci = 'hci' + str(iface)
+        hci = 'hci' + str(self.iface)
 
         # Note that if running from startup, you should require bluetooth.target
         # to ensure that the bluetooth device is started
@@ -348,23 +339,13 @@ class MyoDelegate(btle.DefaultDelegate):
 def setup_threads():
 
     # get parameters from xml files and create Servers
-    s1 = MyoUdpServer(iface=uc.get_user_config_var('MyoUdpServer.iface_1', 0),
-                      mac_address=uc.get_user_config_var('MyoUdpServer.mac_address_1', 'xx:xx:xx:xx:xx'),
-                      local_port=get_address(uc.get_user_config_var('MyoUdpServer.local_address_1', '//127.0.0.1:16001')),
-                      remote_port=get_address(uc.get_user_config_var('MyoUdpServer.remote_address_1', '//127.0.0.1:15001')),
-                      data_logger=logging.getLogger('Myo1'),
-                      name='Myo1')
+    s1 = MyoUdpServer(data_logger=logging.getLogger('Myo1'), name='Myo1')
 
     if uc.get_user_config_var('MyoUdpServer.num_devices', 2) < 2:
         s2 = None
         return s1, s2
 
-    s2 = MyoUdpServer(iface=uc.get_user_config_var('MyoUdpServer.iface_2', 0),
-                      mac_address=uc.get_user_config_var('MyoUdpServer.mac_address_2', 'xx:xx:xx:xx:xx'),
-                      local_port=get_address(uc.get_user_config_var('MyoUdpServer.local_address_2', '//127.0.0.1:16002')),
-                      remote_port=get_address(uc.get_user_config_var('MyoUdpServer.remote_address_2', '//127.0.0.1:15002')),
-                      data_logger=logging.getLogger('Myo2'),
-                      name='Myo2')
+    s2 = MyoUdpServer(data_logger=logging.getLogger('Myo2'), name='Myo2')
 
     return s1, s2
 
@@ -381,8 +362,7 @@ def main():
 
     # Parameters:
     parser = argparse.ArgumentParser(description='myo_server: read bluetooth packets from myo and stream to UDP.')
-    parser.add_argument('-x', '--XML', help=r'XML Parameter File (e.g. user_config.xml)',
-                        default=None)
+    parser.add_argument('-x', '--XML', help=r'XML Parameter File (e.g. user_config.xml)', default=None)
     args = parser.parse_args()
 
     if args.XML is not None:

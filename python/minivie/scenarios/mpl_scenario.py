@@ -27,7 +27,7 @@ class MplScenario(object):
 
     def __init__(self):
         # import socket
-        self.SignalSource = None
+        self.SignalSource = []
         self.SignalClassifier = None
         self.FeatureExtract = None
         self.TrainingData = None
@@ -417,22 +417,24 @@ class MplScenario(object):
         ################################################
         # Configure Inputs
         ################################################
-        source_list = None
         input_device = get_user_config_var('input_device', 'myo')
         if input_device == 'myo':
-            if get_user_config_var('MyoUdpClient.num_devices', 1) == 1:
-                local_port_1 = get_user_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
-                source_list = [myo_client.MyoUdp(source=local_port_1)]
-            elif get_user_config_var('MyoUdpClient.num_devices', 1) == 2:
+            num_devices = get_user_config_var('MyoUdpClient.num_devices', 1)
+            # Connect first armband
+            local_1 = get_user_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
+            remote_1 = get_user_config_var('MyoUdpClient.remote_address_1', '//127.0.0.1:16001')
+            self.attach_source(myo_client.MyoUdp(local_addr_str=local_1, remote_addr_str=remote_1))
+
+            if num_devices == 2:
                 # Dual Armband Case
-                local_port_1 = get_user_config_var('MyoUdpClient.local_address_1', '//0.0.0.0:15001')
-                local_port_2 = get_user_config_var('MyoUdpClient.local_address_2', '//0.0.0.0:15002')
-                source_list = [myo_client.MyoUdp(source=local_port_1), myo_client.MyoUdp(source=local_port_2)]
-            self.attach_source(source_list)
+                local_2 = get_user_config_var('MyoUdpClient.local_address_2', '//0.0.0.0:15002')
+                remote_2 = get_user_config_var('MyoUdpClient.local_address_2', '//127.0.0.1:16002')
+                self.attach_source(myo_client.MyoUdp(local_addr_str=local_2, remote_addr_str=remote_2))
+
         elif input_device == 'daq':
             from inputs import daqEMGDevice
             src = daqEMGDevice.DaqEMGDevice(get_user_config_var('DaqDevice.device_name_and_channels', 'Dev1/ai0:7'))
-            self.attach_source([src])
+            self.attach_source(src)
         elif input_device == 'ctrl':
             from inputs import emg_device_client
             ws_address = get_user_config_var('EmgDevice.ws_address', 'ws://localhost:5678')
@@ -493,8 +495,8 @@ class MplScenario(object):
             sink.command_port = get_user_config_var('UnityUdp.ghost_command_port', 25010)
             sink.config_port = get_user_config_var('UnityUdp.ghost_config_port', 27000)
         elif data_sink == 'NfuUdp':
-            import mpl.open_nfu_sink
-            sink = mpl.open_nfu_sink.NfuSink()
+            import mpl.open_nfu.open_nfu_sink
+            sink = mpl.open_nfu.open_nfu_sink.NfuSink()
             sink.connect()
         else:
             import sys
@@ -551,11 +553,10 @@ class MplScenario(object):
     def attach_source(self, input_source):
         # Pass in a list of signal sources and they will be added to the scenario
 
-        self.SignalSource = input_source
+        self.SignalSource.append(input_source)
 
-        for s in input_source:
-            s.connect()
-            self.num_channels += s.num_channels
+        input_source.connect()
+        self.num_channels += input_source.num_channels
 
     def set_precision_mode(self, value):
         # Select between precision mode or default mode.

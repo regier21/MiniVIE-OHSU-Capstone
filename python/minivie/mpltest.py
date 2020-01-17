@@ -16,7 +16,7 @@ import threading
 import tornado.ioloop
 
 import utilities.sys_cmd
-from mpl.open_nfu_sink import NfuSink
+from mpl.open_nfu.open_nfu_sink import NfuSink
 # from mpl.unity import UnityUdp
 import mpl.roc as roc
 

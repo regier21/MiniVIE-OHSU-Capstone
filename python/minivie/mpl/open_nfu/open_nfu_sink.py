@@ -1,13 +1,11 @@
 from collections import deque
 from os import name as os_name
 import logging
-import time
 import numpy as np
 import mpl
 from mpl.data_sink import DataSink
 from mpl import JointEnum as MplId, extract_percepts
-from mpl import open_nfu_protocol as nfu
-from mpl import open_nfu_comms
+from mpl.open_nfu import open_nfu_protocol as nfu
 from utilities.user_config import get_user_config_var
 
 
@@ -45,7 +43,7 @@ class NfuSink(DataSink):
         self.impedance_level = 'high'  # Options are low | high
         self.percepts = None
 
-        self.comm_obj = None
+        self.transport = None
 
         self.load_config_parameters()
 
@@ -88,15 +86,15 @@ class NfuSink(DataSink):
         if remote_address is None:
             remote_address = get_user_config_var('NfuUdp.remote_address', '//127.0.0.1:9027')
 
-        # self.comm_obj = open_nfu_comms.AsyncUdp(local_address, remote_address)
-        # self.comm_obj.name = 'AsyncOpenNfu'
-        # self.comm_obj.add_message_handler(self.parse_messages)
-        # self.comm_obj.connect()
+        # self.transport = open_nfu_comms.AsyncUdp(local_address, remote_address)
+        # self.transport.name = 'AsyncOpenNfu'
+        # self.transport.add_message_handler(self.parse_messages)
+        # self.transport.connect()
         from utilities import udp_comms
-        self.comm_obj = udp_comms.Udp(local_address, remote_address)
-        self.comm_obj.name = 'ThreadedOpenNfu'
-        self.comm_obj.onmessage = self.parse_messages
-        self.comm_obj.connect()
+        self.transport = udp_comms.Udp(local_address, remote_address)
+        self.transport.name = 'ThreadedOpenNfu'
+        self.transport.add_message_handler(self.parse_messages)
+        self.transport.connect()
 
     def get_voltage(self):
         # returns the battery voltage as a string based on the last status message
@@ -148,14 +146,14 @@ class NfuSink(DataSink):
         msg += '<br>NFU:{} '.format(self.mpl_status['nfu_state'])
         msg += '<br>LC:{} '.format(self.mpl_status['lc_software_state'])
         msg += '<br>dt:{:.1f}ms '.format(self.mpl_status['nfu_ms_per_ACTUATEMPL'])
-        msg += f'<br>Percepts:{self.comm_obj.get_packet_data_rate():.0f} Hz'
+        msg += f'<br>Percepts:{self.transport.get_packet_data_rate():.0f} Hz'
 
         return msg
 
     def close(self):
         logging.info("Closing Nfu Data Sink")
-        # self.comm_obj.transport.close()
-        self.comm_obj.close()
+        # self.transport.transport.close()
+        self.transport.close()
 
     def send_joint_angles(self, values, velocity=None):
         # Transmit joint angle command in radians
@@ -167,7 +165,7 @@ class NfuSink(DataSink):
         #    joint angles in radians of size 27 for all arm joints (e.g. [0.0] * 27 )
         #
 
-        if self.mpl_connection_check and self.comm_obj is not None and not self.comm_obj.data_received:
+        if self.mpl_connection_check and self.transport is not None and not self.transport.data_received:
             logging.warning('MPL Connection is closed; not sending joint angles.')
             return
 
@@ -212,7 +210,7 @@ class NfuSink(DataSink):
 
     def send_udp_command(self, msg):
         # transmit packets (and optionally write to log for DEBUG)
-        self.comm_obj.send(msg)
+        self.transport.send(msg)
 
     def get_percepts(self):
         return self.percepts
@@ -287,4 +285,4 @@ class NfuSink(DataSink):
             logging.info(log_msg)  # 60 us
 
     def data_received(self):
-        return self.position['last_percept'] is not None and self.comm_obj.get_packet_data_rate() > 0
+        return self.position['last_percept'] is not None and self.transport.get_packet_data_rate() > 0

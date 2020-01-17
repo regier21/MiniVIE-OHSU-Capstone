@@ -16,7 +16,7 @@ Updated 3-21-17 by Connor Pyles
 
 import numpy as np
 import serial
-from cpc_headstage import CpcHeadstage
+from inputs.cpc_headstage import CpcHeadstage
 import time
 import logging
 import threading
@@ -50,7 +50,7 @@ class CpchSerial(CpcHeadstage, SignalInput):
         # Initialize superclass
         super(CpchSerial, self).__init__()
 
-        #public access variables
+        # public access variables
         self.serial_port = port  # Port must be capable of 921600 baud
         self.bioamp_mask = bioamp_mask
         self.gpi_mask = gpi_mask
@@ -81,8 +81,8 @@ class CpchSerial(CpcHeadstage, SignalInput):
         
         # private access variables
         self._serial_obj = None
-        self._data_buffer = []  #list of bytearrays
-        self._serial_buffer = bytearray([])  #bytearray
+        self._data_buffer = []  # list of bytearrays
+        self._serial_buffer = bytearray([])  # bytearray
         self._prev_data_frame_id = -1
         self._bioamp_cnt = 0
         self._gpi_cnt = 0
@@ -132,10 +132,10 @@ class CpchSerial(CpcHeadstage, SignalInput):
                 stopbits=serial.STOPBITS_ONE,
                 bytesize=serial.EIGHTBITS,
                 timeout = 1,
-                xonxoff = False,     #disable software flow control
-                rtscts = False,      #disable hardware (RTS/CTS) flow control
-                dsrdtr = False,      #disable hardware (DSR/DTR) flow control
-                writeTimeout = 1,    #timeout for write
+                xonxoff = False,     # disable software flow control
+                rtscts = False,      # disable hardware (RTS/CTS) flow control
+                dsrdtr = False,      # disable hardware (DSR/DTR) flow control
+                writeTimeout = 1,    # timeout for write
             )
             print('[%s] Port Opened: %s' % (__file__, self.serial_port.upper()))
 
@@ -163,7 +163,7 @@ class CpchSerial(CpcHeadstage, SignalInput):
         msg = self.encode_config_read_msg(1)
         self._serial_obj.write(msg)
         # Check response
-        r = bytearray(self._serial_obj.read(7))   #cast string to more portable bytearray
+        r = bytearray(self._serial_obj.read(7))   # cast string to more portable bytearray
         rcnt = len(r)
 
         # Do this after the first read so that we can establish if any
@@ -186,12 +186,12 @@ class CpchSerial(CpcHeadstage, SignalInput):
         # 2 = param type 2 (active channels)
         
         # Send Request
-        channel_config = (self.gpi_mask << 16) + self.bioamp_mask #bitshift(uint32(obj.GPIMask), 16) + uint32(obj.BioampMask);
+        channel_config = (self.gpi_mask << 16) + self.bioamp_mask # bitshift(uint32(obj.GPIMask), 16) + uint32(obj.BioampMask);
         msg = self.encode_config_write_msg(2, channel_config)
-        self._serial_obj.write(msg)#fwrite(obj.SerialObj, msg, 'uint8');
+        self._serial_obj.write(msg) # fwrite(obj.SerialObj, msg, 'uint8');
         
         # Check response
-        r = bytearray(self._serial_obj.read(3))   #[r, rcnt] = fread(obj.SerialObj, 3, 'uint8');
+        r = bytearray(self._serial_obj.read(3))   # [r, rcnt] = fread(obj.SerialObj, 3, 'uint8');
         rcnt = len(r)
         
         msgId = self.msg_id_configuration_write_response
@@ -203,10 +203,10 @@ class CpchSerial(CpcHeadstage, SignalInput):
         # read back to ensure the message structure is correct since
         # not all channels can (or will) return data.  Unrequested channels
         # are unreturned by the system.
-        msg = self.encode_config_read_msg(2);
-        self._serial_obj.write(msg)   #fwrite(obj.SerialObj, msg, 'uint8');
+        msg = self.encode_config_read_msg(2)
+        self._serial_obj.write(msg)   # fwrite(obj.SerialObj, msg, 'uint8');
         # Check response
-        r = bytearray(self._serial_obj.read(7)) #[r, rcnt] = fread(obj.SerialObj, 7, 'uint8');
+        r = bytearray(self._serial_obj.read(7))  # [r, rcnt] = fread(obj.SerialObj, 7, 'uint8');
         rcnt = len(r)
         
         msgId = self.msg_id_configuration_read_response
@@ -215,7 +215,7 @@ class CpchSerial(CpcHeadstage, SignalInput):
         
         frameframe_b = self.decode_msg(r, self._bioamp_cnt, self._gpi_cnt)
         
-        assert frameframe_b.Mask == channel_config ,'Defined channel mask does not match returned mask. Expected: uint32[%d] Got:uint32[%d]' % (channel_config, frameframe_b.Mask)
+        assert frameframe_b.Mask == channel_config,'Defined channel mask does not match returned mask. Expected: uint32[%d] Got:uint32[%d]' % (channel_config, frameframe_b.Mask)
         
         self._channel_mask = [int(i) for i in format(frameframe_b.Mask, '0' + str(self._data_buffer.shape[1]) + 'b')]
 
@@ -277,7 +277,7 @@ class CpchSerial(CpcHeadstage, SignalInput):
             num_available = self._serial_obj.in_waiting
 
             if num_available == 0:
-                #print('No data available from serial buffer, internal buffer not updated.')
+                # print('No data available from serial buffer, internal buffer not updated.')
                 pass
             else:
                 if self._stream_on_thread:
@@ -290,7 +290,7 @@ class CpchSerial(CpcHeadstage, SignalInput):
         # Record start time of this loop
         stream_loop_start_time = time.time()
 
-        # Read samples from serial buffer and place in internal bufer
+        # Read samples from serial buffer and place in internal buffer
         # (potentially with leftover remaining bytes)
         num_available = self._serial_obj.in_waiting
         r = bytearray(self._serial_obj.read(num_available))
