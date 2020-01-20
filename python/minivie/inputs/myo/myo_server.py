@@ -212,10 +212,10 @@ class MyoUdpServer(object):
         while True:
             try:
                 self.peripheral.connect(self.mac_address, addrType=btle.ADDR_TYPE_PUBLIC, iface=self.iface)
-                print('Connection Successful')
+                self.logger.info('Connection Successful')
                 break
             except btle.BTLEException:
-                print('Timed out while connecting to device at address {}'.format(self.mac_address))
+                self.logger.info('Timed out while connecting to device at address {}'.format(self.mac_address))
 
         self.set_device_parameters()
 

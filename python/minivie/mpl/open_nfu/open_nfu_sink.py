@@ -7,14 +7,15 @@ from mpl.data_sink import DataSink
 from mpl import JointEnum as MplId, extract_percepts
 from mpl.open_nfu import open_nfu_protocol as nfu
 from utilities.user_config import get_user_config_var
+from utilities import udp_comms, get_address
 
 
 class NfuSink(DataSink):
     """
-    Python Class for NFU Data Sink
+    Python Class for NFU Data Sink.  Also compatible with VulcanX (though no heartbeat messages used there)
     """
 
-    def __init__(self):
+    def __init__(self, local_addr_str='//0.0.0.0:9029', remote_addr_str='//127.0.0.1:9027'):
 
         # Initialize superclass
         super(NfuSink, self).__init__()
@@ -43,7 +44,16 @@ class NfuSink(DataSink):
         self.impedance_level = 'high'  # Options are low | high
         self.percepts = None
 
-        self.transport = None
+        # self.transport = open_nfu_comms.AsyncUdp(local_addr_str, remote_addr_str)
+        # self.transport.name = 'AsyncOpenNfu'
+        # self.transport.add_message_handler(self.parse_messages)
+        # self.transport.connect()
+
+        self.transport = udp_comms.Udp()
+        self.transport.name = 'OpenNfu'
+        self.transport.local_addr = get_address(local_addr_str)
+        self.transport.remote_addr = get_address(remote_addr_str)
+        self.transport.add_message_handler(self.parse_messages)
 
         self.load_config_parameters()
 
@@ -80,20 +90,7 @@ class NfuSink(DataSink):
 
         self.mpl_connection_check = get_user_config_var('MPL.connection_check', 1)
 
-    def connect(self, local_address=None, remote_address=None):
-        if local_address is None:
-            local_address = get_user_config_var('NfuUdp.local_address', '//0.0.0.0:9028')
-        if remote_address is None:
-            remote_address = get_user_config_var('NfuUdp.remote_address', '//127.0.0.1:9027')
-
-        # self.transport = open_nfu_comms.AsyncUdp(local_address, remote_address)
-        # self.transport.name = 'AsyncOpenNfu'
-        # self.transport.add_message_handler(self.parse_messages)
-        # self.transport.connect()
-        from utilities import udp_comms
-        self.transport = udp_comms.Udp(local_address, remote_address)
-        self.transport.name = 'ThreadedOpenNfu'
-        self.transport.add_message_handler(self.parse_messages)
+    def connect(self):
         self.transport.connect()
 
     def get_voltage(self):
@@ -223,8 +220,6 @@ class NfuSink(DataSink):
         Directs message bytes to the appropriate parsing function based on msg_id
         """
 
-        import logging  # Importing this here to consolidate logging calls
-
         # Get the message ID
         try:
             msg_id = data[2]
@@ -285,4 +280,10 @@ class NfuSink(DataSink):
             logging.info(log_msg)  # 60 us
 
     def data_received(self):
+        """
+        Define a check for whether data (percepts) are actively coming in.  Note you can be connected (udp socket open)
+        but not receiving data, hence this function
+
+        @return: bool
+        """
         return self.position['last_percept'] is not None and self.transport.get_packet_data_rate() > 0

@@ -414,8 +414,8 @@ class MplScenario(object):
         # from inputs import myo
         # from inputs import myo  # Note that myo_async causes timing issue on DART
         from inputs.myo import myo_client
-        # from mpl.unity import UnityUdp
-        from mpl.unity_asyncio import UnityUdp
+        from mpl.unity import UnityUdp
+        # from mpl.unity_asyncio import UnityUdp
         from controls.plant import Plant
         from pattern_rec import features_selected
 
@@ -483,9 +483,8 @@ class MplScenario(object):
         data_sink = get_user_config_var('DataSink', 'Unity')
         if data_sink in ['Unity', 'UnityUdp']:
             # The main output is to unity here, however output also supports additional 'ghost' limb control
-            local_address = get_user_config_var('UnityUdp.local_address', '//0.0.0.0:25001')
-            remote_address = get_user_config_var('UnityUdp.remote_address', '//127.0.0.1:25000')
-            sink = UnityUdp(local_address=local_address, remote_address=remote_address)
+            sink = UnityUdp(local_addr_str=get_user_config_var('UnityUdp.local_address', '//0.0.0.0:25001'),
+                            remote_addr_str=get_user_config_var('UnityUdp.remote_address', '//127.0.0.1:25000'))
             sink.connect()
             # send some default config parameters on setup for ghost arms (turn them off)
             enable = get_user_config_var('UnityUdp.ghost_default_enable', 0.0)
@@ -500,8 +499,9 @@ class MplScenario(object):
             sink.command_port = get_user_config_var('UnityUdp.ghost_command_port', 25010)
             sink.config_port = get_user_config_var('UnityUdp.ghost_config_port', 27000)
         elif data_sink == 'NfuUdp':
-            import mpl.open_nfu.open_nfu_sink
-            sink = mpl.open_nfu.open_nfu_sink.NfuSink()
+            from mpl.open_nfu.open_nfu_sink import NfuSink
+            sink = NfuSink(local_addr_str=get_user_config_var('NfuUdp.local_address', '//0.0.0.0:9029'),
+                           remote_addr_str=get_user_config_var('NfuUdp.remote_address', '//127.0.0.1:9027'))
             sink.connect()
         else:
             import sys
@@ -926,9 +926,6 @@ class MplScenario(object):
             s.close()
         if self.DataSink is not None:
             self.DataSink.close()
-
-
-
 
 
 def test_scenarios():
