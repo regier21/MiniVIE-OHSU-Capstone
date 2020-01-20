@@ -26,8 +26,8 @@ JHUAPL vMPL Unity Communications Info:
 
 
 Inputs: 
-    remote_address - string of IP address and port of destination (running Unity) default = '//127.0.0.1:25000'
-    local_address - string of IP address and port to receive percepts default = '//127.0.0.1:25001'
+    remote_addr_str - string of IP address and port of destination (running Unity) default = '//127.0.0.1:25000'
+    local_addr_str - string of IP address and port to receive percepts default = '//127.0.0.1:25001'
 
 Methods:
     sendJointAngles - accept a 7 element or 27 element array of joint angles in radians 
@@ -45,7 +45,7 @@ Example:
     Verify that the right virtual arm moves in Unity
     Next add a left arm controller:
 
-    >>> sink2 = UnityUdp(remote_address='//127.0.0.1:25100', local_address='//127.0.0.1:25101')
+    >>> sink2 = UnityUdp(remote_addr_str='//127.0.0.1:25100', local_addr_str='//127.0.0.1:25101')
     >>> sink2.connect()
     >>> sink2.send_joint_angles([0.2,0.2,0.2,0.9,0.2,0.2,0.2])
 
@@ -66,7 +66,7 @@ import logging
 import numpy as np
 from mpl import JointEnum as MplId
 from mpl.data_sink import DataSink
-from utilities.udp_comms import Udp
+from utilities import udp_comms, get_address
 from utilities.user_config import get_user_config_var
 
 
@@ -127,7 +127,7 @@ def extract_percepts(data):
     return percepts
 
 
-class UnityUdp(Udp, DataSink):
+class UnityUdp(udp_comms.Udp, DataSink):
     """
         % Left
         obj.MplCmdPort = 25100;
@@ -139,9 +139,9 @@ class UnityUdp(Udp, DataSink):
         obj.MplAddress = '127.0.0.1';
 
     """
-    def __init__(self, local_address='//0.0.0.0:25001', remote_address='//127.0.0.1:25000'):
+    def __init__(self, local_addr_str='//0.0.0.0:25001', remote_addr_str='//127.0.0.1:25000'):
         DataSink.__init__(self)
-        Udp.__init__(self, local_address=local_address, remote_address=remote_address)
+        udp_comms.Udp.__init__(self, local_address=get_address(local_addr_str), remote_address=get_address(remote_addr_str))
         self.command_port = 25010  # integer port for ghost arm position commands
         self.config_port = 27000    # integer port for ghost arm display commands
         self.name = "UnityUdp"

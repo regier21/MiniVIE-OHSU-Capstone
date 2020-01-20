@@ -26,8 +26,8 @@ JHUAPL vMPL Unity Communications Info:
 
 
 Inputs: 
-    remote_address - string of IP address and port of destination (running Unity) default = '//127.0.0.1:25000'
-    local_address - string of IP address and port to receive percepts default = '//127.0.0.1:25001'
+    remote_addr_str - string of IP address and port of destination (running Unity) default = '//127.0.0.1:25000'
+    local_addr_str - string of IP address and port to receive percepts default = '//127.0.0.1:25001'
 
 Methods:
     sendJointAngles - accept a 7 element or 27 element array of joint angles in radians 
@@ -82,7 +82,7 @@ class UnityUdp(DataSink):
         obj.MplAddress = '127.0.0.1';
 
     """
-    def __init__(self, local_address='//0.0.0.0:25001', remote_address='//127.0.0.1:25000'):
+    def __init__(self, local_addr_str='//0.0.0.0:25001', remote_addr_str='//127.0.0.1:25000'):
         DataSink.__init__(self)
         self.command_port = 25010  # integer port for ghost arm position commands
         self.config_port = 27000    # integer port for ghost arm display commands
@@ -92,8 +92,8 @@ class UnityUdp(DataSink):
         self.loop = None
         self.transport = None
         self.protocol = None
-        self.local_address = local_address
-        self.remote_address = remote_address
+        self.local_address = get_address(local_addr_str)  # tuple ("IP_ADDRESS", Port)
+        self.remote_address = get_address(remote_addr_str)  # tuple ("IP_ADDRESS", Port)
         self.is_connected = True
         self.percepts = None
         self.position = {'last_percept': None}
@@ -118,7 +118,7 @@ class UnityUdp(DataSink):
         # low-level APIs.
         # From python 3.7 docs (https://docs.python.org/3.7/library/asyncio-protocol.html#)
         listen = self.loop.create_datagram_endpoint(
-            lambda: UdpProtocol(parent=self), local_addr=get_address(self.local_address))
+            lambda: UdpProtocol(parent=self), local_addr=self.local_address)
         self.transport, self.protocol = self.loop.run_until_complete(listen)
         pass
 
@@ -179,7 +179,7 @@ class UnityUdp(DataSink):
         packer = struct.Struct('27f')
         packed_data = packer.pack(*values)
 
-        (addr, port) = get_address(self.remote_address)
+        (addr, port) = self.remote_address
 
         if self.is_connected:
             if send_to_ghost:
@@ -224,7 +224,7 @@ class UnityUdp(DataSink):
         packer = struct.Struct('5f')
         packed_data = packer.pack(*values)
 
-        (addr, port) = get_address(self.remote_address)
+        (addr, port) = self.remote_address
 
         if self.is_connected:
             self.transport.sendto(packed_data, (addr, self.config_port))
@@ -294,7 +294,7 @@ def main():
     # Last tested 12/13/2019
 
     # create socket
-    sink = UnityUdp(local_address='//0.0.0.0:25001', remote_address='//127.0.0.1:25000')
+    sink = UnityUdp(local_addr_str='//0.0.0.0:25001', remote_addr_str='//127.0.0.1:25000')
     sink.connect()
     loop = asyncio.get_event_loop()
     loop.create_task(test_loop(sink))
