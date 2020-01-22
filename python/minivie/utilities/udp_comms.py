@@ -20,33 +20,33 @@ class Udp(threading.Thread):
         """
 
         threading.Thread.__init__(self)
-        self.__run_control = False  # Used by the start and terminate methods to control thread
+        self._run_control = False  # Used by the start and terminate methods to control thread
         self.read_buffer_size = 1024
         self.sock = None
 
         self.local_addr = local_address
         self.remote_addr = remote_address
 
-        self.__is_data_received = False  # This is True when packets are actively coming in without timout
-        self.__is_connected = False  # This is True once socket open, but no guarantee of data incoming
+        self._is_data_received = False  # This is True when packets are actively coming in without timout
+        self._is_connected = False  # This is True once socket open, but no guarantee of data incoming
         self.timeout = 3.0
 
         # store some rate counting parameters
-        self.__packet_count = 0
-        self.__packet_time = 0.0
-        self.__packet_rate = 0.0
-        self.__packet_update_time = 1.0  # seconds
+        self._packet_count = 0
+        self._packet_time = 0.0
+        self._packet_rate = 0.0
+        self._packet_update_time = 1.0  # seconds
 
         # store functions to be called on for incoming data
-        self.__message_handlers = []
+        self._message_handlers = []
 
     def data_received(self):
-        return self.__is_data_received
+        return self._is_data_received
 
     def add_message_handler(self, message_handler):
         # attach a function to subscribe to messages
-        if message_handler not in self.__message_handlers:
-            self.__message_handlers.append(message_handler)
+        if message_handler not in self._message_handlers:
+            self._message_handlers.append(message_handler)
 
     def connect(self):
 
@@ -56,7 +56,7 @@ class Udp(threading.Thread):
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)  # Enable broadcasting
         self.sock.bind(self.local_addr)
         self.sock.settimeout(self.timeout)
-        self.__is_connected = True
+        self._is_connected = True
 
         # Create a thread for processing new data
         if not self.is_alive():
@@ -65,8 +65,8 @@ class Udp(threading.Thread):
 
     def terminate(self):
         logging.info(f'Terminating receive thread: {self.name}')
-        self.__run_control = False
-        self.__is_connected = False
+        self._run_control = False
+        self._is_connected = False
 
     def on_connection_lost(self):
         logging.warning(f'Udp "{self.name}" timed out during recvfrom() on address: {self.local_addr}')
@@ -82,13 +82,13 @@ class Udp(threading.Thread):
         @return:
         """
 
-        if not self.__is_connected:
+        if not self._is_connected:
             logging.error("Socket is not connected")
             return
 
-        self.__run_control = True
+        self._run_control = True
 
-        while self.__run_control:
+        while self._run_control:
             # Blocking call until data received
             try:
                 # receive call will error if socket closed externally (i.e. on exit)
@@ -96,20 +96,20 @@ class Udp(threading.Thread):
                 data_bytes, address = self.sock.recvfrom(self.read_buffer_size)
 
                 # if the above function returns (without error) it means we have a connection
-                if not self.__is_data_received:
+                if not self._is_data_received:
                     logging.info('Connection is Active: Data received')
-                    self.__is_data_received = True
+                    self._is_data_received = True
 
                 # Count new packets
-                self.__packet_count += 1
+                self._packet_count += 1
 
                 # Execute the callback function assigned to __message_handlers
-                for message_handler in self.__message_handlers:
+                for message_handler in self._message_handlers:
                     message_handler(data_bytes)
 
             except socket.timeout:
                 # the data stream has stopped.  don't break the thread, just continue to wait
-                self.__is_data_received = False
+                self._is_data_received = False
                 self.on_connection_lost()
                 continue
 
@@ -117,7 +117,7 @@ class Udp(threading.Thread):
                 # The connection has been closed
                 logging.info(f"Socket Closed at {self.local_addr}")
                 # break so that the thread can terminate
-                self.__run_control = False
+                self._run_control = False
                 break
 
     def send(self, msg_bytes, address=None):
@@ -134,7 +134,7 @@ class Udp(threading.Thread):
 
         address = address if address is not None else self.remote_addr
 
-        if self.__is_connected:
+        if self._is_connected:
             # Note this command can error if socket disconnected
             try:
                 self.sock.sendto(msg_bytes, address)
@@ -151,15 +151,15 @@ class Udp(threading.Thread):
 
         # compute data rate
         t_now = time.time()
-        t_elapsed = t_now - self.__packet_time
+        t_elapsed = t_now - self._packet_time
 
-        if t_elapsed > self.__packet_update_time:
+        if t_elapsed > self._packet_update_time:
             # compute rate (every few seconds second)
-            self.__packet_rate = self.__packet_count / t_elapsed
-            self.__packet_count = 0  # reset counter
-            self.__packet_time = t_now
+            self._packet_rate = self._packet_count / t_elapsed
+            self._packet_count = 0  # reset counter
+            self._packet_time = t_now
 
-        return self.__packet_rate
+        return self._packet_rate
 
     def close(self):
         """

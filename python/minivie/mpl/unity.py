@@ -166,9 +166,13 @@ class UnityUdp(udp_comms.Udp, DataSink):
             self.position['last_percept'] = None
 
     def get_status_msg(self):
-        # returns a general purpose status message about the system state
-        # e.g. ' 22.5V 72.6C'
-        return 'vMPL'
+        """
+               Create a short status message, typically shown on user interface
+
+               :return: a general purpose status message about the system state
+                   e.g. ' 22.5V 72.6C' or vMPL: 50Hz
+               """
+        return 'vMPL: {:.0f}Hz%'.format(self.get_packet_data_rate())
 
     def send_joint_angles(self, values, velocity=None, send_to_ghost=False):
         """
@@ -192,7 +196,7 @@ class UnityUdp(udp_comms.Udp, DataSink):
 
         """
 
-        if not self.__is_connected:
+        if not self._is_connected:
             logging.warning('Connection closed.  Call connect() first')
             return
 
@@ -214,7 +218,7 @@ class UnityUdp(udp_comms.Udp, DataSink):
 
         packer = struct.Struct('27f')
         packed_data = packer.pack(*values)
-        if self.__is_connected:
+        if self._is_connected:
             if send_to_ghost:
                 self.send(packed_data, (self.remote_hostname, self.command_port))
             else:
@@ -244,7 +248,7 @@ class UnityUdp(udp_comms.Udp, DataSink):
 
         """
 
-        if not self.__is_connected:
+        if not self._is_connected:
             logging.warning('Connection closed.  Call connect() first')
             return
 
@@ -256,7 +260,7 @@ class UnityUdp(udp_comms.Udp, DataSink):
 
         packer = struct.Struct('5f')
         packed_data = packer.pack(*values)
-        if self.__is_connected:
+        if self._is_connected:
             self.send(packed_data, (self.remote_addr[0], self.config_port))
         else:
             print('Socket disconnected')

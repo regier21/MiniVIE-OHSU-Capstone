@@ -414,8 +414,6 @@ class MplScenario(object):
         # from inputs import myo
         # from inputs import myo  # Note that myo_async causes timing issue on DART
         from inputs.myo import myo_client
-        from mpl.unity import UnityUdp
-        # from mpl.unity_asyncio import UnityUdp
         from controls.plant import Plant
         from pattern_rec import features_selected
 
@@ -481,7 +479,11 @@ class MplScenario(object):
         # Sink is the output to outside world (in this case to VIE)
         # For MPL, this might be: real MPL/NFU, Virtual Arm, etc.
         data_sink = get_user_config_var('DataSink', 'Unity')
-        if data_sink in ['Unity', 'UnityUdp']:
+        if data_sink in ['Unity', 'UnityUdp', 'UnityAsyncio']:
+            if data_sink == 'UnityAsyncio':
+                from mpl.unity_asyncio import UnityUdp
+            else:
+                from mpl.unity import UnityUdp
             # The main output is to unity here, however output also supports additional 'ghost' limb control
             sink = UnityUdp(local_addr_str=get_user_config_var('UnityUdp.local_address', '//0.0.0.0:25001'),
                             remote_addr_str=get_user_config_var('UnityUdp.remote_address', '//127.0.0.1:25000'))
