@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+"""
+communicate between cyberglove bluetooth serial interface and UDP
+
+@author: Armiger
+"""
+import serial
+import socket
+
+
+def main():
+    print('Starting...')
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)  # Enable broadcasting
+    sock.settimeout(1.0)
+
+    ser = serial.Serial("/dev/rfcomm0", 115200, timeout=1.0)
+    #   ser.open()
+    ser.write(b'?W')
+    r = ser.read(100)
+    print(r)
+    ser.write(b'?S')
+    r = ser.read(100)
+    print(r)
+    while 1:
+        print('Getting Data')
+        ser.write(b'G')
+        buff = b''
+
+        # Read full response
+        while 1:
+            r = ser.read()
+            if r == b'\x00':
+                print(f'Got NULL terminator Msg={buff}')
+                break
+            buff += r
+
+
+if __name__ == '__main__':
+    main()
