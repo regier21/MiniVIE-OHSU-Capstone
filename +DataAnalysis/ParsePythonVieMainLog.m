@@ -33,6 +33,7 @@ classdef ParsePythonVieMainLog < handle
         meanVoltageMsg
         torqueMsg
         jointCmdMsg
+        jointTempMsg
         tempMsg
         dcellMsg
         firstDatetime
@@ -283,6 +284,11 @@ classdef ParsePythonVieMainLog < handle
                 torqueLines = obj.textLines(torqueMsgId)';
                 obj.torqueMsg.time = datetime(extractBefore(torqueLines,24),'InputFormat','yyyy-MM-dd HH:mm:ss,SSS');
                 obj.torqueMsg.value = cellfun(@str2num,extractAfter(torqueLines,'Torque: '),'UniformOutput',false);
+                
+                % check invalid length
+                validId = cellfun(@length,obj.torqueMsg.value) == 27;
+                obj.torqueMsg.time = obj.torqueMsg.time(validId);
+                obj.torqueMsg.value = obj.torqueMsg.value(validId);
             end
             
             %%%%%%%%%%%%%%%%%
@@ -294,6 +300,28 @@ classdef ParsePythonVieMainLog < handle
                 jointCmdLines = obj.textLines(jointCmdMsgId)';
                 obj.jointCmdMsg.time = datetime(extractBefore(jointCmdLines,24),'InputFormat','yyyy-MM-dd HH:mm:ss,SSS');
                 obj.jointCmdMsg.value = cellfun(@str2num,extractAfter(jointCmdLines,'CmdAngles: '),'UniformOutput',false);
+                
+                % check invalid length
+                validId = cellfun(@length,obj.jointCmdMsg.value) == 27;
+                obj.jointCmdMsg.time = obj.jointCmdMsg.time(validId);
+                obj.jointCmdMsg.value = obj.jointCmdMsg.value(validId);                
+            end
+            
+            %%%%%%%%%%%%%%%%%
+            % Parse Joint Temp Command:
+            %%%%%%%%%%%%%%%%%
+            jointTempMsgId = contains(obj.textLines,'Temp:') & ~contains(obj.textLines,'CPU');
+            obj.isRead(jointTempMsgId) = true;
+            if any(jointTempMsgId)
+                jointTempLines = obj.textLines(jointTempMsgId)';
+                obj.jointTempMsg.time = datetime(extractBefore(jointTempLines,24),'InputFormat','yyyy-MM-dd HH:mm:ss,SSS');
+                obj.jointTempMsg.value = cellfun(@str2num,extractAfter(jointTempLines,'Temp: '),'UniformOutput',false);
+                
+                % check invalid length
+                validId = cellfun(@length,obj.jointTempMsg.value) == 27;
+                obj.jointTempMsg.time = obj.jointTempMsg.time(validId);
+                obj.jointTempMsg.value = obj.jointTempMsg.value(validId);              
+                
             end
             
             %%%%%%%%%%%%%%%%%%
