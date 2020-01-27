@@ -49,7 +49,8 @@ class MyoUdp(SignalInput):
         self.__battery_level = -1  # initial value is unknown
         self.__rate_emg = 0.0
         self.__count_emg = 0  # reset counter
-        self.__time_emg = None
+        self.__time_emg = 0.0
+        self.emg_rate_update_interval = 1.5
 
         self.transport = udp_comms.Udp()
         self.transport.name = 'MyoUdpRcv'
@@ -129,20 +130,8 @@ class MyoUdp(SignalInput):
 
         if num_emg_samples == 0:
             return
-
-        # compute data rate
-        if self.__count_emg == 0:
-            # mark time
-            self.__time_emg = time.time()
-        self.__count_emg += num_emg_samples
-
-        t_now = time.time()
-        t_elapsed = t_now - self.__time_emg
-
-        if t_elapsed > 3.0:
-            # compute rate (every second)
-            self.__rate_emg = self.__count_emg / t_elapsed
-            self.__count_emg = 0  # reset counter
+        else:
+            self.__count_emg += num_emg_samples
 
     def get_data(self):
         """ Return data buffer [nSamples][nChannels] """
@@ -178,6 +167,19 @@ class MyoUdp(SignalInput):
     def get_data_rate_emg(self):
         # Data rate is just EMG rate, not IMU or packet rate and should be calculated accordingly
         # Return the emg data rate
+
+        # compute data rate
+        t_now = time.time()
+        t_elapsed = t_now - self.__time_emg
+
+        if t_elapsed > self.emg_rate_update_interval:
+
+            # compute rate (every second)
+            self.__rate_emg = self.__count_emg / t_elapsed
+            self.__count_emg = 0  # reset counter
+            # reset time
+            self.__time_emg = time.time()
+
         return self.__rate_emg
 
     def get_status_msg(self):
