@@ -19,7 +19,7 @@ Requires=bluetooth.target
 After=network.target bluetooth.target
 
 [Service]
-ExecStart=/usr/bin/python3.7 -u -m inputs.myo_server -x vmpl_user_config.xml
+ExecStart=/usr/bin/python3 -u -m inputs.myo.myo_server -x vmpl_user_config.xml
 WorkingDirectory=/home/pi/git/minivie/python/minivie
 StandardOutput=inherit
 StandardError=inherit
@@ -29,12 +29,6 @@ User=pi
 [Install]
 WantedBy=multi-user.target
 ------------------------- mpl_myo1.service ------------------------------
-
-Enable the service
-
-    $ sudo systemctl enable mpl_myo1.service
-
-    Created symlink from /etc/systemd/system/multi-user.target.wants/mpl_myo1.service to /lib/systemd/system/mpl_myo1.service.
 
 Start service and check status
 
@@ -50,6 +44,11 @@ Start service and check status
 
     Aug 16 03:54:51 raspberrypi systemd[1]: Started Myo Streamer.
 
+Enable the service
+
+    $ sudo systemctl enable mpl_myo1.service
+
+    Created symlink from /etc/systemd/system/multi-user.target.wants/mpl_myo1.service to /lib/systemd/system/mpl_myo1.service.
 
 
 
@@ -340,12 +339,24 @@ def setup_threads():
 
     # get parameters from xml files and create Servers
     s1 = MyoUdpServer(data_logger=logging.getLogger('Myo1'), name='Myo1')
+    s1.iface = uc.get_user_config_var("MyoUdpServer.iface_1", 0)
+    s1.mac_address = uc.get_user_config_var("MyoUdpServer.mac_address_1", 'XX:XX:XX:XX:XX:XX')
+    local_port_str = uc.get_user_config_var("MyoUdpServer.local_address_1", '//0.0.0.0:16001')
+    s1.local_port = get_address(local_port_str)
+    remote_port_str = uc.get_user_config_var("MyoUdpServer.remote_address_1", '//127.0.0.1:15001')
+    s1.remote_port = get_address(remote_port_str)
 
     if uc.get_user_config_var('MyoUdpServer.num_devices', 2) < 2:
         s2 = None
         return s1, s2
 
     s2 = MyoUdpServer(data_logger=logging.getLogger('Myo2'), name='Myo2')
+    s2.iface = uc.get_user_config_var("MyoUdpServer.iface_2", 0)
+    s2.mac_address = uc.get_user_config_var("MyoUdpServer.mac_address_2", 'XX:XX:XX:XX:XX:XX')
+    local_port_str = uc.get_user_config_var("MyoUdpServer.local_address_2", '//0.0.0.0:16001')
+    s2.local_port = get_address(local_port_str)
+    remote_port_str = uc.get_user_config_var("MyoUdpServer.remote_address_2", '//127.0.0.1:15001')
+    s2.remote_port = get_address(remote_port_str)
 
     return s1, s2
 
@@ -370,18 +381,18 @@ def main():
         s1, s2 = setup_threads()
 
         if s2 is None:
-            print('Connecting Device #1')
+            print(f'Connecting Device #1:{s1.mac_address}')
             s1.connect()
             time.sleep(0.5)
             s1.thread.start()
             time.sleep(0.5)
             s1.set_host_parameters()
         else:
-            print('Connecting Device #1')
+            print(f'Connecting Device #1:{s1.mac_address}')
             s1.connect()
-            print('Connecting Device #2')
+            print(f'Connecting Device #2:{s2.mac_address}')
             s2.connect()
-            print('Both Connected')
+            print('Both Connected. Starting Threads')
 
             time.sleep(0.5)
             s1.thread.start()
