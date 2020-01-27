@@ -7,6 +7,12 @@ This relies on the bluepy module for linux
 Typical use would be to set this up as a service on a linux system to continually scan
 for myo armbands and stream data as available
 
+Remove requirement for sudo to do lescan and configure streaming properties (needed to achieve full MYO Rate)
+
+  > sudo apt install libcap2-bin
+  > sudo setcap 'cap_net_raw,cap_net_admin+eip' `which hcitool`
+
+
 Setting up service (on raspberry pi):
 
 Create the service file
@@ -19,7 +25,7 @@ Requires=bluetooth.target
 After=network.target bluetooth.target
 
 [Service]
-ExecStart=/usr/bin/python3.7 -u -m inputs.myo_server -x vmpl_user_config.xml
+ExecStart=/usr/bin/python3 -u -m inputs.myo.myo_server -x vmpl_user_config.xml
 WorkingDirectory=/home/pi/git/minivie/python/minivie
 StandardOutput=inherit
 StandardError=inherit
@@ -29,12 +35,6 @@ User=pi
 [Install]
 WantedBy=multi-user.target
 ------------------------- mpl_myo1.service ------------------------------
-
-Enable the service
-
-    $ sudo systemctl enable mpl_myo1.service
-
-    Created symlink from /etc/systemd/system/multi-user.target.wants/mpl_myo1.service to /lib/systemd/system/mpl_myo1.service.
 
 Start service and check status
 
@@ -50,6 +50,11 @@ Start service and check status
 
     Aug 16 03:54:51 raspberrypi systemd[1]: Started Myo Streamer.
 
+Enable the service
+
+    $ sudo systemctl enable mpl_myo1.service
+
+    Created symlink from /etc/systemd/system/multi-user.target.wants/mpl_myo1.service to /lib/systemd/system/mpl_myo1.service.
 
 
 
@@ -72,9 +77,9 @@ __version__ = "1.1.0"
 
 class MyoUdpServer(object):
 
-    def __init__(self, data_logger=None, name='Myo'):
-        import threading
-        import subprocess
+    def __init__(self, name='Myo'):
+
+        self.name = name
 
         # These are defaults but can be changed prior to connecting
         self.iface = 0
@@ -83,7 +88,40 @@ class MyoUdpServer(object):
         self.remote_port = ('localhost', 15001)
 
         # Setup file and console logging
-        self.logger = data_logger
+        self.logger = None
+
+        # Create data object handles
+        self.peripheral = None
+        self.sock = None
+        self.delegate = None
+        self.thread = None
+
+    def setup_devices(self):
+        # Create data object handles
+        import threading
+        import subprocess
+
+        send_udp = lambda data: self.sock.sendto(data, self.remote_port)
+        self.delegate = MyoDelegate(send_udp, self.logger)
+        self.thread = threading.Thread(target=self.run)
+        self.thread.name = self.name
+
+        self.logger.debug('Running subprocess command: hcitool dev')
+        hci = 'hci' + str(self.iface)
+
+        # Note that if running from startup, you should require bluetooth.target
+        # to ensure that the bluetooth device is started
+        output = subprocess.check_output(["hcitool", "dev"])
+        if hci in output.decode('utf-8'):
+            self.logger.info('Found device: ' + hci)
+        else:
+            self.logger.info('Device not found: ' + hci)
+
+
+    def setup_logger(self):
+        # Setup file and console logging
+        # Note this should occur after MAC address assigned since that is used for the filename
+        self.logger = logging.getLogger(self.name)
         self.logger.setLevel(logging.DEBUG)
         self.logger.propagate = 0
         fh = logging.FileHandler(
@@ -96,24 +134,6 @@ class MyoUdpServer(object):
         self.logger.addHandler(fh)
         self.logger.addHandler(ch)
 
-        # Create data object handles
-        self.peripheral = None
-        self.sock = None
-        send_udp = lambda data: self.sock.sendto(data, self.remote_port)
-        self.delegate = MyoDelegate(send_udp, self.logger)
-        self.thread = threading.Thread(target=self.run)
-        self.thread.name = name
-
-        self.logger.debug('Running subprocess command: hcitool dev')
-        hci = 'hci' + str(self.iface)
-
-        # Note that if running from startup, you should require bluetooth.target
-        # to ensure that the bluetooth device is started
-        output = subprocess.check_output(["hcitool", "dev"])
-        if hci in output.decode('utf-8'):
-            self.logger.info('Found device: ' + hci)
-        else:
-            self.logger.info('Device not found: ' + hci)
 
     def set_device_parameters(self):
         """function parameters"""
@@ -339,13 +359,30 @@ class MyoDelegate(btle.DefaultDelegate):
 def setup_threads():
 
     # get parameters from xml files and create Servers
-    s1 = MyoUdpServer(data_logger=logging.getLogger('Myo1'), name='Myo1')
+    s1 = MyoUdpServer(name='Myo1')
+    s1.iface = uc.get_user_config_var("MyoUdpServer.iface_1", 0)
+    s1.mac_address = uc.get_user_config_var("MyoUdpServer.mac_address_1", 'XX:XX:XX:XX:XX:XX')
+    local_port_str = uc.get_user_config_var("MyoUdpServer.local_address_1", '//0.0.0.0:16001')
+    s1.local_port = get_address(local_port_str)
+    remote_port_str = uc.get_user_config_var("MyoUdpServer.remote_address_1", '//127.0.0.1:15001')
+    s1.remote_port = get_address(remote_port_str)
+    s1.setup_logger()
+    s1.setup_devices()
 
     if uc.get_user_config_var('MyoUdpServer.num_devices', 2) < 2:
         s2 = None
         return s1, s2
 
-    s2 = MyoUdpServer(data_logger=logging.getLogger('Myo2'), name='Myo2')
+    s2 = MyoUdpServer(name='Myo2')
+    s2.iface = uc.get_user_config_var("MyoUdpServer.iface_2", 0)
+    s2.mac_address = uc.get_user_config_var("MyoUdpServer.mac_address_2", 'XX:XX:XX:XX:XX:XX')
+    local_port_str = uc.get_user_config_var("MyoUdpServer.local_address_2", '//0.0.0.0:16001')
+    s2.local_port = get_address(local_port_str)
+    remote_port_str = uc.get_user_config_var("MyoUdpServer.remote_address_2", '//127.0.0.1:15001')
+    s2.remote_port = get_address(remote_port_str)
+    s2.setup_logger()
+    s2.setup_devices()
+
 
     return s1, s2
 
@@ -370,18 +407,18 @@ def main():
         s1, s2 = setup_threads()
 
         if s2 is None:
-            print('Connecting Device #1')
+            print(f'Connecting Device #1:{s1.mac_address}')
             s1.connect()
             time.sleep(0.5)
             s1.thread.start()
             time.sleep(0.5)
             s1.set_host_parameters()
         else:
-            print('Connecting Device #1')
+            print(f'Connecting Device #1:{s1.mac_address}')
             s1.connect()
-            print('Connecting Device #2')
+            print(f'Connecting Device #2:{s2.mac_address}')
             s2.connect()
-            print('Both Connected')
+            print('Both Connected. Starting Threads')
 
             time.sleep(0.5)
             s1.thread.start()
