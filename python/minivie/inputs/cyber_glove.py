@@ -11,12 +11,14 @@ import socket
 
 
 def main():
+    port = ("10.132.13.210", 16700)
+
     print('Starting...')
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)  # Enable broadcasting
     sock.settimeout(1.0)
 
-    ser = serial.Serial("/dev/rfcomm2", 115200, timeout=1.0)
+    ser = serial.Serial("/dev/rfcomm0", 115200, timeout=1.0)
     #   ser.open()
     ser.write(b'?W')
     r = ser.read(100)
@@ -39,7 +41,7 @@ def main():
                 print(f'Msg [{len(buff)}] = {buff}')
                 break
             buff += r
-        sock.sendto(buff, ('localhost', 16700))
+        sock.sendto(buff, port)
 
 
 if __name__ == '__main__':
