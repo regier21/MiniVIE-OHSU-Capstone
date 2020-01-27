@@ -16,7 +16,7 @@ tornado
 h5py
 transforms3d
 websockets
-serial
+pyserial
 matplotlib
 bluepy
 nidaqmx
