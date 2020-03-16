@@ -14,18 +14,17 @@ import numpy as np
 # Ensure that the minivie specific modules can be found on path allowing execution from the 'inputs' folder
 import os
 
-import pattern_rec.feature_extract
-
 if os.path.split(os.getcwd())[1] == 'gui':
     import sys
     sys.path.insert(0, os.path.abspath('..'))
-from inputs import myo
+from inputs.myo import myo_client
 import pattern_rec
+import pattern_rec.feature_extract
 from pattern_rec import features_selected
 from pattern_rec import features
 
 # Setup Data Source
-m = myo.MyoUdp(source='//127.0.0.1:15001', num_samples=50)
+m = myo_client.MyoUdp(local_addr_str='//127.0.0.1:15001', num_samples=50)
 m.connect()
 
 # data_buffer = [(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 7.0)] * 100
