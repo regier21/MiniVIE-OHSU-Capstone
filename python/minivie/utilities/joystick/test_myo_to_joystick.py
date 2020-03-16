@@ -5,10 +5,10 @@ from inputs import myo
 import time
 import binascii
 
-m1 = myo.MyoUdp(source='//127.0.0.1:15001')
+m1 = myo.MyoUdp(local_addr_str='//127.0.0.1:15001')
 m1.connect()
 
-m2 = myo.MyoUdp(source='//127.0.0.1:15002')
+m2 = myo.MyoUdp(local_addr_str='//127.0.0.1:15002')
 m2.connect()
 
 
