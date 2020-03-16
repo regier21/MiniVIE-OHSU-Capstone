@@ -15,11 +15,13 @@ import os
 if os.path.split(os.getcwd())[1] == 'gui':
     import sys
     sys.path.insert(0, os.path.abspath('..'))
-from inputs import myo
+#from inputs import myo
+from inputs.myo import myo_client
 
 
 # Setup Data Source
-m = myo.MyoUdp(source='//0.0.0.0:15001', num_samples=600)
+# m = myo_client.MyoUdp(local_addr_str='//0.0.0.0:15001', num_samples=600)
+m = myo_client.MyoUdp(local_addr_str='//0.0.0.0:15001', num_samples=600)
 m.connect()
 
 style.use('dark_background')
