@@ -15,7 +15,7 @@ def start_test():
     #thread.start()
 
     # Read myo udp stream
-    source = myo.MyoUdp(source='//127.0.0.1:15001')
+    source = myo.MyoUdp(local_addr_str='//127.0.0.1:15001')
     source.connect()
 
     # Start signal viewer

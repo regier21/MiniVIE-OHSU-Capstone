@@ -17,7 +17,9 @@ import tornado.ioloop
 
 import utilities.sys_cmd
 from mpl.open_nfu.open_nfu_sink import NfuSink
+from mpl.unity_asyncio import UnityUdp
 # from mpl.unity import UnityUdp
+
 import mpl.roc as roc
 
 
@@ -42,19 +44,21 @@ choice = input('Enter selection : ')
 assert isinstance(choice, str)  # native str on Py2 and Py3
 
 # Convert string to int type
-choice = int(choice)
+if choice == '':
+    choice = 0
+else:
+    choice = int(choice)
 
+# Set the starting values for the test
 AA = -0.3
 EL = 0
 armTestStart = [0, AA, 0, EL, 0, 0, 0]
 
-#udp_params = dict(hostname="192.168.7.2", udp_telem_port=9028, udp_command_port=9027)
-udp_params = dict(hostname="localhost", udp_telem_port=9028, udp_command_port=9027)
-
 # Take action as per selected menu-option #
 if choice == 0:
-    pass
-if choice == 1:
+    print("Exiting...")
+    exit(0)
+elif choice == 1:
     print("Starting ping...")
     print(60 * '-')
     print("NOTE: MPL/NFU and host MAC addresses must be on the approved access list in /etc/iptables/rules.v4")
@@ -64,116 +68,96 @@ if choice == 1:
     while not result:
         result = utilities.sys_cmd.ping('192.168.8.1')
     print(result)
-
-elif choice == 2:
-    print("Starting MPL Wrist...")
-    # hSink = UnityUdp()  commands on cmd_port, telem 9028
-    hSink = NfuSink()
-    hSink.mpl_connection_check = True
-    hSink.connect(local_address='//0.0.0.0:9028', remote_address='//127.0.0.1:9027')
-
-    # start network services
-    thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
-    thread.start()
-
-    hSink.send_joint_angles([0, AA, 0, EL, -0.7, -0.5, -0.5])
-    time.sleep(1.0)
-    AA = -0.25
-    hSink.send_joint_angles([0, AA, 0, EL + 0.55, -0.7, -0.5, -0.5])
-    time.sleep(1.0)
-    hSink.send_joint_angles([0, AA, 0, EL, 0.7, 0.5, 0.5])
-    time.sleep(1.0)
-    hSink.send_joint_angles(armTestStart)
-    hSink.close()
-
-elif choice == 3:
-    print("Starting MPL Grasps...")
-    # hSink = UnityUdp()
-    hSink = NfuSink()
-    hSink.mpl_connection_check = True
-    hSink.connect(local_address='//0.0.0.0:9028', remote_address='//127.0.0.1:9027')
-
-    # start network services
-    thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
-    thread.start()
-
-    # Read ROC Table
-    filename = "../../WrRocDefaults.xml"
-    rocTable = roc.read_roc_table(filename)
-
-    for iRoc in [2, 4, 5, 7, 15]:
-        numOpenSteps = 50
-        numWaitSteps = 50
-        numCloseSteps = 50
-
-        mplAngles = np.zeros(27)
-        mplAngles[1] = -0.3
-        mplAngles[3] = EL + 0.05
-
-        rocElem = roc.get_roc_id(rocTable, iRoc)
-
-        graspVal = np.concatenate(
-            (np.linspace(0, 1, numOpenSteps), np.ones(numWaitSteps), np.linspace(1, 0, numCloseSteps)))
-        for iVal in graspVal:
-            print('Entry #{}, RocId={}, {} {:6.1f} Pct'.format(iRoc, rocElem.id, rocElem.name, iVal * 100))
-            mplAngles[rocElem.joints] = roc.get_roc_values(rocElem, iVal)
-            hSink.send_joint_angles(mplAngles)
-            time.sleep(0.02)
-    hSink.close()
-
-elif choice == 4:
-    logging.basicConfig(level=logging.INFO)
-    hSink = NfuSink()
-    hSink.mpl_connection_check = True
-    hSink.connect(local_address='//0.0.0.0:9028', remote_address='//127.0.0.1:9027')
-
-    # start network services
-    thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
-    thread.start()
-
-    while True:
-        try:
-            print(hSink.get_status_msg())
-            time.sleep(1)
-        except KeyboardInterrupt:
-            break
-
-    hSink.close()
-
-elif choice == 5:
-    print("Starting MPL Range of Motion Test...")
-
-    # Read ROM File
-    filename = "../tests/mpl_motion_arm5.csv"
-    with open(filename) as f:
-        mpl_angles = f.read().splitlines()
-
-    # hSink = UnityUdp()
-    # By selecting a different port for telemetry, this can run while run_www is open
-    hSink = NfuUdp(**udp_params)
+else:
+    # All remaining commands need a device connection
+    logging.basicConfig(level=logging.DEBUG)
+    vmpl = False
+    if vmpl:
+        hSink = UnityUdp(local_addr_str='//0.0.0.0:25009', remote_addr_str='//127.0.0.1:25000')
+    else:
+        hSink = NfuSink(local_addr_str='//0.0.0.0:9028', remote_addr_str='//127.0.0.1:9027')
     hSink.connect()
-    time.sleep(1.5)
-    # hSink.wait_for_connection()
-    hSink.enable_impedance = 1
-    hSink.reset_impedance = 0
 
-    i_loop = 0
-    while 1:
-        i_loop += 1
-        print('Running.  Starting Loop: {}'.format(i_loop))
+    # start network services
+    thread = threading.Thread(target=tornado.ioloop.IOLoop.instance().start, name='WebThread')
+    thread.start()
 
-        try:
-            for s in mpl_angles:
-                angles = [float(x) for x in s.split(',')]
-                # msg = 'JointCmd: ' + ','.join(['%.1f' % elem for elem in angles])
-                # print(msg)
-                hSink.active_connection = True
-                hSink.send_joint_angles(angles)
-                time.sleep(0.02)
-        except KeyboardInterrupt:
-            break
+    connection_check = False
+    while connection_check and not hSink.data_received():
+        time.sleep(0.1)
+        print(f'Waiting for valid percepts...')
 
-    hSink.close()
+    try:
+        if choice == 2:
+            print("Starting MPL Wrist...")
+            hSink.send_joint_angles([0, AA, 0, EL, -0.7, -0.5, -0.5])
+            time.sleep(1.0)
+            AA = -0.25
+            hSink.send_joint_angles([0, AA, 0, EL + 0.55, -0.7, -0.5, -0.5])
+            time.sleep(1.0)
+            hSink.send_joint_angles([0, AA, 0, EL, 0.7, 0.5, 0.5])
+            time.sleep(1.0)
+            hSink.send_joint_angles(armTestStart)
 
-else:  # default
-    print("Exiting...")
+        elif choice == 3:
+            print("Starting MPL Grasps...")
+            # Read ROC Table
+            filename = "mpl/#MPL_GEN3_ROC.xml"
+            rocTable = roc.read_roc_table(filename)
+
+            for iRoc in [2, 4, 5, 7, 15]:
+                numOpenSteps = 50
+                numWaitSteps = 50
+                numCloseSteps = 50
+
+                mplAngles = np.zeros(27)
+                mplAngles[1] = -0.3
+                mplAngles[3] = EL + 0.05
+
+                rocElem = roc.get_roc_id(rocTable, iRoc)
+
+                graspVal = np.concatenate(
+                    (np.linspace(0, 1, numOpenSteps), np.ones(numWaitSteps), np.linspace(1, 0, numCloseSteps)))
+                for iVal in graspVal:
+                    print('Entry #{}, RocId={}, {} {:6.1f} Pct'.format(iRoc, rocElem.id, rocElem.name, iVal * 100))
+                    mplAngles[rocElem.joints] = roc.get_roc_values(rocElem, iVal)
+                    hSink.send_joint_angles(mplAngles)
+                    time.sleep(0.02)
+
+        elif choice == 4:
+            # get status message and print every few seconds
+            while True:
+                print(hSink.get_status_msg())
+                time.sleep(1)
+
+        elif choice == 5:
+            print("Starting MPL Range of Motion Test...")
+            # Read ROM File
+            filename = "../tests/mpl_motion_arm5.csv"
+            with open(filename) as f:
+                mpl_angles = f.read().splitlines()
+            time.sleep(1.5)
+            hSink.enable_impedance = 1
+            hSink.reset_impedance = 0
+
+            i_loop = 0
+            while 1:
+                i_loop += 1
+                print('Running.  Starting Loop: {}'.format(i_loop))
+                for s in mpl_angles:
+                    angles = [float(x) for x in s.split(',')]
+                    # msg = 'JointCmd: ' + ','.join(['%.1f' % elem for elem in angles])
+                    # print(msg)
+                    hSink.active_connection = True
+                    hSink.send_joint_angles(angles)
+                    time.sleep(0.02)
+
+    except KeyboardInterrupt:
+        print("Got Keyboard Break")
+        pass
+
+    finally:
+        hSink.close()
+        tornado.ioloop.IOLoop.instance().stop()
+        #thread.join()
+        exit(0)
