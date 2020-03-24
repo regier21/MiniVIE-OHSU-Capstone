@@ -125,7 +125,10 @@ classdef ParsePythonMyoLog
                 timeIMU = extractBefore(imuLines,' IMU: ');
                 dataIMU = extractAfter(imuLines,' IMU: ');
                 
-                isValid = strlength(dataIMU) == 40;
+                % 03MAR2020 Armiger: Added second check to ensure 'null'
+                % characters don;t appear in byte stream
+                %isValid = strlength(dataIMU) == 40;
+                isValid = strlength(dataIMU) == 40 & ~cellfun(@(x)any(x == 0),dataIMU);
                 fprintf('Omitting %d bad IMU lines (wrong length)\n',sum(~isValid))
                 dataIMU = dataIMU(isValid);
                 timeIMU  = timeIMU(isValid);
