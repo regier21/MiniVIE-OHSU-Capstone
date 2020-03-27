@@ -36,6 +36,7 @@ classdef ParsePythonVieMainLog < handle
         jointTempMsg
         tempMsg
         dcellMsg
+        scnCmdMsg
         firstDatetime
         lastDatetime
         elapsedTime
@@ -323,6 +324,18 @@ classdef ParsePythonVieMainLog < handle
                 obj.jointTempMsg.value = obj.jointTempMsg.value(validId);              
                 
             end
+            
+            %%%%%%%%%%%%%%%%%
+            % Parse Scenario Command:
+            %%%%%%%%%%%%%%%%%
+            scenarioCmdMsgId = contains(obj.textLines,'new scenario command:');
+            obj.isRead(scenarioCmdMsgId) = true;
+            if any(scenarioCmdMsgId)
+                scnCmdLines = obj.textLines(scenarioCmdMsgId)';
+                obj.scnCmdMsg.time = datetime(extractBefore(scnCmdLines,24),'InputFormat','yyyy-MM-dd HH:mm:ss,SSS');
+                obj.scnCmdMsg.value(:,1) = extractBefore(extractAfter(scnCmdLines,'command:'),':');                                
+                obj.scnCmdMsg.value(:,2) = extractAfter(extractAfter(scnCmdLines,'command:'),':');                                
+            end            
             
             %%%%%%%%%%%%%%%%%%
             % Parse Hearbeat lines
