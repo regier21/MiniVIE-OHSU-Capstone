@@ -81,8 +81,8 @@ classdef ParsePythonMyoLog
             fprintf('\nRead file: "%s" \t Found %d Lines\n',obj.fileName,obj.numLines);
             
             % Use for date conversion: Convert unix time (epoc 1970) to matlab time
-            zone = -5*60*60;
-            convertTime = @(posixtime)datetime(posixtime+zone,'ConvertFrom','posixtime');
+            % zone = -4*60*60;
+            convertTime = @(posixtime)datetime(posixtime,'ConvertFrom','posixtime','TimeZone','America/New_York');
             
             % Parse Line types
             % 1491529009.595366 MAC: F0:1C:CD:A7:2C:85 is handle 1025
@@ -121,7 +121,10 @@ classdef ParsePythonMyoLog
             obj.isRead(isImuMsg) = true;
             if any(isImuMsg)
                 imuLines = obj.textLines(isImuMsg)';
-                
+                % trim training whitespace since some systems might
+                % produce "?" :
+                imuLines = strtrim(imuLines);
+
                 timeIMU = extractBefore(imuLines,' IMU: ');
                 dataIMU = extractAfter(imuLines,' IMU: ');
                 
@@ -199,6 +202,11 @@ classdef ParsePythonMyoLog
                 
                 tString = cat(2,time0,time1,time2,time3);
                 emgString = cat(2,emg0, emg1, emg2, emg3);
+                
+                % trim training whitespace since some systems might
+                % produce "?" :
+                %  {'174414070ffe180808d8d8f8fcf2e4f5?'}
+                emgString = strtrim(emgString);
                 
                 % sort by date
                 tNum = str2double(tString);
