@@ -361,12 +361,17 @@ classdef TrainingData < handle
             
         end
         
-        function success = setClassNames(obj,classNames)
-            % setClassNames(obj,featureNames)
+        function success = setClassNames(obj,classNames,promptForConfirmation)
+            % setClassNames(obj,featureNames,promptForConfirmation)
             % Set class names as a cell array of strings.  Note This could
             % pose a problem if the class names are being reordered.
             % perform a check if the classname existed before and update
-            % map
+            % map. 
+            % Allow for turning off confirmation prompt when removing
+            % classes that contian data.
+            if nargin < 3
+                promptForConfirmation = true;
+            end
             success = false;
             
             assert(iscell(classNames),'Expected a cell array of strings');
@@ -392,7 +397,7 @@ classdef TrainingData < handle
             deleteClassses = setdiff( trainedClassNames, maintainedClasses);
             
             % Prompt here to continue
-            if ~isempty(deleteClassses)
+            if ~isempty(deleteClassses) && promptForConfirmation
                 reply = questdlg([{'Are you sure you want to remove trained classes:'},deleteClassses(:)'],'Data Loss','Yes','No','No');
                 if ~strcmp(reply,'Yes')
                     return
