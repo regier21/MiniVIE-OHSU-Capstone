@@ -19,14 +19,20 @@ classdef EmgSimulator < Inputs.SignalInput
         DEFAULT_PATTERN = 9; % No Movement for data file
     end
     methods
-        function obj = EmgSimulator(patternFileName)
+        function obj = EmgSimulator(patternFileName, guiBin)
             % Constructor
-            obj.uiControlPanel();
-            obj.CurrentPattern = obj.DEFAULT_PATTERN;
-            
             if nargin < 1
                 patternFileName = 'emgPatternData.mat';
             end
+            if nargin < 2
+                guiBin = 1;
+            end
+            if guiBin
+                obj.uiControlPanel();
+            end
+
+            obj.CurrentPattern = obj.DEFAULT_PATTERN;
+            
             
             try
                 fprintf('[%s] Loading EMG File: %s...',mfilename,patternFileName);

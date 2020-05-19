@@ -156,9 +156,13 @@ classdef TrainingData < handle
             
             metaLabel = obj.EnableLabel(1:obj.SampleCount);
         end
-        function [filteredData, dataBreaks] = getClassData(obj,iClass)
+        function [filteredData, dataBreaks] = getClassData(obj,iClass,filterBin)
             % [filteredData dataBreaks] = getClassData(obj,iClass)
             isThisClass = iClass == obj.ClassLabelId;
+            
+            if nargin < 3
+                filterBin = 1;
+            end
             
             assert( sum(isThisClass) > 0 ,...
                 'Requested class label %d not found in data set',iClass);
@@ -174,15 +178,18 @@ classdef TrainingData < handle
             
             filteredSignals = classRawFrames;
             
-            Fs = obj.SampleRate;
-            HPF = Inputs.HighPass();
-            NF = Inputs.Notch();
+           if filterBin
+                Fs = obj.SampleRate;
+                HPF = Inputs.HighPass();
+                NF = Inputs.Notch();
+
+                for i = 1:sum(isThisClass)
+                    filteredSignals(:,:,i) = HPF.apply(double(filteredSignals(:,:,i)'))';
+                    filteredSignals(:,:,i) = NF.apply(double(filteredSignals(:,:,i)'))';
+                end
+           end
             
-            for i = 1:sum(isThisClass)
-                filteredSignals(:,:,i) = HPF.apply(double(filteredSignals(:,:,i)'))';
-                filteredSignals(:,:,i) = NF.apply(double(filteredSignals(:,:,i)'))';
-            end
-            
+            [windowSize] = size(classRawFrames,2);
             dataBreaks = windowSize:windowSize:sum(isThisClass)*windowSize;
             filteredData = reshape(filteredSignals,length(obj.ActiveChannels),[])';
             

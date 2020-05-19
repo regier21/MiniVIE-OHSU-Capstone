@@ -59,7 +59,7 @@ classdef MiniVIE < Common.MiniVieObj
             setupFigure(obj);
             
             % Set valid input options
-            set(obj.hg.popupInput,'String',{'None','Signal Simulator','EMG Simulator','DaqHwSession','DaqHwDevice','CpchSerial','NfuInput','UdpDevice','IntanDevBoard','OpenBCI','ThalmicLabs MyoUdp'});
+            set(obj.hg.popupInput,'String',{'None','Signal Simulator','EMG Simulator', 'EMG Simulator 2.0', 'DaqHwSession','DaqHwDevice','CpchSerial','NfuInput','UdpDevice','IntanDevBoard','OpenBCI','ThalmicLabs MyoUdp'});
             set(obj.hg.popupInput,'Value',1);
             set(obj.hg.popupAnalysis,'String',{'None','LDA Classifier','DiscriminantAnalysis','SupportVectorMachine','SvmStatTlbx'});
             set(obj.hg.popupAnalysis,'Value',1);
@@ -408,6 +408,10 @@ classdef MiniVIE < Common.MiniVieObj
                             fname = fullfile(PathName,FileName);
                         end
                         h = Inputs.EmgSimulator(fname);
+                    case 'EMG Simulator 2.0'
+                        addpath(fullfile(fileparts(mfilename),'AppDesignerGuis'));
+                        ms = MuscleSimulator();
+                        h = ms.EmgSource;
                     case 'DaqHwSession'
                         h = loadDaqHwDevice('Session');
                         % Ref Hargove 2014 comparison of real-time controlability
