@@ -1,4 +1,4 @@
-tdPath = 'C:\GIT\bitbucket_minivie_dev\+Inputs\@EmgSimulator\private\USER_2020MAY17_16-37-27.trainingData';
+tdPath = 'C:\GIT\bitbucket_minivie_dev\+Inputs\@EmgSimulator\private\DEFAULT.trainingData';
 savePath = 'C:\GIT\bitbucket_minivie_dev\+Inputs\@EmgSimulator\private\emgPatternData2';
 
 td = PatternRecognition.TrainingData(tdPath);
