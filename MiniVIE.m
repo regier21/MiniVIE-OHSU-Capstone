@@ -400,7 +400,6 @@ classdef MiniVIE < Common.MiniVieObj
                         h.addfilter(Inputs.HighPass(20,3,Fs));
                         
                     case 'EMG Simulator'
-                        addpath(fullfile(fileparts(mfilename),'AppDesignerGuis'));
                         ms = MuscleSimulator();
                         h = ms.EmgSource;
                     case 'DaqHwSession'
@@ -1271,6 +1270,7 @@ classdef MiniVIE < Common.MiniVieObj
             
             % add folder and sub-directories:
             addpath(genpath(fullfile(pathName,'ThirdParty')));
+            addpath(genpath(fullfile(pathName,'AppDesignerGuis')));
             
             fprintf('[%s.m] Configured MiniVIE path at: %s\n', mfilename, pathName)
         end
