@@ -94,8 +94,8 @@ switch MplStreamingMessageId
         %Parse SegmentPerceptsType Data
         SegmentPerceptsType = udpData(ind);
         ind = ind + 1;
-        feedback_data.segmentPercepts.fstnForce = zeros(14, 5);
-        feedback_data.segmentPercepts.fstnAccel = zeros(3, 5);
+        feedback_data.segmentPercepts.ftsnForce = zeros(14, 5);
+        feedback_data.segmentPercepts.ftsnAccel = zeros(3, 5);
         feedback_data.segmentPercepts.contactPercepts = zeros(1,37);
         switch SegmentPerceptsType
             case NONE
@@ -154,7 +154,7 @@ switch MplStreamingMessageId
                         %force_temp = swapbytes(typecast(udpData(ind:ind+3), 'double')); %Float32 z
                         ind = ind + 4; %Increment UDP Array Index - (4 Bytes in each Float32 value)
                         
-                        feedback_data.segmentPercepts.fstnForce(axisId, segmentId) = force_temp;
+                        feedback_data.segmentPercepts.ftsnForce(axisId, segmentId) = force_temp;
                         
                         % Populate segFTSNPercepts Array - Force Values
                         segFTSNPercepts(segmentId, NUM_FTSN_DATA_TYPES_FORCE, axisId) = force_temp;
@@ -174,7 +174,7 @@ switch MplStreamingMessageId
                         %accel_temp = swapbytes(typecast(udpData(ind:ind+3), 'double')); %Float32 z
                         ind = ind + 4; %Increment UDP Array Index - (4 Bytes in each Float32 value)
                         
-                        feedback_data.segmentPercepts.fstnAccel(axisId,segmentId) = accel_temp;
+                        feedback_data.segmentPercepts.ftsnAccel(axisId,segmentId) = accel_temp;
                         
                         % Populate segFTSNPercepts Array - Acceleration Values
                         segFTSNPercepts(segmentId, NUM_FTSN_DATA_TYPES_ACCEL, axisId) = accel_temp;
@@ -250,7 +250,7 @@ switch MplStreamingMessageId
                         %force_temp = swapbytes(typecast(udpData(ind:ind+3), 'double')); %Float32 z
                         ind = ind + 4; %Increment UDP Array Index - (4 Bytes in each Float32 value)
                         
-                        feedback_data.segmentPercepts.fstnForce(axisId, segmentId) = force_temp;
+                        feedback_data.segmentPercepts.ftsnForce(axisId, segmentId) = force_temp;
                         
                         
                         % Populate segFTSNPercepts Array - Force Values
@@ -271,7 +271,7 @@ switch MplStreamingMessageId
                         %accel_temp = swapbytes(typecast(udpData(ind:ind+3), 'double')); %Float32 z
                         ind = ind + 4; %Increment UDP Array Index - (4 Bytes in each Float32 value)
                         
-                        feedback_data.segmentPercepts.fstnAccel(axisId,segmentId) = accel_temp;
+                        feedback_data.segmentPercepts.ftsnAccel(axisId,segmentId) = accel_temp;
                         
                         % Populate segFTSNPercepts Array - Acceleration Values
                         segFTSNPercepts(segmentId, NUM_FTSN_DATA_TYPES_ACCEL, axisId) = accel_temp;
